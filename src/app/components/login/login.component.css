@@ -1,0 +1,12 @@
+html,
+body {
+  height: 100vh;
+  margin: 0;
+}
+
+body {
+  background-image: url('/assets/fondo-hojas-platanera.png');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
