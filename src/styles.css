@@ -1,14 +1,25 @@
-html,
-body {
-  height: 100%;
+/* RESET & BASE */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-.title {
-  margin: 0;
-  font-size: 8vh;
-  padding-top: 20vh;
-  text-align: center;
-  color: green;
+html,
+body {
+  height: 100%;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-image: url('/assets/fondo-hojas-platanera.png');
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }

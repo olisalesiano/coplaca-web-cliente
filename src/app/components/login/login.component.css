@@ -1,12 +1,182 @@
-html,
-body {
-  height: 100vh;
-  margin: 0;
+/* WRAPPER */
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 620px;
+  padding: 1rem;
 }
 
-body {
-  background-image: url('/assets/fondo-hojas-platanera.png');
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+/* LOGO */
+.logo-container {
+  background-color: rgba(255, 255, 255, 0.75);
+  border-radius: 50%;
+  width: 130px;
+  height: 130px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  z-index: 2;
+  margin-bottom: -65px; /* overlaps the card */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.image-logo {
+  width: 85px;
+  height: 85px;
+  object-fit: contain;
+}
+
+/* CARD */
+.login-card {
+  background-color: rgba(50, 180, 80, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 20px;
+  padding: 100px 60px 50px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* TYPOGRAPHY */
+.title {
+  font-size: 2.4rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 0.3rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #1a1a1a;
+  margin-bottom: 2rem;
+  opacity: 0.85;
+}
+
+/* FORM */
+.form-group {
+  text-align: left;
+  margin-bottom: 1.4rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1a1a1a;
+  margin-bottom: 0.4rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #f5c518;
+  border-radius: 30px;
+  background-color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #e0a800;
+  box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.3);
+}
+
+.form-group input::placeholder {
+  color: #888;
+}
+
+/* PASSWORD FIELD */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 3rem;
+}
+
+.toggle-eye {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  display: flex;
+  align-items: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.toggle-eye:hover {
+  color: #222;
+}
+
+/* BUTTON */
+.btn-login {
+  width: 55%;
+  padding: 0.85rem;
+  background-color: #1a7a40;
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition:
+    background-color 0.2s,
+    transform 0.1s;
+}
+
+.btn-login:hover {
+  background-color: #155e30;
+  transform: translateY(-1px);
+}
+
+.btn-login:active {
+  transform: translateY(0);
+}
+
+/* REGISTER LINK */
+.register-link {
+  margin-top: 1.2rem;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
+.register-link a {
+  color: #f5c518;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 90px 28px 40px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+  }
+
+  .btn-login {
+    width: 80%;
+  }
 }
