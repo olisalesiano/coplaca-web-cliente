@@ -1,0 +1,119 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-logo" (click)="goToShop()">
+    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+  </div>
+
+  <div class="navbar-links">
+    <a (click)="goToShop()">Tienda</a>
+    <a (click)="goToOrders()">Tus pedidos</a>
+    <a (click)="goToCart()">
+      Tu carrito
+      <mat-icon>shopping_cart</mat-icon>
+    </a>
+  </div>
+
+  <button class="profile-btn" (click)="goToProfile()">
+    <mat-icon>person</mat-icon>
+  </button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+  <!-- OFERTAS DEL DÍA -->
+  <section class="section">
+    <h2 class="section-title">¡Ofertas del día!</h2>
+    <p class="section-sub">Frutas a un 30 % ahora, aprovecha</p>
+
+    <div class="carousel-wrapper">
+      <button class="arrow left" (click)="prevOfertas()" [disabled]="ofertasIndex === 0">
+        &#8249;
+      </button>
+
+      <div class="carousel">
+        <div
+          class="cards-track"
+          [style.transform]="'translateX(-' + ofertasIndex * (100 / visibles) + '%)'"
+        >
+          <!-- HARDCODEADO -->
+          <div class="product-card oferta">
+            <img src="/assets/test/Banana.png" alt="producto" class="product-img" />
+            <div class="product-info">
+              <span class="product-name">Nombre</span>
+              <span class="product-price">Precio</span>
+              <span class="product-discount">Precio con descuento</span>
+            </div>
+            <button class="btn-add">Añadir</button>
+          </div>
+          <!-- /HARDCODEADO -->
+        </div>
+      </div>
+
+      <button
+        class="arrow right"
+        (click)="nextOfertas()"
+        [disabled]="ofertasIndex >= ofertas.length - visibles"
+      >
+        &#8250;
+      </button>
+    </div>
+  </section>
+
+  <!-- PRODUCTOS DE TEMPORADA -->
+  <section class="section">
+    <h2 class="section-title">¡Productos de temporada!</h2>
+
+    <div class="carousel-wrapper">
+      <button class="arrow left" (click)="prevTemporada()" [disabled]="temporadaIndex === 0">
+        &#8249;
+      </button>
+
+      <div class="carousel">
+        <div
+          class="cards-track"
+          [style.transform]="'translateX(-' + temporadaIndex * (100 / visibles) + '%)'"
+        >
+          <!-- HARDCODEADO -->
+          <div class="product-card">
+            <img src="/assets/test/Banana.png" alt="producto" class="product-img" />
+            <div class="product-info">
+              <span class="product-name">Nombre</span>
+              <span class="product-price">Precio</span>
+            </div>
+            <button class="btn-add">Añadir</button>
+          </div>
+          <!-- /HARDCODEADO -->
+        </div>
+      </div>
+
+      <button
+        class="arrow right"
+        (click)="nextTemporada()"
+        [disabled]="temporadaIndex >= temporada.length - visibles"
+      >
+        &#8250;
+      </button>
+    </div>
+  </section>
+
+  <!-- NUESTROS PRODUCTOS -->
+  <section class="section nuestros">
+    <h2 class="section-title-big">Nuestros productos</h2>
+
+    <div class="productos-grid">
+      <!-- HARDCODEADO -->
+      <div class="producto-card">
+        <div class="producto-top">
+          <img src="/assets/test/Banana.png" alt="producto" class="producto-img" />
+          <div class="producto-info">
+            <span class="producto-name">Nombre</span>
+            <span class="producto-price">Precio</span>
+          </div>
+        </div>
+        <button class="btn-add">Añadir</button>
+      </div>
+      <!-- /HARDCODEADO -->
+    </div>
+  </section>
+</main>
