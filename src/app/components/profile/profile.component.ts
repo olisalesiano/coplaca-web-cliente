@@ -30,6 +30,7 @@ export class ProfileComponent {
   }
   darDeBaja(): void {
     /* implementar */
+    this.router.navigate(['/login']);
   }
   irAPedidos(): void {
     this.router.navigate(['/orders']);
