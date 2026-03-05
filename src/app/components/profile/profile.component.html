@@ -1,0 +1,48 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-logo" (click)="goToShop()">
+    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+  </div>
+
+  <div class="navbar-links">
+    <a (click)="goToShop()">Tienda</a>
+    <a (click)="goToOrders()">Tus pedidos</a>
+    <a (click)="goToCart()">
+      Tu carrito
+      <mat-icon>shopping_cart</mat-icon>
+    </a>
+  </div>
+
+  <button class="profile-btn" (click)="goToProfile()">
+    <mat-icon>person</mat-icon>
+  </button>
+</nav>
+
+<!-- MAIN CONTENT -->
+<main class="main-content">
+  <!-- TARJETA PERFIL -->
+  <div class="profile-card">
+    <div class="profile-header">
+      <div class="avatar">
+        <mat-icon>person</mat-icon>
+      </div>
+      <h1 class="profile-title">¡Aquí tienes tu espacio!</h1>
+    </div>
+
+    <div class="profile-data">
+      <p><strong>Nombre:</strong></p>
+      <p><strong>Apellidos:</strong></p>
+      <p><strong>Email:</strong></p>
+      <p><strong>Ubicación:</strong></p>
+    </div>
+  </div>
+
+  <!-- BOTONES -->
+  <button class="btn-edit" (click)="editInfo()">Editar información</button>
+
+  <div class="btn-row">
+    <button class="btn-baja" (click)="darDeBaja()">Dar de baja</button>
+    <button class="btn-pedidos" (click)="irAPedidos()">Ir a pedidos &gt;</button>
+  </div>
+</main>

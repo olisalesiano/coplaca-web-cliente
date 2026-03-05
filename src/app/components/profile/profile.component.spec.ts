@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Profile } from './profile';
+import { Profile } from './profile.component';
 
 describe('Profile', () => {
   let component: Profile;
@@ -8,9 +8,8 @@ describe('Profile', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Profile]
-    })
-    .compileComponents();
+      imports: [Profile],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(Profile);
     component = fixture.componentInstance;
