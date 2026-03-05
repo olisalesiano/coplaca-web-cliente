@@ -1,3 +1,4 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 <div class="login-wrapper">
   <!-- LOGO -->
   <div class="logo-container">
@@ -24,21 +25,7 @@
         />
         <button class="toggle-eye" type="button" (click)="togglePassword()">
           <!-- Ojo abierto: contraseña visible -->
-          <svg
-            *ngIf="showPassword"
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
+          <mat-icon *ngIf="showPassword">remove_red_eye</mat-icon>
           <!-- Ojo tachado: contraseña oculta -->
           <svg
             *ngIf="!showPassword"
@@ -62,8 +49,12 @@
       </div>
     </div>
 
-    <button class="btn-login">Iniciar sesión</button>
+    <!-- BOTÓN CORRECTO ABAJO, PROVISIONAL EL OTRO -->
+    <!-- <button class="btn-login">Iniciar sesión</button> -->
+    <button class="btn-login" (click)="goToOurProducts()">Iniciar sesión</button>
 
-    <p class="register-link">¿No tiene una cuenta? <a href="#">Registrarse...</a></p>
+    <p class="register-link">
+      ¿No tiene una cuenta? <a (click)="goToRegister()">Registrarse...</a>
+    </p>
   </div>
 </div>
