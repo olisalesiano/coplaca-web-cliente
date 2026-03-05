@@ -4,7 +4,6 @@
   <div class="navbar-logo" (click)="goToShop()">
     <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
   </div>
-
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
     <a (click)="goToOrders()">Tus pedidos</a>
@@ -13,7 +12,6 @@
       <mat-icon>shopping_cart</mat-icon>
     </a>
   </div>
-
   <button class="profile-btn" (click)="goToProfile()">
     <mat-icon>person</mat-icon>
   </button>
@@ -23,7 +21,6 @@
 <main class="main-content">
   <div class="orders-card">
     <h2 class="orders-title">Pedidos</h2>
-
     <div class="orders-scroll">
       <!-- HARDCODEADO -->
       <div class="order-item" *ngFor="let p of pedidos">
@@ -43,3 +40,32 @@
     </div>
   </div>
 </main>
+
+<!-- DIALOG OVERLAY -->
+<div class="dialog-overlay" *ngIf="dialogVisible" (click)="cerrarDialog()">
+  <div class="dialog" (click)="$event.stopPropagation()">
+    <!-- CABECERA -->
+    <div class="dialog-header">
+      <span class="dialog-id">{{ pedidoSeleccionado?.id }}</span>
+      <span class="dialog-fecha">{{ pedidoSeleccionado?.fecha }}</span>
+      <span class="dialog-estado">{{ pedidoSeleccionado?.estado }}</span>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div class="dialog-products">
+      <!-- HARDCODEADO -->
+      <div class="dialog-product" *ngFor="let prod of detalleProductos">
+        <img src="/assets/test/Banana.png" alt="producto" class="dialog-product-img" />
+        <span class="dialog-product-name">{{ prod.nombre }}</span>
+        <span class="dialog-product-cantidad">{{ prod.cantidad }}</span>
+        <span class="dialog-product-precio">{{ prod.precioPeso }}</span>
+      </div>
+      <!-- /HARDCODEADO -->
+    </div>
+
+    <!-- FOOTER -->
+    <div class="dialog-footer">
+      <button class="btn-cancelar" (click)="cancelarPedido()">Cancelar pedido</button>
+    </div>
+  </div>
+</div>

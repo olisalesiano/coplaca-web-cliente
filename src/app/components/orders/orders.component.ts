@@ -21,6 +21,17 @@ export class OrdersComponent {
   ];
   // /HARDCODEADO
 
+  // HARDCODEADO
+  detalleProductos = [
+    { nombre: 'Nombre', cantidad: 'Cantidad', precioPeso: 'Precio/Peso' },
+    { nombre: 'Nombre', cantidad: 'Cantidad', precioPeso: 'Precio/Peso' },
+    { nombre: 'Nombre', cantidad: 'Cantidad', precioPeso: 'Precio/Peso' },
+  ];
+  // /HARDCODEADO
+
+  pedidoSeleccionado: any = null;
+  dialogVisible = false;
+
   constructor(private router: Router) {}
 
   goToShop(): void {
@@ -35,7 +46,20 @@ export class OrdersComponent {
   goToProfile(): void {
     this.router.navigate(['/profile']);
   }
+
   verDetalles(pedido: any): void {
-    /* implementar */
+    this.pedidoSeleccionado = pedido;
+    this.dialogVisible = true;
+  }
+
+  cerrarDialog(): void {
+    this.dialogVisible = false;
+    this.pedidoSeleccionado = null;
+    window.location.reload();
+  }
+
+  cancelarPedido(): void {
+    // implementar lógica de cancelación
+    this.cerrarDialog();
   }
 }
