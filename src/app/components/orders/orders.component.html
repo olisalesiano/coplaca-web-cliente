@@ -1,0 +1,45 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-logo" (click)="goToShop()">
+    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+  </div>
+
+  <div class="navbar-links">
+    <a (click)="goToShop()">Tienda</a>
+    <a (click)="goToOrders()">Tus pedidos</a>
+    <a (click)="goToCart()">
+      Tu carrito
+      <mat-icon>shopping_cart</mat-icon>
+    </a>
+  </div>
+
+  <button class="profile-btn" (click)="goToProfile()">
+    <mat-icon>person</mat-icon>
+  </button>
+</nav>
+
+<!-- MAIN -->
+<main class="main-content">
+  <div class="orders-card">
+    <h2 class="orders-title">Pedidos</h2>
+
+    <div class="orders-scroll">
+      <!-- HARDCODEADO -->
+      <div class="order-item" *ngFor="let p of pedidos">
+        <div class="order-row">
+          <div class="order-left">
+            <span class="order-id">{{ p.id }}</span>
+            <span class="order-estado">{{ p.estado }}</span>
+          </div>
+          <div class="order-right">
+            <span class="order-fecha">{{ p.fecha }}</span>
+            <span class="order-total">Total pedido: {{ p.total }}</span>
+          </div>
+        </div>
+        <button class="btn-detalles" (click)="verDetalles(p)">Ver detalles</button>
+      </div>
+      <!-- /HARDCODEADO -->
+    </div>
+  </div>
+</main>
