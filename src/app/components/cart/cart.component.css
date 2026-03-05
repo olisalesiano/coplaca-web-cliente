@@ -39,6 +39,7 @@
 }
 
 .navbar-links {
+  margin-right: 75px;
   display: flex;
   gap: 3rem;
 }

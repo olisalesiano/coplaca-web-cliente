@@ -6,8 +6,7 @@
   justify-content: space-between;
   padding: 0 2rem;
   height: 72px;
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
   z-index: 100;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
@@ -30,6 +29,7 @@
 }
 
 .navbar-links {
+  margin-right: 75px;
   display: flex;
   gap: 3rem;
 }
