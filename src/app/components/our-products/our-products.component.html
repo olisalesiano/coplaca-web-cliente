@@ -44,7 +44,18 @@
               <span class="product-price">Precio</span>
               <span class="product-discount">Precio con descuento</span>
             </div>
-            <button class="btn-add">Añadir</button>
+            <button
+              class="btn-add"
+              (click)="
+                openDialog({
+                  nombre: 'Nombre',
+                  precio: 'Precio',
+                  imagen: '/assets/test/Banana.png',
+                })
+              "
+            >
+              Añadir
+            </button>
           </div>
           <!-- /HARDCODEADO -->
         </div>
@@ -81,7 +92,18 @@
               <span class="product-name">Nombre</span>
               <span class="product-price">Precio</span>
             </div>
-            <button class="btn-add">Añadir</button>
+            <button
+              class="btn-add"
+              (click)="
+                openDialog({
+                  nombre: 'Nombre',
+                  precio: 'Precio',
+                  imagen: '/assets/test/Banana.png',
+                })
+              "
+            >
+              Añadir
+            </button>
           </div>
           <!-- /HARDCODEADO -->
         </div>
@@ -111,9 +133,53 @@
             <span class="producto-price">Precio</span>
           </div>
         </div>
-        <button class="btn-add">Añadir</button>
+        <button
+          class="btn-add"
+          (click)="
+            openDialog({ nombre: 'Nombre', precio: 'Precio', imagen: '/assets/test/Banana.png' })
+          "
+        >
+          Añadir
+        </button>
       </div>
       <!-- /HARDCODEADO -->
     </div>
+
+    <!-- llama al diálogo -->
+    <app-dialog
+      #addProductDialog
+      title="Añadir producto a la cesta"
+      confirmLabel="Añadir producto"
+      cancelLabel="Cancelar"
+    >
+      <!-- HARDCODEADO DE PRUEBINHA -->
+      <div class="product-main-card">
+        <div class="product-main-info">
+          <h2 class="product-title">{{ addProductDialog.product?.nombre || 'Nombre' }}</h2>
+          <p class="product-meta">Peso: {{ addProductDialog.product?.peso || '-' }}kg</p>
+          <p class="product-meta">Precio: {{ addProductDialog.product?.precio || '-' }}€</p>
+
+          <div class="quantity-row">
+            <button class="qty-btn" (click)="addProductDialog.decrement()">&#8722;</button>
+            <span class="qty-value">{{ addProductDialog.cantidad }}</span>
+            <button class="qty-btn" (click)="addProductDialog.increment()">&#43;</button>
+          </div>
+        </div>
+
+        <img
+          [src]="addProductDialog.product?.imagen || '/assets/test/Banana.png'"
+          [alt]="addProductDialog.product?.nombre"
+          class="product-main-img"
+        />
+      </div>
+
+      <div class="product-description-card">
+        <h3 class="desc-title">Descripción</h3>
+        <p class="desc-text">
+          {{ addProductDialog.product?.descripcion || 'Producto de origen Canario.' }}
+        </p>
+      </div>
+      <!-- /HARDCODEADO -->
+    </app-dialog>
   </section>
 </main>

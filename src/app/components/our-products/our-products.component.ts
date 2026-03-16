@@ -1,12 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { DialogComponent } from '../dlg/dialog.component';
 import { Router } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'app-our-products',
   standalone: true,
-  imports: [CommonModule, MatIcon],
+  imports: [CommonModule, MatIconModule, DialogComponent],
   templateUrl: './our-products.component.html',
   styleUrls: ['./our-products.component.css'],
 })
@@ -20,6 +21,13 @@ export class ourProductsComponent {
     descuento: 'Precio con descuento',
   });
   temporada = Array(10).fill({ nombre: 'Nombre', precio: 'Precio' });
+
+  @ViewChild('addProductDialog') addProductDialog!: DialogComponent;
+  selectedProduct: any = null;
+
+  openDialog(product: any): void {
+    this.addProductDialog.open(product);
+  }
 
   visibles = 6;
 
