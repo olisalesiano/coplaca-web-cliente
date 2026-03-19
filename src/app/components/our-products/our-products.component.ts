@@ -1,50 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { ApiService } from '../../core/api.service';
-import { CartStore } from '../../core/cart.store';
-import { ProductDTO } from '../../core/api.models';
 
 @Component({
   selector: 'app-our-products',
   standalone: true,
-  imports: [CommonModule, MatIcon, FormsModule],
+  imports: [CommonModule, MatIcon],
   templateUrl: './our-products.component.html',
   styleUrls: ['./our-products.component.css'],
 })
-export class OurProductsComponent {
-  products: ProductDTO[] = [];
-  searchQuery = '';
-  loading = false;
-  message = '';
-  quantityByProduct: Record<number, number> = {};
+export class ourProductsComponent {
+  ofertasIndex = 0;
+  temporadaIndex = 0;
 
-  constructor(
-    private readonly router: Router,
-    private readonly apiService: ApiService,
-    private readonly cartStore: CartStore,
-  ) {
-    this.loadProducts();
+  ofertas = Array(10).fill({
+    nombre: 'Nombre',
+    precio: 'Precio',
+    descuento: 'Precio con descuento',
+  });
+  temporada = Array(10).fill({ nombre: 'Nombre', precio: 'Precio' });
+
+  visibles = 6;
+
+  constructor(private router: Router) {}
+
+  prevOfertas(): void {
+    if (this.ofertasIndex > 0) this.ofertasIndex--;
   }
 
-  loadProducts(): void {
-    this.loading = true;
-    this.apiService.getProducts(this.searchQuery).subscribe({
-      next: (products) => {
-        this.products = products;
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-        this.message = 'No se pudieron cargar los productos.';
-      },
-    });
-  }
-
-  getOffers(): ProductDTO[] {
-    return this.products.filter((product) => !!product.offerReason || (product.discountPercentage ?? 0) > 0);
+  nextOfertas(): void {
+    if (this.ofertasIndex < this.ofertas.length - this.visibles) this.ofertasIndex++;
   }
 
   addToCart(product: ProductDTO): void {

@@ -46,8 +46,7 @@
               <span class="product-discount">Oferta: {{ p.offerReason || 'Promocion temporal' }}</span>
               <span class="product-discount">Stock: {{ p.stockQuantity }} kg</span>
             </div>
-            <input type="number" min="0.1" step="0.1" [(ngModel)]="quantityByProduct[p.id]" placeholder="Kg" />
-            <button class="btn-add" (click)="addToCart(p)">Añadir</button>
+            <button class="btn-add">Añadir</button>
           </div>
         </div>
       </div>
@@ -69,8 +68,7 @@
               <span class="product-discount">{{ p.description || 'Sin descripcion' }}</span>
               <span class="product-discount">Stock: {{ p.stockQuantity }} kg</span>
             </div>
-            <input type="number" min="0.1" step="0.1" [(ngModel)]="quantityByProduct[p.id]" placeholder="Kg" />
-            <button class="btn-add" (click)="addToCart(p)">Añadir</button>
+            <button class="btn-add">Añadir</button>
           </div>
         </div>
       </div>
@@ -90,8 +88,45 @@
             <span class="producto-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
           </div>
         </div>
-        <button class="btn-add" (click)="addToCart(p)">Añadir 1kg</button>
+        <button class="btn-add">Añadir</button>
       </div>
     </div>
+
+    <!-- llama al diálogo -->
+    <app-dialog
+      #addProductDialog
+      title="Añadir producto a la cesta"
+      confirmLabel="Añadir producto"
+      cancelLabel="Cancelar"
+    >
+      <!-- HARDCODEADO DE PRUEBINHA -->
+      <div class="product-main-card">
+        <div class="product-main-info">
+          <h2 class="product-title">{{ addProductDialog.product?.nombre || 'Nombre' }}</h2>
+          <p class="product-meta">Peso: {{ addProductDialog.product?.peso || '-' }}kg</p>
+          <p class="product-meta">Precio: {{ addProductDialog.product?.precio || '-' }}€</p>
+
+          <div class="quantity-row">
+            <button class="qty-btn" (click)="addProductDialog.decrement()">&#8722;</button>
+            <span class="qty-value">{{ addProductDialog.cantidad }}</span>
+            <button class="qty-btn" (click)="addProductDialog.increment()">&#43;</button>
+          </div>
+        </div>
+
+        <img
+          [src]="addProductDialog.product?.imagen || '/assets/test/Banana.png'"
+          [alt]="addProductDialog.product?.nombre"
+          class="product-main-img"
+        />
+      </div>
+
+      <div class="product-description-card">
+        <h3 class="desc-title">Descripción</h3>
+        <p class="desc-text">
+          {{ addProductDialog.product?.descripcion || 'Producto de origen Canario.' }}
+        </p>
+      </div>
+      <!-- /HARDCODEADO -->
+    </app-dialog>
   </section>
 </main>

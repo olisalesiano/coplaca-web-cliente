@@ -1,0 +1,37 @@
+<div class="add-product-wrapper">
+  <div class="product-main-card">
+    <div class="product-main-info">
+      <h2 class="product-title">{{ product?.nombre || 'Nombre' }}</h2>
+      <p class="product-meta">Peso: {{ product?.peso || '-' }}kg</p>
+      <p class="product-meta">Precio: {{ product?.precio || '-' }}€</p>
+
+      <div class="quantity-row">
+        <button class="qty-btn" (click)="decrement()">
+          <span class="material-icons">remove_circle_outline</span>
+        </button>
+        <span class="qty-value">{{ cantidad }}</span>
+        <button class="qty-btn" (click)="increment()">
+          <span class="material-icons">add_circle_outline</span>
+        </button>
+      </div>
+    </div>
+
+    <img
+      [src]="product?.imagen || '/assets/test/Banana.png'"
+      [alt]="product?.nombre"
+      class="product-main-img"
+    />
+  </div>
+
+  <div class="product-description-card">
+    <h3 class="desc-title">Descripción</h3>
+    <p class="desc-text">
+      {{
+        product?.descripcion ||
+          'Este es un producto de origen Canario cuyo peso medio es de x kilos y es considerado muy bueno para la salud'
+      }}
+    </p>
+  </div>
+
+  <button class="btn-añadir" (click)="añadir()">Añadir producto</button>
+</div>

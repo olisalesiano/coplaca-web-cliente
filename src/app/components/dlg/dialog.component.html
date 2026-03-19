@@ -1,0 +1,15 @@
+<div class="dialog-backdrop" *ngIf="isOpen" (click)="close()">
+  <div class="dialog-box" (click)="$event.stopPropagation()">
+    <div class="dialog-header">
+      <h3>{{ title }}</h3>
+      <button class="close-btn" (click)="close()">✕</button>
+    </div>
+    <div class="dialog-body">
+      <ng-content></ng-content>
+    </div>
+    <div class="dialog-footer">
+      <button class="btn confirm" (click)="confirm()">{{ confirmLabel }}</button>
+      <button class="btn cancel" (click)="close()">{{ cancelLabel }}</button>
+    </div>
+  </div>
+</div>
