@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
+import { ApiService } from '../../core/api.service';
+import { OrderDTO } from '../../core/api.models';
 
 @Component({
   selector: 'app-orders',
@@ -11,28 +13,28 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./orders.component.css'],
 })
 export class OrdersComponent {
-  // HARDCODEADO
-  pedidos = [
-    { id: 'ID Pedido', estado: 'Estado', fecha: 'Fecha', total: 'x€' },
-    { id: 'ID Pedido', estado: 'Estado', fecha: 'Fecha', total: 'x€' },
-    { id: 'ID Pedido', estado: 'Estado', fecha: 'Fecha', total: 'x€' },
-    { id: 'ID Pedido', estado: 'Estado', fecha: 'Fecha', total: 'x€' },
-    { id: 'ID Pedido', estado: 'Estado', fecha: 'Fecha', total: 'x€' },
-  ];
-  // /HARDCODEADO
-
-  // HARDCODEADO
-  detalleProductos = [
-    { nombre: 'Nombre', cantidad: 'Cantidad', precioPeso: 'Precio/Peso' },
-    { nombre: 'Nombre', cantidad: 'Cantidad', precioPeso: 'Precio/Peso' },
-    { nombre: 'Nombre', cantidad: 'Cantidad', precioPeso: 'Precio/Peso' },
-  ];
-  // /HARDCODEADO
-
-  pedidoSeleccionado: any = null;
+  pedidos: OrderDTO[] = [];
+  pedidoSeleccionado: OrderDTO | null = null;
   dialogVisible = false;
+  error = '';
 
-  constructor(private router: Router) {}
+  constructor(
+    private readonly router: Router,
+    private readonly apiService: ApiService,
+  ) {
+    this.loadOrders();
+  }
+
+  loadOrders(): void {
+    this.apiService.getMyOrders().subscribe({
+      next: (orders) => {
+        this.pedidos = orders;
+      },
+      error: () => {
+        this.error = 'No se pudieron cargar los pedidos.';
+      },
+    });
+  }
 
   goToShop(): void {
     this.router.navigate(['/our-products']);
@@ -47,7 +49,7 @@ export class OrdersComponent {
     this.router.navigate(['/profile']);
   }
 
-  verDetalles(pedido: any): void {
+  verDetalles(pedido: OrderDTO): void {
     this.pedidoSeleccionado = pedido;
     this.dialogVisible = true;
   }
@@ -55,11 +57,9 @@ export class OrdersComponent {
   cerrarDialog(): void {
     this.dialogVisible = false;
     this.pedidoSeleccionado = null;
-    window.location.reload();
   }
 
   cancelarPedido(): void {
-    // implementar lógica de cancelación
     this.cerrarDialog();
   }
 }
