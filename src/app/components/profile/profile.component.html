@@ -1,9 +1,9 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="navbar-logo" (click)="goToShop()">
+  <button class="navbar-logo" (click)="goToShop()" type="button">
     <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
-  </div>
+  </button>
 
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
@@ -31,10 +31,19 @@
     </div>
 
     <div class="profile-data">
-      <p><strong>Nombre:</strong></p>
-      <p><strong>Apellidos:</strong></p>
-      <p><strong>Email:</strong></p>
-      <p><strong>Ubicación:</strong></p>
+      <p><strong>Nombre:</strong> <input [(ngModel)]="firstName" /></p>
+      <p><strong>Apellidos:</strong> <input [(ngModel)]="lastName" /></p>
+      <p><strong>Email:</strong> {{ user?.email }}</p>
+      <p><strong>Telefono:</strong> <input [(ngModel)]="phoneNumber" /></p>
+      <p><strong>Calle:</strong> <input [(ngModel)]="street" /></p>
+      <p><strong>Numero:</strong> <input [(ngModel)]="streetNumber" /></p>
+      <p><strong>Piso/Apto:</strong> <input [(ngModel)]="apartment" /></p>
+      <p><strong>Ciudad:</strong> <input [(ngModel)]="city" /></p>
+      <p><strong>Provincia:</strong> <input [(ngModel)]="province" /></p>
+      <p><strong>Codigo postal:</strong> <input [(ngModel)]="postalCode" /></p>
+      <p><strong>Info adicional:</strong> <input [(ngModel)]="additionalInfo" /></p>
+      <p><strong>Almacen asignado:</strong> {{ user?.warehouseName || 'Sin asignar' }}</p>
+      <p *ngIf="message"><strong>{{ message }}</strong></p>
     </div>
   </div>
 
