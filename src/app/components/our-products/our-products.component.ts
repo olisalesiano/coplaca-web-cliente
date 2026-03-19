@@ -1,44 +1,69 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
+import { ApiService } from '../../core/api.service';
+import { CartStore } from '../../core/cart.store';
+import { ProductDTO } from '../../core/api.models';
 
 @Component({
   selector: 'app-our-products',
   standalone: true,
-  imports: [CommonModule, MatIcon],
+  imports: [CommonModule, MatIcon, FormsModule],
   templateUrl: './our-products.component.html',
   styleUrls: ['./our-products.component.css'],
 })
-export class ourProductsComponent {
-  ofertasIndex = 0;
-  temporadaIndex = 0;
+export class OurProductsComponent {
+  products: ProductDTO[] = [];
+  searchQuery = '';
+  loading = false;
+  message = '';
+  quantityByProduct: Record<number, number> = {};
 
-  ofertas = Array(10).fill({
-    nombre: 'Nombre',
-    precio: 'Precio',
-    descuento: 'Precio con descuento',
-  });
-  temporada = Array(10).fill({ nombre: 'Nombre', precio: 'Precio' });
-
-  visibles = 6;
-
-  constructor(private router: Router) {}
-
-  prevOfertas(): void {
-    if (this.ofertasIndex > 0) this.ofertasIndex--;
+  constructor(
+    private readonly router: Router,
+    private readonly apiService: ApiService,
+    private readonly cartStore: CartStore,
+  ) {
+    this.loadProducts();
   }
 
-  nextOfertas(): void {
-    if (this.ofertasIndex < this.ofertas.length - this.visibles) this.ofertasIndex++;
+  loadProducts(): void {
+    this.loading = true;
+    this.apiService.getProducts(this.searchQuery).subscribe({
+      next: (products) => {
+        this.products = products;
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.message = 'No se pudieron cargar los productos.';
+      },
+    });
   }
 
-  prevTemporada(): void {
-    if (this.temporadaIndex > 0) this.temporadaIndex--;
+  getOffers(): ProductDTO[] {
+    return this.products.filter((product) => !!product.offerReason || (product.discountPercentage ?? 0) > 0);
   }
 
-  nextTemporada(): void {
-    if (this.temporadaIndex < this.temporada.length - this.visibles) this.temporadaIndex++;
+  addToCart(product: ProductDTO): void {
+    const quantityKg = this.quantityByProduct[product.id] ?? 1;
+    if (quantityKg <= 0) {
+      this.message = 'La cantidad por kilo debe ser mayor que 0.';
+      return;
+    }
+
+    this.cartStore.addItem({
+      productId: product.id,
+      name: product.name,
+      unitPrice: Number(product.unitPrice),
+      imageUrl: product.imageUrl,
+      stockQuantity: Number(product.stockQuantity),
+      quantityKg,
+      offerReason: product.offerReason,
+    });
+    this.message = `${product.name} anadido a la cesta (${quantityKg} kg).`;
   }
 
   goToProfile(): void {
@@ -54,6 +79,6 @@ export class ourProductsComponent {
   }
 
   goToShop(): void {
-    this.router.navigate(['/shop']);
+    this.loadProducts();
   }
 }
