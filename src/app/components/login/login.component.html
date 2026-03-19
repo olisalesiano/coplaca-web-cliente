@@ -12,7 +12,7 @@
 
     <div class="form-group">
       <label for="email">Email</label>
-      <input type="email" id="email" placeholder="Introduzca su email..." />
+      <input type="email" id="email" [(ngModel)]="email" placeholder="Introduzca su email..." />
     </div>
 
     <div class="form-group">
@@ -21,6 +21,7 @@
         <input
           [type]="showPassword ? 'text' : 'password'"
           id="password"
+          [(ngModel)]="password"
           placeholder="••••••••••••"
         />
         <button class="toggle-eye" type="button" (click)="togglePassword()">
@@ -49,9 +50,11 @@
       </div>
     </div>
 
-    <!-- BOTÓN CORRECTO ABAJO, PROVISIONAL EL OTRO -->
-    <!-- <button class="btn-login">Iniciar sesión</button> -->
-    <button class="btn-login" (click)="goToOurProducts()">Iniciar sesión</button>
+    <button class="btn-login" (click)="login()" [disabled]="loading">
+      {{ loading ? 'Entrando...' : 'Iniciar sesión' }}
+    </button>
+
+    <p class="register-link" *ngIf="error">{{ error }}</p>
 
     <p class="register-link">
       ¿No tiene una cuenta? <a (click)="goToRegister()">Registrarse...</a>
