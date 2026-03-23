@@ -69,20 +69,40 @@
     </div>
 
     <!-- Dirección de envío -->
-    <div class="section-card">
+    <div class="section-card" [class.card-error]="errorDireccion">
       <h2 class="section-title">
         <mat-icon>local_shipping</mat-icon> Dirección de envío
+        <mat-icon class="required-icon" *ngIf="errorDireccion">error</mat-icon>
       </h2>
-      <div class="address-block">
+
+      <p class="error-msg" *ngIf="errorDireccion">
+        <mat-icon>warning</mat-icon> Completa los 3 campos para continuar
+      </p>
+
+      <div class="address-block" *ngIf="!editandoDireccion">
         <mat-icon class="address-icon">location_on</mat-icon>
         <div>
-          <p class="address-line">{{ direccion }}</p>
-          <p class="address-line">{{ ciudad }}</p>
-          <p class="address-line">CP {{ codigoPostal }}</p>
+          <p class="address-line" [class.placeholder-text]="!direccion">
+            {{ direccion || 'Sin dirección' }}
+          </p>
+          <p class="address-line" [class.placeholder-text]="!ciudad">
+            {{ ciudad || 'Sin ciudad' }}
+          </p>
+          <p class="address-line" [class.placeholder-text]="!codigoPostal">
+            {{ codigoPostal ? 'CP ' + codigoPostal : 'Sin código postal' }}
+          </p>
         </div>
       </div>
-      <button class="btn-change">
-        <mat-icon>edit</mat-icon> Cambiar dirección
+
+      <div class="address-edit" *ngIf="editandoDireccion">
+        <input [(ngModel)]="direccionTemp" class="address-input" placeholder="Calle y número *" />
+        <input [(ngModel)]="ciudadTemp" class="address-input" placeholder="Ciudad *" />
+        <input [(ngModel)]="codigoPostalTemp" class="address-input" placeholder="Código postal *" />
+      </div>
+
+      <button class="btn-change" [class.btn-guardar-dir]="editandoDireccion" (click)="editarDireccion()">
+        <mat-icon>{{ editandoDireccion ? 'save' : 'edit' }}</mat-icon>
+        {{ editandoDireccion ? 'Guardar dirección' : 'Cambiar dirección' }}
       </button>
     </div>
 
@@ -95,17 +115,20 @@
         <mat-icon>payment</mat-icon> Método de pago
       </h2>
 
-      <!-- Selector de método -->
-      <div class="balance-block">
+      <div class="balance-block" [class.balance-error]="errorSaldo">
         <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
         <div>
           <span class="balance-label">Saldo disponible</span>
-          <span class="balance-amount">{{ saldoCuenta }}</span>
+          <span class="balance-amount">{{ saldoCuenta | number:'1.2-2' }} €</span>
         </div>
+        <mat-icon class="balance-warn" *ngIf="errorSaldo">error</mat-icon>
       </div>
 
-      <!-- Botón confirmar -->
-      <button class="btn-pagar" (click)="confirmarPedido()">
+      <p class="error-msg error-msg-dark" *ngIf="errorSaldo">
+        <mat-icon>warning</mat-icon> Saldo insuficiente — añade saldo en tu perfil
+      </p>
+
+      <button class="btn-pagar" (click)="confirmarPedido()" [class.btn-disabled]="!saldoSuficiente || !direccionCompleta">
         <mat-icon>lock</mat-icon> Confirmar y pagar {{ totalPedido }}
       </button>
 
