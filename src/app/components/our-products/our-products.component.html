@@ -87,25 +87,72 @@
     <p class="section-sub" *ngIf="message">{{ message }}</p>
   </section>
 
+  <!-- DIÁLOGO GLOBAL - Disponible para todas las secciones -->
+  <app-dialog
+    #addProductDialog
+    title="Añadir producto a la cesta"
+    confirmLabel="Añadir"
+    cancelLabel="Cancelar"
+    (confirmed)="onDialogConfirm($event)"
+  >
+    <div class="product-main-card">
+      <div class="product-main-info">
+        <h2 class="product-title">{{ addProductDialog.product?.name || 'Nombre' }}</h2>
+        <p class="product-meta">Unidad: {{ addProductDialog.product?.unit || 'kg' }}</p>
+        <p class="product-meta">
+          Precio: {{ addProductDialog.getUnitPrice() | number: '1.2-2' }} €/{{ addProductDialog.getUnitLabel() }}
+        </p>
+        <p class="product-meta">Stock: {{ addProductDialog.product?.stockQuantity || '-' }} kg</p>
+
+        <div class="quantity-row">
+          <button class="qty-btn" type="button" (click)="addProductDialog.decrement()">&#8722;</button>
+          <span class="qty-value">{{ addProductDialog.cantidad }}</span>
+          <button class="qty-btn" type="button" (click)="addProductDialog.increment()">&#43;</button>
+        </div>
+
+        <p class="product-meta">
+          Subtotal actual: <strong>{{ addProductDialog.getTotalPrice() | number: '1.2-2' }} €</strong>
+        </p>
+      </div>
+
+      <img
+        [src]="addProductDialog.product ? getProductImage(addProductDialog.product) : '/assets/test/Banana.png'"
+        [alt]="addProductDialog.product?.name"
+        class="product-main-img"
+        (error)="onProductImageError($event)"
+      />
+    </div>
+
+    <div class="product-description-card">
+      <h3 class="desc-title">Descripción</h3>
+      <p class="desc-text">
+        {{ addProductDialog.product?.description || 'Producto fresco de origen canario.' }}
+      </p>
+    </div>
+  </app-dialog>
+
   <!-- OFERTAS DEL DÍA -->
-  <section class="section">
+  <section class="section offers-section">
     <h2 class="section-title">¡Ofertas del día!</h2>
-    <div class="carousel-wrapper" *ngIf="getDisplayOffers().length > 0; else noOffers">
-      <div class="carousel-offers">
-        <div class="offer-card" *ngFor="let offer of getDisplayOffers()">
+    <div *ngIf="getDisplayOffers().length > 0; else noOffers">
+      <div class="offers-grid">
+        <div class="offer-card-full" *ngFor="let offer of getDisplayOffers()">
           <img
             [src]="getProductImage(offer.product)"
             (error)="onProductImageError($event)"
             alt="producto en oferta"
-            class="offer-img"
+            class="offer-img-full"
           />
-          <div class="offer-badge">{{ offer.discountPercentage }}% OFF</div>
-          <span class="offer-reason">{{ offer.reason }}</span>
-          <div class="offer-details">
-            <span class="offer-name">{{ offer.product.name }}</span>
-            <span class="offer-price">{{ offer.product.unitPrice }} €/{{ offer.product.unit || 'kg' }}</span>
+          <div class="offer-info">
+            <div class="offer-header">
+              <span class="offer-name-full">{{ offer.product.name }}</span>
+              <div class="offer-badge-full">{{ offer.discountPercentage }}% OFF</div>
+            </div>
+            <span class="offer-reason-full">{{ offer.reason }}</span>
+            <span class="offer-price-full">{{ offer.product.unitPrice }} €/{{ offer.product.unit || 'kg' }}</span>
+            <span class="offer-stock">Stock: {{ offer.product.stockQuantity }} kg</span>
           </div>
-          <button class="btn-add" type="button" (click)="openProductDialog(offer.product)">Ver</button>
+          <button class="btn-offer" type="button" (click)="openProductDialog(offer.product)">Añadir al carrito</button>
         </div>
       </div>
     </div>
@@ -113,14 +160,14 @@
   </section>
 
   <!-- PRODUCTOS DISPONIBLES (ROTACIÓN) -->
-  <section class="section">
+  <section class="section products-available-section">
     <h2 class="section-title">Productos disponibles</h2>
-    <div class="carousel-wrapper" *ngIf="!loading; else loadingProducts">
-      <div class="carousel-simple">
-        <div class="simple-product-card" *ngFor="let p of getRotatedAvailableProducts()">
-          <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="simple-product-img" />
-          <span class="simple-product-name">{{ p.name }}</span>
-          <button class="btn-add" type="button" (click)="openProductDialog(p)">Agregar</button>
+    <div *ngIf="!loading; else loadingProducts">
+      <div class="available-products-grid">
+        <div class="available-product-card" *ngFor="let p of getRotatedAvailableProducts()">
+          <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="available-product-img" />
+          <span class="available-product-name">{{ p.name }}</span>
+          <button class="btn-add-available" type="button" (click)="openProductDialog(p)">Agregar</button>
         </div>
       </div>
     </div>
@@ -149,7 +196,7 @@
   </section>
 
   <!-- NUESTROS PRODUCTOS -->
-  <section class="section nuestros">
+  <section class="section nuestros nuestros-section">
     <h2 class="section-title-big">Nuestros productos</h2>
     <div class="productos-grid" *ngIf="getReactiveProducts().length > 0">
       <div class="producto-card" *ngFor="let p of getReactiveProducts()">
@@ -163,51 +210,5 @@
         <button class="btn-add" type="button" (click)="openProductDialog(p)">Abrir</button>
       </div>
     </div>
-
-    <!-- llama al diálogo -->
-    <app-dialog
-      #addProductDialog
-      title="Añadir producto a la cesta"
-      confirmLabel="Añadir"
-      cancelLabel="Cancelar"
-      (confirmed)="onDialogConfirm($event)"
-    >
-      <!-- HARDCODEADO DE PRUEBINHA -->
-      <div class="product-main-card">
-        <div class="product-main-info">
-          <h2 class="product-title">{{ addProductDialog.product?.name || 'Nombre' }}</h2>
-          <p class="product-meta">Unidad: {{ addProductDialog.product?.unit || 'kg' }}</p>
-          <p class="product-meta">
-            Precio: {{ addProductDialog.getUnitPrice() | number: '1.2-2' }} €/{{ addProductDialog.getUnitLabel() }}
-          </p>
-          <p class="product-meta">Stock: {{ addProductDialog.product?.stockQuantity || '-' }} kg</p>
-
-          <div class="quantity-row">
-            <button class="qty-btn" type="button" (click)="addProductDialog.decrement()">&#8722;</button>
-            <span class="qty-value">{{ addProductDialog.cantidad }}</span>
-            <button class="qty-btn" type="button" (click)="addProductDialog.increment()">&#43;</button>
-          </div>
-
-          <p class="product-meta">
-            Subtotal actual: <strong>{{ addProductDialog.getTotalPrice() | number: '1.2-2' }} €</strong>
-          </p>
-        </div>
-
-        <img
-          [src]="addProductDialog.product ? getProductImage(addProductDialog.product) : '/assets/test/Banana.png'"
-          [alt]="addProductDialog.product?.name"
-          class="product-main-img"
-          (error)="onProductImageError($event)"
-        />
-      </div>
-
-      <div class="product-description-card">
-        <h3 class="desc-title">Descripción</h3>
-        <p class="desc-text">
-          {{ addProductDialog.product?.description || 'Producto fresco de origen canario.' }}
-        </p>
-      </div>
-      <!-- /HARDCODEADO -->
-    </app-dialog>
   </section>
 </main>

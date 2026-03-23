@@ -72,7 +72,7 @@ export class OurProductsComponent implements OnInit, OnDestroy {
   onlyFresh = false;
   quantityByProduct: Record<number, number> = {};
   rotatedProductsIndex: number = 0;
-  rotationInterval: number = 5000; // 5 segundos
+  rotationInterval: number = 10000; // 10 segundos
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchInput$ = new Subject<string>();
   private readonly rotationTrigger$ = new Subject<void>();

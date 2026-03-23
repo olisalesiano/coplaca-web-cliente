@@ -27,6 +27,10 @@ export class ProfileComponent {
   postalCode = '';
   additionalInfo = '';
   message = '';
+  saldo = 0;
+  cantidadInput = '';
+  editando = false;
+  dialogAbierto = false;
 
   constructor(
     private readonly router: Router,
@@ -70,33 +74,36 @@ export class ProfileComponent {
     this.router.navigate(['/profile']);
   }
   editInfo(): void {
-    this.apiService
-      .updateCurrentUser({
-        firstName: this.firstName,
-        lastName: this.lastName,
-        phoneNumber: this.phoneNumber,
-        address: {
-          street: this.street,
-          streetNumber: this.streetNumber,
-          apartment: this.apartment,
-          city: this.city,
-          province: this.province,
-          postalCode: this.postalCode,
-          additionalInfo: this.additionalInfo,
-          latitude: 0,
-          longitude: 0,
-          isDefault: false,
-        },
-      })
-      .subscribe({
-        next: () => {
-          this.message = 'Perfil actualizado.';
-          this.loadProfile();
-        },
-        error: () => {
-          this.message = 'No se pudo actualizar el perfil.';
-        },
-      });
+    this.editando = !this.editando;
+    if (!this.editando) {
+      this.apiService
+        .updateCurrentUser({
+          firstName: this.firstName,
+          lastName: this.lastName,
+          phoneNumber: this.phoneNumber,
+          address: {
+            street: this.street,
+            streetNumber: this.streetNumber,
+            apartment: this.apartment,
+            city: this.city,
+            province: this.province,
+            postalCode: this.postalCode,
+            additionalInfo: this.additionalInfo,
+            latitude: 0,
+            longitude: 0,
+            isDefault: false,
+          },
+        })
+        .subscribe({
+          next: () => {
+            this.message = 'Perfil actualizado.';
+            this.loadProfile();
+          },
+          error: () => {
+            this.message = 'No se pudo actualizar el perfil.';
+          },
+        });
+    }
   }
 
   darDeBaja(): void {
@@ -112,5 +119,27 @@ export class ProfileComponent {
   }
   irAPedidos(): void {
     this.router.navigate(['/orders']);
+  }
+
+  abrirDialogoSaldo(): void {
+    this.dialogAbierto = true;
+    this.cantidadInput = '';
+  }
+
+  cerrarDialogoSaldo(): void {
+    this.dialogAbierto = false;
+    this.cantidadInput = '';
+  }
+
+  confirmarSaldo(): void {
+    const cantidad = Number(this.cantidadInput) || 0;
+    if (cantidad <= 0) {
+      this.message = 'La cantidad debe ser mayor a 0.';
+      return;
+    }
+
+    this.saldo += cantidad;
+    this.message = `Se agregaron ${cantidad.toFixed(2)} € a tu saldo.`;
+    this.cerrarDialogoSaldo();
   }
 }
