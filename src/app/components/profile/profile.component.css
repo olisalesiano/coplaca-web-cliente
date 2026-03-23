@@ -57,9 +57,7 @@
   text-decoration: none;
 }
 
-.navbar-links a:hover {
-  color: white;
-}
+.navbar-links a:hover { color: white; }
 
 .profile-btn {
   background: white;
@@ -75,9 +73,7 @@
   transition: background 0.2s;
 }
 
-.profile-btn:hover {
-  background: #f0f0f0;
-}
+.profile-btn:hover { background: #f0f0f0; }
 
 /* ===== MAIN ===== */
 .main-content {
@@ -128,24 +124,52 @@
   margin: 0;
 }
 
-.profile-data {
+.profile-data { display: flex; flex-direction: column; gap: 0.3rem; }
+.profile-data p { margin: 0; font-size: 1rem; color: #1a1a1a; }
+.profile-data strong { font-weight: 700; }
+
+/* ===== SALDO ===== */
+.saldo-row {
   display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
+  align-items: center;
+  gap: 1rem;
+  background: #f5c518;
+  border-radius: 12px;
+  padding: 0.9rem 1.5rem;
 }
 
-.profile-data p {
-  margin: 0;
+.saldo-label {
   font-size: 1rem;
+  font-weight: 600;
   color: #1a1a1a;
-  font-weight: 400;
+  flex: 1;
 }
 
-.profile-data strong {
+.saldo-amount {
+  font-size: 1.3rem;
   font-weight: 700;
+  color: #2a9d3f;
 }
 
-/* ===== BUTTONS ===== */
+.btn-saldo {
+  background: #2a9d3f;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1.2rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background 0.2s;
+}
+
+.btn-saldo:hover { background: #1f7a30; }
+
+/* ===== BOTONES ===== */
 .btn-edit {
   width: 100%;
   padding: 1rem;
@@ -160,14 +184,9 @@
   transition: background 0.2s;
 }
 
-.btn-edit:hover {
-  background-color: #1f7a30;
-}
+.btn-edit:hover { background-color: #1f7a30; }
 
-.btn-row {
-  display: flex;
-  gap: 1rem;
-}
+.btn-row { display: flex; gap: 1rem; }
 
 .btn-baja {
   flex: 1;
@@ -183,9 +202,7 @@
   transition: background 0.2s;
 }
 
-.btn-baja:hover {
-  background-color: #c04444;
-}
+.btn-baja:hover { background-color: #c04444; }
 
 .btn-pedidos {
   flex: 1;
@@ -201,6 +218,126 @@
   transition: background 0.2s;
 }
 
-.btn-pedidos:hover {
-  background-color: #1f7a30;
+.btn-pedidos:hover { background-color: #1f7a30; }
+
+/* ===== DIÁLOGO SALDO ===== */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.saldo-dialog {
+  background: #f5c518;
+  border-radius: 16px;
+  width: 380px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.saldo-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.saldo-dialog-header h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  color: #1a1a1a;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.saldo-actual {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+.saldo-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: white;
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+}
+
+.saldo-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  background: transparent;
+}
+
+.euro-sign {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2a9d3f;
+}
+
+.saldo-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.btn {
+  padding: 0.7rem 1.6rem;
+  border: none;
+  border-radius: 24px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn:hover { opacity: 0.85; }
+
+/* ===== EDICIÓN DE PERFIL ===== */
+.profile-field {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2rem;
+}
+
+.profile-input {
+  border: none;
+  border-bottom: 2px solid #2a9d3f;
+  background: transparent;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  color: #1a1a1a;
+  outline: none;
+  padding: 0.1rem 0.3rem;
+  flex: 1;
+}
+
+.btn-guardar {
+  background-color: #f5a623 !important;
+}
+
+.btn-guardar:hover {
+  background-color: #e0911a !important;
 }

@@ -1,48 +1,83 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-<!-- NAVBAR -->
 <nav class="navbar">
   <div class="navbar-logo" (click)="goToShop()">
     <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
   </div>
-
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
     <a (click)="goToOrders()">Tus pedidos</a>
-    <a (click)="goToCart()">
-      Tu carrito
-      <mat-icon>shopping_cart</mat-icon>
-    </a>
+    <a (click)="goToCart()">Tu carrito <mat-icon>shopping_cart</mat-icon></a>
   </div>
-
   <button class="profile-btn" (click)="goToProfile()">
     <mat-icon>person</mat-icon>
   </button>
 </nav>
 
-<!-- MAIN CONTENT -->
 <main class="main-content">
-  <!-- TARJETA PERFIL -->
+
   <div class="profile-card">
     <div class="profile-header">
-      <div class="avatar">
-        <mat-icon>person</mat-icon>
-      </div>
+      <div class="avatar"><mat-icon>person</mat-icon></div>
       <h1 class="profile-title">¡Aquí tienes tu espacio!</h1>
     </div>
 
     <div class="profile-data">
-      <p><strong>Nombre:</strong></p>
-      <p><strong>Apellidos:</strong></p>
-      <p><strong>Email:</strong></p>
-      <p><strong>Ubicación:</strong></p>
+      <div class="profile-field">
+        <span><strong>Nombre:</strong></span>
+        <input *ngIf="editando" [(ngModel)]="nombreTemp" class="profile-input" placeholder="Tu nombre" />
+        <span *ngIf="!editando">{{ nombre }}</span>
+      </div>
+      <div class="profile-field">
+        <span><strong>Apellidos:</strong></span>
+        <input *ngIf="editando" [(ngModel)]="apellidosTemp" class="profile-input" placeholder="Tus apellidos" />
+        <span *ngIf="!editando">{{ apellidos }}</span>
+      </div>
+      <div class="profile-field">
+        <span><strong>Email:</strong></span>
+        <input *ngIf="editando" [(ngModel)]="emailTemp" class="profile-input" placeholder="Tu email" type="email" />
+        <span *ngIf="!editando">{{ email }}</span>
+      </div>
+      <div class="profile-field">
+        <span><strong>Ubicación:</strong></span>
+        <input *ngIf="editando" [(ngModel)]="ubicacionTemp" class="profile-input" placeholder="Tu ubicación" />
+        <span *ngIf="!editando">{{ ubicacion }}</span>
+      </div>
     </div>
   </div>
 
-  <!-- BOTONES -->
-  <button class="btn-edit" (click)="editInfo()">Editar información</button>
+  <div class="saldo-row">
+    <span class="saldo-label">Saldo en cuenta:</span>
+    <span class="saldo-amount">{{ saldo | number:'1.2-2' }} €</span>
+    <button class="btn-saldo" (click)="abrirDialogoSaldo()">
+      <mat-icon>add_circle</mat-icon> Añadir saldo
+    </button>
+  </div>
+
+  <button class="btn-edit" [class.btn-guardar]="editando" (click)="editInfo()">
+    {{ editando ? 'Guardar' : 'Editar información' }}
+  </button>
 
   <div class="btn-row">
     <button class="btn-baja" (click)="darDeBaja()">Dar de baja</button>
     <button class="btn-pedidos" (click)="irAPedidos()">Ir a pedidos &gt;</button>
   </div>
+
+  <div class="dialog-backdrop" *ngIf="dialogAbierto" (click)="cerrarDialogoSaldo()">
+    <div class="saldo-dialog" (click)="$event.stopPropagation()">
+      <div class="saldo-dialog-header">
+        <h3>Añadir saldo</h3>
+        <button class="close-btn" (click)="cerrarDialogoSaldo()">✕</button>
+      </div>
+      <p class="saldo-actual">Saldo actual: <strong>{{ saldo | number:'1.2-2' }} €</strong></p>
+      <div class="saldo-input-row">
+        <input type="number" [(ngModel)]="cantidadInput" placeholder="0.00" min="0" class="saldo-input" />
+        <span class="euro-sign">€</span>
+      </div>
+      <div class="saldo-dialog-footer">
+        <button class="btn confirm" (click)="confirmarSaldo()">Añadir</button>
+        <button class="btn cancel" (click)="cerrarDialogoSaldo()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
 </main>
