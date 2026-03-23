@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -31,6 +31,7 @@ interface FallbackOffer {
 })
 export class OurProductsComponent implements OnInit, OnDestroy {
   @ViewChild('addProductDialog') addProductDialogRef?: DialogComponent;
+  @ViewChild('offersGridContainer') offersGridContainer?: ElementRef<HTMLDivElement>;
   private static readonly DEFAULT_PRODUCT_IMAGE = '/assets/test/Banana.png';
 
   private static readonly PRODUCT_IMAGE_BY_KEYWORD: Record<string, string> = {
@@ -373,5 +374,31 @@ export class OurProductsComponent implements OnInit, OnDestroy {
       normalizedCategory.includes('ortaliza');
 
     return isFreshCategory && Number(product.stockQuantity) >= 120;
+  }
+
+  scrollOffersLeft(): void {
+    const container = this.offersGridContainer?.nativeElement;
+    if (!container) {
+      return;
+    }
+
+    const cardStep = container.clientWidth / 5;
+    container.scrollBy({
+      left: -cardStep,
+      behavior: 'smooth',
+    });
+  }
+
+  scrollOffersRight(): void {
+    const container = this.offersGridContainer?.nativeElement;
+    if (!container) {
+      return;
+    }
+
+    const cardStep = container.clientWidth / 5;
+    container.scrollBy({
+      left: cardStep,
+      behavior: 'smooth',
+    });
   }
 }

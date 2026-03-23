@@ -134,8 +134,11 @@
   <!-- OFERTAS DEL DÍA -->
   <section class="section offers-section">
     <h2 class="section-title">¡Ofertas del día!</h2>
-    <div *ngIf="getDisplayOffers().length > 0; else noOffers">
-      <div class="offers-grid">
+    <div *ngIf="getDisplayOffers().length > 0; else noOffers" class="offers-container">
+      <button class="scroll-btn scroll-left" type="button" (click)="scrollOffersLeft()" aria-label="Scroll izquierda">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <div class="offers-grid" #offersGridContainer>
         <div class="offer-card-full" *ngFor="let offer of getDisplayOffers()">
           <img
             [src]="getProductImage(offer.product)"
@@ -155,6 +158,9 @@
           <button class="btn-offer" type="button" (click)="openProductDialog(offer.product)">Añadir al carrito</button>
         </div>
       </div>
+      <button class="scroll-btn scroll-right" type="button" (click)="scrollOffersRight()" aria-label="Scroll derecha">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
     <ng-template #noOffers><p class="section-sub">No hay ofertas activas en este momento.</p></ng-template>
   </section>
@@ -176,7 +182,6 @@
 
   <section class="section">
     <h2 class="section-title">Productos frescos de hoy</h2>
-    <p class="section-sub">Selección reactiva por disponibilidad y frescura.</p>
     <div class="productos-grid" *ngIf="getFreshProducts().length > 0; else noFreshProducts">
       <div class="producto-card" *ngFor="let p of getFreshProducts()">
         <div class="producto-top">
