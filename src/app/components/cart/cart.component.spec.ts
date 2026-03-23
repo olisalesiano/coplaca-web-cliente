@@ -3,6 +3,7 @@ import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { ApiService } from '../../core/api.service';
 import { CartStore } from '../../core/cart.store';
+import { OrderStore } from '../../core/order.store';
 
 import { CartComponent } from './cart.component';
 
@@ -27,6 +28,12 @@ describe('CartComponent', () => {
             getItems: () => [],
             saveItems: () => undefined,
             clear: () => undefined,
+          },
+        },
+        {
+          provide: OrderStore,
+          useValue: {
+            prependOrder: () => undefined,
           },
         },
       ],

@@ -5,6 +5,7 @@ import { MatIconModule, MatIcon } from '@angular/material/icon';
 import { ApiService } from '../../core/api.service';
 import { CartStore } from '../../core/cart.store';
 import { CartItem } from '../../core/api.models';
+import { OrderStore } from '../../core/order.store';
 
 @Component({
   selector: 'app-cart',
@@ -22,6 +23,7 @@ export class CartComponent {
     private readonly router: Router,
     private readonly apiService: ApiService,
     private readonly cartStore: CartStore,
+    private readonly orderStore: OrderStore,
   ) {
     this.refreshCart();
   }
@@ -32,7 +34,7 @@ export class CartComponent {
   }
 
   increment(item: CartItem): void {
-    item.quantityKg = Number((item.quantityKg + 0.5).toFixed(2));
+    item.quantityKg = Number(Math.min(item.stockQuantity, item.quantityKg + 0.5).toFixed(2));
     this.cartStore.saveItems(this.cartItems);
     this.refreshCart();
   }
@@ -41,6 +43,19 @@ export class CartComponent {
     item.quantityKg = Number(Math.max(0.5, item.quantityKg - 0.5).toFixed(2));
     this.cartStore.saveItems(this.cartItems);
     this.refreshCart();
+  }
+
+  removeItem(item: CartItem): void {
+    this.cartItems = this.cartItems.filter((value) => value.productId !== item.productId);
+    this.cartStore.saveItems(this.cartItems);
+    this.refreshCart();
+    this.message = 'Producto eliminado del carrito.';
+  }
+
+  clearCart(): void {
+    this.cartStore.clear();
+    this.refreshCart();
+    this.message = 'Carrito vaciado correctamente.';
   }
 
   goToShop(): void {
@@ -67,7 +82,8 @@ export class CartComponent {
     }));
 
     this.apiService.createOrder(items).subscribe({
-      next: () => {
+      next: (createdOrder) => {
+        this.orderStore.prependOrder(createdOrder);
         this.cartStore.clear();
         this.refreshCart();
         this.message = 'Pedido creado correctamente.';
@@ -77,5 +93,9 @@ export class CartComponent {
         this.message = 'No se pudo crear el pedido.';
       },
     });
+  }
+
+  trackItem(_index: number, item: CartItem): number {
+    return item.productId;
   }
 }

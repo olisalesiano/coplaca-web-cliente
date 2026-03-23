@@ -21,21 +21,48 @@
   <!-- CARRITO (scroll interno) -->
   <div class="cart-section">
     <div class="cart-card">
-      <h2 class="cart-title">Tu carrito</h2>
+      <div class="cart-header">
+        <div>
+          <h2 class="cart-title">Tu carrito</h2>
+          <p class="cart-subtitle">Revisa tus productos antes de finalizar la compra.</p>
+        </div>
+        <button class="btn-clear" type="button" (click)="clearCart()" [disabled]="cartItems.length === 0">
+          Vaciar carrito
+        </button>
+      </div>
 
-      <div class="cart-scroll">
-        <div class="cart-item" *ngFor="let item of cartItems">
+      <div class="cart-summary" *ngIf="cartItems.length > 0">
+        <span class="cart-count">{{ cartItems.length }} producto{{ cartItems.length === 1 ? '' : 's' }}</span>
+        <span class="cart-help">Pasa el mouse sobre un producto para ver acciones rapidas.</span>
+      </div>
+
+      <div class="cart-empty" *ngIf="cartItems.length === 0">
+        <h3>Tu carrito esta vacio</h3>
+        <p>Anade productos para verlos aqui y continuar con tu compra.</p>
+        <button class="btn-add" type="button" (click)="goToShop()">Ver productos</button>
+      </div>
+
+      <div class="cart-scroll" *ngIf="cartItems.length > 0">
+        <div class="cart-item" *ngFor="let item of cartItems; trackBy: trackItem">
           <img [src]="item.imageUrl || '/assets/test/Banana.png'" alt="producto" class="cart-item-img" />
-          <span class="cart-item-name">{{ item.name }}</span>
-          <div class="cart-item-details">
-            <span>
-              Cantidad:
-              <button class="btn-add" (click)="decrement(item)">-</button>
-              {{ item.quantityKg }} kg
-              <button class="btn-add" (click)="increment(item)">+</button>
-            </span>
-            <span>Precio: {{ item.unitPrice }} €/kg</span>
-            <span>Subtotal: {{ item.quantityKg * item.unitPrice | number:'1.2-2' }} €</span>
+          <div class="cart-item-main">
+            <span class="cart-item-name">{{ item.name }}</span>
+            <span class="cart-item-stock">{{ item.quantityKg }} kg en tu carrito</span>
+          </div>
+
+          <div class="cart-hover-panel">
+            <div class="cart-item-details">
+              <span>Stock disponible: {{ item.stockQuantity }} kg</span>
+              <span>Precio: {{ item.unitPrice }} €/kg</span>
+              <span>Subtotal: {{ item.quantityKg * item.unitPrice | number:'1.2-2' }} €</span>
+            </div>
+
+            <div class="cart-item-actions">
+              <button class="btn-qty" type="button" (click)="decrement(item)">-</button>
+              <span class="qty-value">{{ item.quantityKg }} kg</span>
+              <button class="btn-qty" type="button" (click)="increment(item)">+</button>
+              <button class="btn-remove" type="button" (click)="removeItem(item)">Eliminar</button>
+            </div>
           </div>
         </div>
       </div>
@@ -49,6 +76,6 @@
   <!-- FOOTER: total + pagar -->
   <div class="cart-footer">
     <span class="total-label">Total pedido: {{ totalPedido | number:'1.2-2' }} €</span>
-    <button class="btn-pagar" (click)="pagar()">Pagar</button>
+    <button class="btn-pagar" type="button" (click)="pagar()" [disabled]="cartItems.length === 0">Pagar</button>
   </div>
 </main>
