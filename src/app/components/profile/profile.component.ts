@@ -85,6 +85,7 @@ export class ProfileComponent {
           additionalInfo: this.additionalInfo,
           latitude: 0,
           longitude: 0,
+          isDefault: false,
         },
       })
       .subscribe({
