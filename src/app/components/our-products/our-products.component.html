@@ -39,7 +39,7 @@
       <div class="carousel">
         <div class="cards-track">
           <div class="product-card oferta" *ngFor="let p of getOffers()">
-            <img [src]="p.imageUrl || '/assets/test/Banana.png'" alt="producto" class="product-img" />
+            <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="product-img" />
             <div class="product-info">
               <span class="product-name">{{ p.name }}</span>
               <span class="product-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
@@ -61,7 +61,7 @@
       <div class="carousel">
         <div class="cards-track">
           <div class="product-card" *ngFor="let p of products">
-            <img [src]="p.imageUrl || '/assets/test/Banana.png'" alt="producto" class="product-img" />
+            <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="product-img" />
             <div class="product-info">
               <span class="product-name">{{ p.name }}</span>
               <span class="product-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
@@ -82,7 +82,7 @@
     <div class="productos-grid" *ngIf="products.length > 0">
       <div class="producto-card" *ngFor="let p of products">
         <div class="producto-top">
-          <img [src]="p.imageUrl || '/assets/test/Banana.png'" alt="producto" class="producto-img" />
+          <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="producto-img" />
           <div class="producto-info">
             <span class="producto-name">{{ p.name }}</span>
             <span class="producto-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
