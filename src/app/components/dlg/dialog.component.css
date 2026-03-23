@@ -19,7 +19,7 @@
   --dlg-yellow-200: #fff1a6;
   --dlg-text: #1b2d1f;
 
-  width: min(680px, 100%);
+  width: min(480px, 100%);
   background: linear-gradient(170deg, var(--dlg-white) 0%, #fbfffc 55%, var(--dlg-green-100) 100%);
   border: 2px solid rgba(39, 138, 65, 0.22);
   border-radius: 20px;
