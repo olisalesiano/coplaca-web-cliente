@@ -61,7 +61,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #2a9d3f;
+  color: #1b6e2f;
   transition: background 0.2s;
 }
 
@@ -107,6 +107,160 @@
   margin-top: 1rem;
 }
 
+/* ===== SEARCH ===== */
+.search-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.8rem;
+  max-width: 760px;
+  background: linear-gradient(135deg, #fff7ca 0%, #f0f8e7 100%);
+  border: 2px solid #dfe8d7;
+  border-radius: 16px;
+  padding: 0.7rem;
+  box-shadow: 0 8px 20px rgba(30, 80, 40, 0.12);
+}
+
+.search-input-wrap {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #d8e7d6;
+  min-height: 50px;
+  padding: 0 0.55rem;
+}
+
+.search-icon {
+  color: #2a9d3f;
+}
+
+.search-input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+  background: transparent;
+  color: #1b2b1e;
+}
+
+.search-input::placeholder {
+  color: #6e7e73;
+}
+
+.search-clear {
+  border: none;
+  background: #f2f7f1;
+  color: #52745c;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.search-clear:hover {
+  background: #e6f0e3;
+  color: #244c2e;
+}
+
+.search-btn {
+  border: none;
+  border-radius: 12px;
+  padding: 0 1rem;
+  min-height: 50px;
+  background: linear-gradient(135deg, #1b6e2f 0%, #145522 100%);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 8px 18px rgba(39, 130, 55, 0.25);
+}
+
+.search-btn:hover {
+  filter: brightness(1.05);
+}
+
+.filter-btn {
+  border: 2px solid #2a9d3f;
+  border-radius: 12px;
+  padding: 0 1rem;
+  min-height: 50px;
+  background: #ffffff;
+  color: #1f7f31;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.filter-btn:hover {
+  background: #eef8ef;
+}
+
+.filters-panel {
+  margin-top: 0.8rem;
+  max-width: 760px;
+  border: 2px solid #d6e4ce;
+  border-radius: 14px;
+  background: #f7fbf2;
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.filter-chip {
+  border: 1px solid #9ec5a3;
+  background: #ffffff;
+  color: #32603d;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-chip.active {
+  background: #1b6e2f;
+  color: #ffffff;
+  border-color: #1b6e2f;
+}
+
+.toggle-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #37563f;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.toggle-option input {
+  accent-color: #2a9d3f;
+}
+
+.search-hint {
+  margin: 0.7rem 0 0;
+  font-size: 0.95rem;
+  color: #4c6351;
+}
+
 /* ===== CAROUSEL ===== */
 .carousel-wrapper {
   display: flex;
@@ -140,6 +294,12 @@
   padding: 0.8rem 0.5rem 0.6rem;
   gap: 0.4rem;
   flex-shrink: 0;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 10px 22px rgba(34, 94, 46, 0.22);
 }
 
 .product-card.oferta {
@@ -193,6 +353,11 @@
   background-color: #e0a800;
 }
 
+.product-card:hover .btn-add,
+.producto-card:hover .btn-add {
+  background-color: #d99a00;
+}
+
 /* ===== ARROWS ===== */
 .arrow {
   background: none;
@@ -230,6 +395,12 @@
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.producto-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(27, 110, 47, 0.2);
 }
 
 .producto-top {
@@ -261,7 +432,24 @@
   color: #444;
 }
 
+.fresh-tag {
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1f7f31;
+}
+
 :host {
   display: block;
   width: 100%;
+}
+
+@media (max-width: 860px) {
+  .search-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .search-btn {
+    justify-content: center;
+  }
 }
