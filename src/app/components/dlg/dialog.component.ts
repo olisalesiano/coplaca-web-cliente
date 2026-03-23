@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CartStore } from '../cart/cart-store/cart-store.component';
 
 @Component({
   selector: 'app-dialog',
@@ -17,6 +18,8 @@ export class DialogComponent {
   @Input() confirmLabel: string = 'Aceptar';
   @Input() cancelLabel: string = 'Cancelar';
 
+  constructor(private cartStore: CartStore) {}
+
   open(product: any): void {
     this.product = product;
     this.cantidad = 1;
@@ -28,8 +31,9 @@ export class DialogComponent {
   }
 
   confirm(): void {
-    console.log('Añadiendo', this.cantidad, 'x', this.product?.nombre);
-    // aquí conectarás con tu servicio de carrito
+    if (this.product) {
+      this.cartStore.addItem(this.product, this.cantidad);
+    }
     this.close();
   }
 
