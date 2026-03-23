@@ -1,15 +1,23 @@
 <div class="dialog-backdrop" *ngIf="isOpen" (click)="close()">
   <div class="dialog-box" (click)="$event.stopPropagation()">
     <div class="dialog-header">
-      <h3>{{ title }}</h3>
-      <button class="close-btn" (click)="close()">✕</button>
+      <h3 class="dialog-title">{{ title }}</h3>
+      <button class="close-btn" type="button" (click)="close()" aria-label="Cerrar dialogo">✕</button>
     </div>
+
     <div class="dialog-body">
       <ng-content></ng-content>
     </div>
+
+    <div class="dialog-total" *ngIf="product">
+      <span class="total-label">Total</span>
+      <span class="total-value">{{ getTotalPrice() | number: '1.2-2' }} €</span>
+      <span class="total-unit">({{ cantidad }} {{ getUnitLabel() }})</span>
+    </div>
+
     <div class="dialog-footer">
-      <button class="btn confirm" (click)="confirm()">{{ confirmLabel }}</button>
-      <button class="btn cancel" (click)="close()">{{ cancelLabel }}</button>
+      <button class="btn cancel" type="button" (click)="close()">{{ cancelLabel }}</button>
+      <button class="btn confirm" type="button" (click)="confirm()">{{ confirmLabel }}</button>
     </div>
   </div>
 </div>
