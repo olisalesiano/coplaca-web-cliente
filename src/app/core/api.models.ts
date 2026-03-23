@@ -9,6 +9,7 @@ export interface AddressDTO {
   latitude?: number;
   longitude?: number;
   additionalInfo?: string;
+  isDefault?: boolean;
 }
 
 export interface UserDTO {
