@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthStore } from './auth.store';
 import { LoginResponse, OrderDTO, ProductDTO, UserDTO } from './api.models';
+import { environment } from '../../environments/environment';
 
 interface SignUpPayload {
   email: string;
@@ -26,7 +27,7 @@ interface SignUpPayload {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly baseUrl = (globalThis as { __COPLACA_API_URL__?: string }).__COPLACA_API_URL__ ?? 'http://localhost:8080';
+  private readonly baseUrl = this.resolveBaseUrl();
 
   constructor(
     private readonly http: HttpClient,
@@ -75,6 +76,11 @@ export class ApiService {
       },
       { headers: this.authHeaders() },
     );
+  }
+
+  private resolveBaseUrl(): string {
+    const runtimeUrl = (globalThis as { __COPLACA_API_URL__?: string }).__COPLACA_API_URL__;
+    return (runtimeUrl ?? environment.apiUrl).replace(/\/+$/, '');
   }
 
   private authHeaders(): HttpHeaders {
