@@ -1,9 +1,9 @@
-import { Component, DestroyRef, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { Subject, of } from 'rxjs';
+import { Subject, of, interval } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../core/api.service';
@@ -29,7 +29,7 @@ interface FallbackOffer {
   templateUrl: './our-products.component.html',
   styleUrls: ['./our-products.component.css'],
 })
-export class OurProductsComponent implements OnInit {
+export class OurProductsComponent implements OnInit, OnDestroy {
   @ViewChild('addProductDialog') addProductDialogRef?: DialogComponent;
   private static readonly DEFAULT_PRODUCT_IMAGE = '/assets/test/Banana.png';
 
@@ -71,9 +71,13 @@ export class OurProductsComponent implements OnInit {
   onlyOffers = false;
   onlyFresh = false;
   quantityByProduct: Record<number, number> = {};
+  rotatedProductsIndex: number = 0;
+  rotationInterval: number = 5000; // 5 segundos
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchInput$ = new Subject<string>();
+  private readonly rotationTrigger$ = new Subject<void>();
   private lastSearchedQuery = '';
+  private rotationSubscription: ReturnType<typeof interval> | null = null;
 
   constructor(
     private readonly router: Router,
@@ -83,7 +87,12 @@ export class OurProductsComponent implements OnInit {
 
   ngOnInit(): void {
     this.setupReactiveSearch();
+    this.setupProductRotation();
     this.searchInput$.next('');
+  }
+
+  ngOnDestroy(): void {
+    this.rotationTrigger$.complete();
   }
 
   loadProducts(): void {
@@ -151,7 +160,27 @@ export class OurProductsComponent implements OnInit {
         } satisfies DisplayOffer;
       })
       .filter((offer): offer is DisplayOffer => offer !== null)
-      .slice(0, 8);
+      .slice(0, 6);
+  }
+
+  getRotatedAvailableProducts(): ProductDTO[] {
+    const available = this.getReactiveProducts().filter(
+      (product) => !this.getDisplayOffers().some((offer) => offer.product.id === product.id)
+    );
+
+    if (available.length === 0) {
+      return [];
+    }
+
+    const itemsPerPage = 5;
+    const startIdx = (this.rotatedProductsIndex * itemsPerPage) % available.length;
+    const endIdx = startIdx + itemsPerPage;
+
+    if (endIdx <= available.length) {
+      return available.slice(startIdx, endIdx);
+    }
+
+    return [...available.slice(startIdx), ...available.slice(0, Math.abs(endIdx - available.length))];
   }
 
   getReactiveProducts(): ProductDTO[] {
@@ -239,6 +268,7 @@ export class OurProductsComponent implements OnInit {
           this.lastSearchedQuery = query;
           this.loading = true;
           this.message = '';
+          this.rotatedProductsIndex = 0;
         }),
         switchMap((query) =>
           this.apiService.getProducts(query).pipe(
@@ -265,6 +295,17 @@ export class OurProductsComponent implements OnInit {
         }
 
         this.loading = false;
+      });
+  }
+
+  private setupProductRotation(): void {
+    interval(this.rotationInterval)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const available = this.getReactiveProducts();
+        if (available.length > 5) {
+          this.rotatedProductsIndex = (this.rotatedProductsIndex + 1) % Math.ceil(available.length / 5);
+        }
       });
   }
 

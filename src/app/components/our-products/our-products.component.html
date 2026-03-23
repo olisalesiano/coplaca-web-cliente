@@ -90,48 +90,37 @@
   <!-- OFERTAS DEL DÍA -->
   <section class="section">
     <h2 class="section-title">¡Ofertas del día!</h2>
-    <p class="section-sub">Si un producto tiene oferta, veras el motivo (abundancia, caducidad, ...).</p>
-
     <div class="carousel-wrapper" *ngIf="getDisplayOffers().length > 0; else noOffers">
-      <div class="carousel">
-        <div class="cards-track">
-          <div class="product-card oferta" *ngFor="let offer of getDisplayOffers()">
-            <img
-              [src]="getProductImage(offer.product)"
-              (error)="onProductImageError($event)"
-              alt="producto"
-              class="product-img"
-            />
-            <div class="product-info">
-              <span class="product-name">{{ offer.product.name }}</span>
-              <span class="product-price">{{ offer.product.unitPrice }} €/{{ offer.product.unit || 'kg' }}</span>
-              <span class="product-discount">Oferta {{ offer.discountPercentage }}% · {{ offer.reason }}</span>
-              <span class="product-discount">Stock: {{ offer.product.stockQuantity }} kg</span>
-            </div>
-            <button class="btn-add" type="button" (click)="openProductDialog(offer.product)">Abrir</button>
+      <div class="carousel-offers">
+        <div class="offer-card" *ngFor="let offer of getDisplayOffers()">
+          <img
+            [src]="getProductImage(offer.product)"
+            (error)="onProductImageError($event)"
+            alt="producto en oferta"
+            class="offer-img"
+          />
+          <div class="offer-badge">{{ offer.discountPercentage }}% OFF</div>
+          <span class="offer-reason">{{ offer.reason }}</span>
+          <div class="offer-details">
+            <span class="offer-name">{{ offer.product.name }}</span>
+            <span class="offer-price">{{ offer.product.unitPrice }} €/{{ offer.product.unit || 'kg' }}</span>
           </div>
+          <button class="btn-add" type="button" (click)="openProductDialog(offer.product)">Ver</button>
         </div>
       </div>
     </div>
-    <ng-template #noOffers><p class="section-sub">No hay ofertas activas ahora mismo.</p></ng-template>
+    <ng-template #noOffers><p class="section-sub">No hay ofertas activas en este momento.</p></ng-template>
   </section>
 
-  <!-- PRODUCTOS DE TEMPORADA -->
+  <!-- PRODUCTOS DISPONIBLES (ROTACIÓN) -->
   <section class="section">
     <h2 class="section-title">Productos disponibles</h2>
     <div class="carousel-wrapper" *ngIf="!loading; else loadingProducts">
-      <div class="carousel">
-        <div class="cards-track">
-          <div class="product-card" *ngFor="let p of getReactiveProducts()">
-            <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="product-img" />
-            <div class="product-info">
-              <span class="product-name">{{ p.name }}</span>
-              <span class="product-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
-              <span class="product-discount">{{ p.description || 'Sin descripcion' }}</span>
-              <span class="product-discount">Stock: {{ p.stockQuantity }} kg</span>
-            </div>
-            <button class="btn-add" type="button" (click)="openProductDialog(p)">Abrir</button>
-          </div>
+      <div class="carousel-simple">
+        <div class="simple-product-card" *ngFor="let p of getRotatedAvailableProducts()">
+          <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="simple-product-img" />
+          <span class="simple-product-name">{{ p.name }}</span>
+          <button class="btn-add" type="button" (click)="openProductDialog(p)">Agregar</button>
         </div>
       </div>
     </div>
