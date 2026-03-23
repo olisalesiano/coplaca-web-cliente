@@ -23,9 +23,66 @@
 <main class="main-content">
   <section class="section">
     <h2 class="section-title">Tienda online por kilo</h2>
-    <div class="form-group" style="max-width: 420px">
-      <input type="text" [(ngModel)]="searchQuery" placeholder="Buscar producto..." />
-      <button class="btn-add" (click)="loadProducts()">Buscar</button>
+    <div class="search-shell" role="search" aria-label="Buscar productos en base de datos">
+      <div class="search-input-wrap">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          class="search-input"
+          type="text"
+          [ngModel]="searchQuery"
+          (ngModelChange)="onSearchInput($event)"
+          placeholder="Busca por nombre de producto..."
+          aria-label="Buscar producto"
+        />
+        <button
+          *ngIf="searchQuery"
+          type="button"
+          class="search-clear"
+          (click)="clearSearch()"
+          aria-label="Limpiar busqueda"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <button type="button" class="search-btn" (click)="loadProducts()">
+        <mat-icon>bolt</mat-icon>
+        Buscar ahora
+      </button>
+
+      <button type="button" class="filter-btn" (click)="toggleFilters()" [attr.aria-expanded]="showFilters">
+        <mat-icon>tune</mat-icon>
+        Filtrar
+      </button>
+    </div>
+
+    <div class="filters-panel" *ngIf="showFilters">
+      <div class="filter-row categories">
+        <button
+          type="button"
+          class="filter-chip"
+          *ngFor="let category of getCategoryFilters()"
+          [class.active]="category === selectedCategory"
+          (click)="setCategoryFilter(category)"
+        >
+          {{ category }}
+        </button>
+      </div>
+
+      <div class="filter-row toggles">
+        <label class="toggle-option">
+          <input type="checkbox" [(ngModel)]="onlyInStock" />
+          Solo con stock
+        </label>
+        <label class="toggle-option">
+          <input type="checkbox" [(ngModel)]="onlyOffers" />
+          Solo ofertas
+        </label>
+        <label class="toggle-option">
+          <input type="checkbox" [(ngModel)]="onlyFresh" />
+          Solo frescos
+        </label>
+      </div>
     </div>
     <p class="section-sub" *ngIf="message">{{ message }}</p>
   </section>
@@ -35,18 +92,23 @@
     <h2 class="section-title">¡Ofertas del día!</h2>
     <p class="section-sub">Si un producto tiene oferta, veras el motivo (abundancia, caducidad, ...).</p>
 
-    <div class="carousel-wrapper" *ngIf="getOffers().length > 0; else noOffers">
+    <div class="carousel-wrapper" *ngIf="getDisplayOffers().length > 0; else noOffers">
       <div class="carousel">
         <div class="cards-track">
-          <div class="product-card oferta" *ngFor="let p of getOffers()">
-            <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="product-img" />
+          <div class="product-card oferta" *ngFor="let offer of getDisplayOffers()">
+            <img
+              [src]="getProductImage(offer.product)"
+              (error)="onProductImageError($event)"
+              alt="producto"
+              class="product-img"
+            />
             <div class="product-info">
-              <span class="product-name">{{ p.name }}</span>
-              <span class="product-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
-              <span class="product-discount">Oferta: {{ p.offerReason || 'Promocion temporal' }}</span>
-              <span class="product-discount">Stock: {{ p.stockQuantity }} kg</span>
+              <span class="product-name">{{ offer.product.name }}</span>
+              <span class="product-price">{{ offer.product.unitPrice }} €/{{ offer.product.unit || 'kg' }}</span>
+              <span class="product-discount">Oferta {{ offer.discountPercentage }}% · {{ offer.reason }}</span>
+              <span class="product-discount">Stock: {{ offer.product.stockQuantity }} kg</span>
             </div>
-            <button class="btn-add">Añadir</button>
+            <button class="btn-add" type="button" (click)="openProductDialog(offer.product)">Abrir</button>
           </div>
         </div>
       </div>
@@ -60,7 +122,7 @@
     <div class="carousel-wrapper" *ngIf="!loading; else loadingProducts">
       <div class="carousel">
         <div class="cards-track">
-          <div class="product-card" *ngFor="let p of products">
+          <div class="product-card" *ngFor="let p of getReactiveProducts()">
             <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="product-img" />
             <div class="product-info">
               <span class="product-name">{{ p.name }}</span>
@@ -68,7 +130,7 @@
               <span class="product-discount">{{ p.description || 'Sin descripcion' }}</span>
               <span class="product-discount">Stock: {{ p.stockQuantity }} kg</span>
             </div>
-            <button class="btn-add">Añadir</button>
+            <button class="btn-add" type="button" (click)="openProductDialog(p)">Abrir</button>
           </div>
         </div>
       </div>
@@ -76,11 +138,32 @@
     <ng-template #loadingProducts><p class="section-sub">Cargando productos...</p></ng-template>
   </section>
 
+  <section class="section">
+    <h2 class="section-title">Productos frescos de hoy</h2>
+    <p class="section-sub">Selección reactiva por disponibilidad y frescura.</p>
+    <div class="productos-grid" *ngIf="getFreshProducts().length > 0; else noFreshProducts">
+      <div class="producto-card" *ngFor="let p of getFreshProducts()">
+        <div class="producto-top">
+          <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="producto-img" />
+          <div class="producto-info">
+            <span class="producto-name">{{ p.name }}</span>
+            <span class="producto-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
+            <span class="fresh-tag">Muy fresco · {{ p.stockQuantity }} kg</span>
+          </div>
+        </div>
+        <button class="btn-add" type="button" (click)="openProductDialog(p)">Abrir</button>
+      </div>
+    </div>
+    <ng-template #noFreshProducts>
+      <p class="section-sub">No hay productos frescos que cumplan los filtros actuales.</p>
+    </ng-template>
+  </section>
+
   <!-- NUESTROS PRODUCTOS -->
   <section class="section nuestros">
     <h2 class="section-title-big">Nuestros productos</h2>
-    <div class="productos-grid" *ngIf="products.length > 0">
-      <div class="producto-card" *ngFor="let p of products">
+    <div class="productos-grid" *ngIf="getReactiveProducts().length > 0">
+      <div class="producto-card" *ngFor="let p of getReactiveProducts()">
         <div class="producto-top">
           <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="producto-img" />
           <div class="producto-info">
@@ -88,7 +171,7 @@
             <span class="producto-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
           </div>
         </div>
-        <button class="btn-add">Añadir</button>
+        <button class="btn-add" type="button" (click)="openProductDialog(p)">Abrir</button>
       </div>
     </div>
 
@@ -96,34 +179,43 @@
     <app-dialog
       #addProductDialog
       title="Añadir producto a la cesta"
-      confirmLabel="Añadir producto"
+      confirmLabel="Añadir"
       cancelLabel="Cancelar"
+      (confirmed)="onDialogConfirm($event)"
     >
       <!-- HARDCODEADO DE PRUEBINHA -->
       <div class="product-main-card">
         <div class="product-main-info">
-          <h2 class="product-title">{{ addProductDialog.product?.nombre || 'Nombre' }}</h2>
-          <p class="product-meta">Peso: {{ addProductDialog.product?.peso || '-' }}kg</p>
-          <p class="product-meta">Precio: {{ addProductDialog.product?.precio || '-' }}€</p>
+          <h2 class="product-title">{{ addProductDialog.product?.name || 'Nombre' }}</h2>
+          <p class="product-meta">Unidad: {{ addProductDialog.product?.unit || 'kg' }}</p>
+          <p class="product-meta">
+            Precio: {{ addProductDialog.getUnitPrice() | number: '1.2-2' }} €/{{ addProductDialog.getUnitLabel() }}
+          </p>
+          <p class="product-meta">Stock: {{ addProductDialog.product?.stockQuantity || '-' }} kg</p>
 
           <div class="quantity-row">
-            <button class="qty-btn" (click)="addProductDialog.decrement()">&#8722;</button>
+            <button class="qty-btn" type="button" (click)="addProductDialog.decrement()">&#8722;</button>
             <span class="qty-value">{{ addProductDialog.cantidad }}</span>
-            <button class="qty-btn" (click)="addProductDialog.increment()">&#43;</button>
+            <button class="qty-btn" type="button" (click)="addProductDialog.increment()">&#43;</button>
           </div>
+
+          <p class="product-meta">
+            Subtotal actual: <strong>{{ addProductDialog.getTotalPrice() | number: '1.2-2' }} €</strong>
+          </p>
         </div>
 
         <img
-          [src]="addProductDialog.product?.imagen || '/assets/test/Banana.png'"
-          [alt]="addProductDialog.product?.nombre"
+          [src]="addProductDialog.product ? getProductImage(addProductDialog.product) : '/assets/test/Banana.png'"
+          [alt]="addProductDialog.product?.name"
           class="product-main-img"
+          (error)="onProductImageError($event)"
         />
       </div>
 
       <div class="product-description-card">
         <h3 class="desc-title">Descripción</h3>
         <p class="desc-text">
-          {{ addProductDialog.product?.descripcion || 'Producto de origen Canario.' }}
+          {{ addProductDialog.product?.description || 'Producto fresco de origen canario.' }}
         </p>
       </div>
       <!-- /HARDCODEADO -->
