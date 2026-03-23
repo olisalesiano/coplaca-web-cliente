@@ -1,36 +1,68 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
+import { ApiService } from '../../core/api.service';
+import { CartStore } from '../../core/cart.store';
+import { ProductDTO } from '../../core/api.models';
+import { DialogComponent } from '../dlg/dialog.component';
 
 @Component({
   selector: 'app-our-products',
   standalone: true,
-  imports: [CommonModule, MatIcon],
+  imports: [CommonModule, FormsModule, MatIcon, DialogComponent],
   templateUrl: './our-products.component.html',
   styleUrls: ['./our-products.component.css'],
 })
-export class ourProductsComponent {
-  ofertasIndex = 0;
-  temporadaIndex = 0;
+export class OurProductsComponent implements OnInit {
+  products: ProductDTO[] = [];
+  loading = false;
+  message = '';
+  searchQuery = '';
+  quantityByProduct: Record<number, number> = {};
 
-  ofertas = Array(10).fill({
-    nombre: 'Nombre',
-    precio: 'Precio',
-    descuento: 'Precio con descuento',
-  });
-  temporada = Array(10).fill({ nombre: 'Nombre', precio: 'Precio' });
+  constructor(
+    private readonly router: Router,
+    private readonly apiService: ApiService,
+    private readonly cartStore: CartStore,
+  ) {}
 
-  visibles = 6;
-
-  constructor(private router: Router) {}
-
-  prevOfertas(): void {
-    if (this.ofertasIndex > 0) this.ofertasIndex--;
+  ngOnInit(): void {
+    this.loadProducts();
   }
 
-  nextOfertas(): void {
-    if (this.ofertasIndex < this.ofertas.length - this.visibles) this.ofertasIndex++;
+  loadProducts(): void {
+    this.loading = true;
+    this.message = '';
+
+    this.apiService.getProducts(this.searchQuery).subscribe({
+      next: (products) => {
+        this.products = products;
+
+        for (const product of products) {
+          this.quantityByProduct[product.id] ??= 1;
+        }
+
+        if (products.length === 0) {
+          this.message = 'No se encontraron productos para esa busqueda.';
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.products = [];
+        this.message = 'No se pudieron cargar los productos desde la API Coplaca.';
+      },
+    });
+  }
+
+  getOffers(): ProductDTO[] {
+    return this.products.filter(
+      (product) =>
+        Boolean(product.offerReason) ||
+        (product.discountPercentage !== undefined && Number(product.discountPercentage) > 0),
+    );
   }
 
   addToCart(product: ProductDTO): void {
@@ -49,7 +81,7 @@ export class ourProductsComponent {
       quantityKg,
       offerReason: product.offerReason,
     });
-    this.message = `${product.name} anadido a la cesta (${quantityKg} kg).`;
+    this.message = `${product.name} anadido al carrito (${quantityKg} kg).`;
   }
 
   goToProfile(): void {
