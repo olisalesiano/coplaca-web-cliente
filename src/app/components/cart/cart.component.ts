@@ -38,6 +38,6 @@ export class CartComponent {
     this.router.navigate(['/profile']);
   }
   pagar(): void {
-    /* implementar */
+    this.router.navigate(['/checkout']);
   }
 }

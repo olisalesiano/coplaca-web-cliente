@@ -1,0 +1,118 @@
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+<!-- NAVBAR (idéntico al de cart) -->
+<nav class="navbar">
+  <div class="navbar-logo" (click)="goToShop()">
+    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+  </div>
+
+  <div class="navbar-links">
+    <a (click)="goToShop()">Tienda</a>
+    <a (click)="goToOrders()">Tus pedidos</a>
+    <a (click)="goToCart()">Tu carrito <mat-icon>shopping_cart</mat-icon></a>
+  </div>
+
+  <button class="profile-btn" (click)="goToProfile()">
+    <mat-icon>person</mat-icon>
+  </button>
+</nav>
+
+<!-- MAIN -->
+<main class="main-content">
+
+  <!-- PANTALLA DE ÉXITO -->
+  <div class="success-overlay" *ngIf="orderSuccess">
+    <div class="success-card">
+      <div class="success-icon">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <h2 class="success-title">¡Pedido confirmado!</h2>
+      <button class="btn-pagar" (click)="goToOrders()">Ir a mis pedidos</button>
+    </div>
+  </div>
+
+  <!-- COLUMNA IZQUIERDA: Resumen + Dirección -->
+  <div class="left-col">
+
+    <!-- Resumen del pedido -->
+    <div class="section-card">
+      <h2 class="section-title">
+        <mat-icon>receipt_long</mat-icon> Resumen del pedido
+      </h2>
+      <div class="order-scroll">
+        <div class="order-item" *ngFor="let item of orderItems">
+          <img src="/assets/test/Banana.png" alt="producto" class="order-item-img" />
+          <span class="order-item-name">{{ item.nombre }}</span>
+          <div class="order-item-details">
+            <span><mat-icon class="detail-icon">scale</mat-icon>{{ item.peso }}</span>
+            <span><mat-icon class="detail-icon">tag</mat-icon>x{{ item.cantidad }}</span>
+          </div>
+          <span class="order-item-price">{{ item.precio }}</span>
+        </div>
+      </div>
+
+      <!-- Desglose de totales -->
+      <div class="totals">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span>{{ subtotal }}</span>
+        </div>
+        <div class="total-row">
+          <span>Envío</span>
+          <span>{{ envio }}</span>
+        </div>
+        <div class="total-row total-final">
+          <span>Total</span>
+          <span>{{ totalPedido }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dirección de envío -->
+    <div class="section-card">
+      <h2 class="section-title">
+        <mat-icon>local_shipping</mat-icon> Dirección de envío
+      </h2>
+      <div class="address-block">
+        <mat-icon class="address-icon">location_on</mat-icon>
+        <div>
+          <p class="address-line">{{ direccion }}</p>
+          <p class="address-line">{{ ciudad }}</p>
+          <p class="address-line">CP {{ codigoPostal }}</p>
+        </div>
+      </div>
+      <button class="btn-change">
+        <mat-icon>edit</mat-icon> Cambiar dirección
+      </button>
+    </div>
+
+  </div>
+
+  <!-- COLUMNA DERECHA: Método de pago -->
+  <div class="right-col">
+    <div class="section-card payment-card">
+      <h2 class="section-title">
+        <mat-icon>payment</mat-icon> Método de pago
+      </h2>
+
+      <!-- Selector de método -->
+      <div class="balance-block">
+        <mat-icon class="balance-icon">account_balance_wallet</mat-icon>
+        <div>
+          <span class="balance-label">Saldo disponible</span>
+          <span class="balance-amount">{{ saldoCuenta }}</span>
+        </div>
+      </div>
+
+      <!-- Botón confirmar -->
+      <button class="btn-pagar" (click)="confirmarPedido()">
+        <mat-icon>lock</mat-icon> Confirmar y pagar {{ totalPedido }}
+      </button>
+
+      <p class="secure-note">
+        <mat-icon>verified_user</mat-icon> Pago 100% seguro y cifrado
+      </p>
+    </div>
+  </div>
+
+</main>
