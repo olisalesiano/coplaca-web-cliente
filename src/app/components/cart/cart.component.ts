@@ -30,7 +30,8 @@ export class CartComponent {
 
   refreshCart(): void {
     this.cartItems = this.cartStore.getItems();
-    this.totalPedido = this.cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantityKg, 0);
+    this.totalPedido = this.cartItems.reduce((acc, item) => acc + this.getItemSubtotal(item), 0);
+    this.totalPedido = this.roundMoney(this.totalPedido);
   }
 
   increment(item: CartItem): void {
@@ -97,5 +98,13 @@ export class CartComponent {
 
   trackItem(_index: number, item: CartItem): number {
     return item.productId;
+  }
+
+  getItemSubtotal(item: CartItem): number {
+    return this.roundMoney(item.unitPrice * item.quantityKg);
+  }
+
+  private roundMoney(value: number): number {
+    return Number((Math.round((value + Number.EPSILON) * 100) / 100).toFixed(2));
   }
 }

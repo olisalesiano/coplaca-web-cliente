@@ -54,7 +54,7 @@
             <div class="cart-item-details">
               <span>Stock disponible: {{ item.stockQuantity }} kg</span>
               <span>Precio: {{ item.unitPrice }} €/kg</span>
-              <span>Subtotal: {{ item.quantityKg * item.unitPrice | number:'1.2-2' }} €</span>
+              <span>Subtotal: {{ getItemSubtotal(item) | number:'1.2-2' }} €</span>
             </div>
 
             <div class="cart-item-actions">
@@ -75,7 +75,7 @@
 
   <!-- FOOTER: total + pagar -->
   <div class="cart-footer">
-    <span class="total-label">Total pedido: {{ totalPedido | number:'1.2-2' }} €</span>
+    <span class="total-label">Total a pagar: {{ totalPedido | number:'1.2-2' }} €</span>
     <button class="btn-pagar" type="button" (click)="pagar()" [disabled]="cartItems.length === 0">Pagar</button>
   </div>
 </main>
