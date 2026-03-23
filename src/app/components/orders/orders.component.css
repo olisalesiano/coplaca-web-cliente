@@ -71,7 +71,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #2a9d3f;
+  color: #1f6d2e;
   transition: background 0.2s;
 }
 
@@ -104,21 +104,84 @@
   max-height: calc(100vh - 72px - 5rem);
 }
 
+.orders-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .orders-title {
   font-size: 2rem;
   font-weight: 700;
   color: #2a9d3f;
-  text-align: center;
+  text-align: left;
   margin: 0 0 0.5rem 0;
   flex-shrink: 0;
+}
+
+.btn-refresh {
+  background: #1f6d2e;
+  border: none;
+  border-radius: 30px;
+  padding: 0.55rem 1.1rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  background: #1f7f31;
+}
+
+.btn-refresh:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.orders-message {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #1f334d;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  padding: 0.5rem 0.8rem;
+}
+
+.orders-empty {
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
+  padding: 1.2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.orders-empty h3 {
+  margin: 0;
+  color: #174b20;
+}
+
+.orders-empty p {
+  margin: 0;
+  color: #2f3d3a;
 }
 
 .orders-scroll {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
-  overflow-y: auto;
+  overflow-y: visible;
   padding-right: 0.3rem;
+}
+
+.orders-scroll.orders-scroll-limited {
+  max-height: 390px;
+  overflow-y: auto;
 }
 
 .orders-scroll::-webkit-scrollbar {
@@ -136,6 +199,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .order-row {
@@ -161,7 +225,8 @@
 }
 .order-estado {
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.85);
+  color: #d2ffde;
+  font-weight: 600;
 }
 .order-fecha {
   font-size: 0.85rem;
@@ -265,7 +330,7 @@
 }
 
 .dialog-product {
-  background: #2a9d3f;
+  background: #1f7a31;
   border-radius: 10px;
   padding: 0.7rem 1.2rem;
   display: flex;
@@ -302,7 +367,7 @@
 }
 
 .btn-cancelar {
-  background: #e05c5c;
+  background: #a32626;
   border: none;
   border-radius: 30px;
   padding: 0.7rem 2.5rem;
@@ -315,5 +380,5 @@
 }
 
 .btn-cancelar:hover {
-  background: #c04444;
+  background: #7f1d1d;
 }

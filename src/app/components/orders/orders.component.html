@@ -20,14 +20,27 @@
 <!-- MAIN -->
 <main class="main-content">
   <div class="orders-card">
-    <h2 class="orders-title">Pedidos</h2>
-    <p *ngIf="error">{{ error }}</p>
-    <div class="orders-scroll">
-      <div class="order-item" *ngFor="let p of pedidos">
+    <div class="orders-header">
+      <h2 class="orders-title">Tus pedidos</h2>
+      <button class="btn-refresh" type="button" (click)="loadOrders()" [disabled]="loading">
+        {{ loading ? 'Actualizando...' : 'Actualizar' }}
+      </button>
+    </div>
+
+    <p class="orders-message" *ngIf="error">{{ error }}</p>
+
+    <div class="orders-empty" *ngIf="!loading && pedidos.length === 0">
+      <h3>Aun no tienes pedidos</h3>
+      <p>Cuando completes tu primera compra, aparecera aqui con sus detalles.</p>
+      <button class="btn-detalles" type="button" (click)="goToShop()">Ir a la tienda</button>
+    </div>
+
+    <div class="orders-scroll" [class.orders-scroll-limited]="pedidos.length > 3" *ngIf="pedidos.length > 0">
+      <div class="order-item" *ngFor="let p of pedidos; trackBy: trackOrder">
         <div class="order-row">
           <div class="order-left">
             <span class="order-id">#{{ p.orderNumber || p.id }}</span>
-            <span class="order-estado">{{ p.status }}</span>
+            <span class="order-estado">Estado: {{ p.status }}</span>
           </div>
           <div class="order-right">
             <span class="order-fecha">{{ p.createdAt | date:'short' }}</span>
@@ -53,7 +66,7 @@
     <!-- PRODUCTOS -->
     <div class="dialog-products">
       <div class="dialog-product" *ngFor="let prod of pedidoSeleccionado?.items">
-        <img src="/assets/test/Banana.png" alt="producto" class="dialog-product-img" />
+        <img [src]="resolveProductImage(prod.productId)" alt="producto" class="dialog-product-img" />
         <span class="dialog-product-name">{{ prod.productName }}</span>
         <span class="dialog-product-cantidad">{{ prod.quantity }} kg</span>
         <span class="dialog-product-precio">{{ prod.unitPrice | number:'1.2-2' }} €/kg</span>
@@ -62,7 +75,7 @@
 
     <!-- FOOTER -->
     <div class="dialog-footer">
-      <button class="btn-cancelar" (click)="cancelarPedido()">Cancelar pedido</button>
+      <button class="btn-cancelar" type="button" (click)="cancelarPedido()">Cerrar</button>
     </div>
   </div>
 </div>
