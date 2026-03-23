@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+﻿import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartStore } from '../cart/cart-store/cart-store.component';
 
@@ -10,7 +10,7 @@ import { CartStore } from '../cart/cart-store/cart-store.component';
   styleUrls: ['./dialog.component.css'],
 })
 export class DialogComponent {
-  @Input() title: string = 'Diálogo';
+  @Input() title: string = 'DiÃ¡logo';
   isOpen: boolean = false;
   product: any = null;
   cantidad: number = 1;
@@ -32,16 +32,10 @@ export class DialogComponent {
   }
 
   confirm(): void {
-<<<<<<< HEAD
     this.confirmed.emit({
       product: this.product,
       cantidad: this.cantidad,
     });
-=======
-    if (this.product) {
-      this.cartStore.addItem(this.product, this.cantidad);
-    }
->>>>>>> 14918f291afa8f44ca1ab967cabfce6225084b07
     this.close();
   }
 
@@ -66,3 +60,4 @@ export class DialogComponent {
     return this.getUnitPrice() * this.cantidad;
   }
 }
+
