@@ -50,6 +50,45 @@
       </div>
 
       <div class="form-group">
+        <label for="confirmPassword">Confirmar Contraseña</label>
+        <div class="password-wrapper">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            id="confirmPassword"
+            [(ngModel)]="confirmPassword"
+            placeholder="••••••••••••"
+          />
+          <button class="toggle-eye" type="button" (click)="toggleConfirmPassword()">
+            <mat-icon>remove_red_eye</mat-icon>
+            <svg
+              *ngIf="!showConfirmPassword"
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+              />
+              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+              <line x1="1" y1="1" x2="23" y2="23" />
+            </svg>
+          </button>
+        </div>
+        <!-- Validation Error Messages -->
+        <div class="error-list" *ngIf="passwordErrors.length > 0">
+          <ul>
+            <li *ngFor="let error of passwordErrors">{{ error }}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="form-group">
         <label for="apellidos">Apellidos</label>
         <input type="text" id="apellidos" [(ngModel)]="lastName" placeholder="Introduzca sus apellidos..." />
       </div>
@@ -95,8 +134,8 @@
       </div>
     </div>
 
-    <button class="btn-login" (click)="register()" [disabled]="loading">
-      {{ loading ? 'Creando...' : 'Crear' }}
+    <button class="btn-login" (click)="openConfirmationModal()" [disabled]="loading">
+      {{ loading ? 'Registrando...' : 'Registrarse' }}
     </button>
 
     <p class="register-link" *ngIf="error">{{ error }}</p>
@@ -105,4 +144,36 @@
       ¿Ya tiene una cuenta? <a (click)="goToLogin()">Iniciar sesión...</a>
     </p>
   </div>
+
+  <!-- CONFIRMATION MODAL -->
+  <div class="modal-overlay" *ngIf="showConfirmationModal">
+    <div class="modal-box">
+      <h2 class="modal-title">Confirmar Registro</h2>
+      
+      <div class="modal-content">
+        <p class="modal-text">Por favor, confirme sus datos antes de continuar:</p>
+        
+        <div class="modal-info">
+          <p><strong>Nombre Completo:</strong> {{ firstName }} {{ lastName }}</p>
+          <p><strong>Email:</strong> {{ email }}</p>
+          <p><strong>Teléfono:</strong> {{ phoneNumber }}</p>
+          <p><strong>Dirección:</strong> {{ street }} {{ streetNumber }}, {{ apartment }}, {{ city }}, {{ province }} {{ postalCode }}</p>
+        </div>
+        
+        <p class="modal-text">¿Está seguro de que desea crear su cuenta con estos datos?</p>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn-modal btn-cancel" (click)="closeConfirmationModal()" [disabled]="loading">
+          Cancelar
+        </button>
+        <button class="btn-modal btn-confirm" (click)="confirmRegister()" [disabled]="loading">
+          {{ loading ? 'Registrando...' : 'Sí, crear cuenta' }}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+
+
+
