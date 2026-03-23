@@ -1,9 +1,9 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="navbar-logo" (click)="goToShop()">
+  <button class="navbar-logo" (click)="goToShop()" type="button">
     <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
-  </div>
+  </button>
 
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
@@ -21,128 +21,75 @@
 
 <!-- MAIN CONTENT -->
 <main class="main-content">
+  <section class="section">
+    <h2 class="section-title">Tienda online por kilo</h2>
+    <div class="form-group" style="max-width: 420px">
+      <input type="text" [(ngModel)]="searchQuery" placeholder="Buscar producto..." />
+      <button class="btn-add" (click)="loadProducts()">Buscar</button>
+    </div>
+    <p class="section-sub" *ngIf="message">{{ message }}</p>
+  </section>
+
   <!-- OFERTAS DEL DÍA -->
   <section class="section">
     <h2 class="section-title">¡Ofertas del día!</h2>
-    <p class="section-sub">Frutas a un 30 % ahora, aprovecha</p>
+    <p class="section-sub">Si un producto tiene oferta, veras el motivo (abundancia, caducidad, ...).</p>
 
-    <div class="carousel-wrapper">
-      <button class="arrow left" (click)="prevOfertas()" [disabled]="ofertasIndex === 0">
-        &#8249;
-      </button>
-
+    <div class="carousel-wrapper" *ngIf="getOffers().length > 0; else noOffers">
       <div class="carousel">
-        <div
-          class="cards-track"
-          [style.transform]="'translateX(-' + ofertasIndex * (100 / visibles) + '%)'"
-        >
-          <!-- HARDCODEADO -->
-          <div class="product-card oferta">
-            <img src="/assets/test/Banana.png" alt="producto" class="product-img" />
+        <div class="cards-track">
+          <div class="product-card oferta" *ngFor="let p of getOffers()">
+            <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="product-img" />
             <div class="product-info">
-              <span class="product-name">Nombre</span>
-              <span class="product-price">Precio</span>
-              <span class="product-discount">Precio con descuento</span>
+              <span class="product-name">{{ p.name }}</span>
+              <span class="product-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
+              <span class="product-discount">Oferta: {{ p.offerReason || 'Promocion temporal' }}</span>
+              <span class="product-discount">Stock: {{ p.stockQuantity }} kg</span>
             </div>
-            <button
-              class="btn-add"
-              (click)="
-                openDialog({
-                  nombre: 'Nombre',
-                  precio: 'Precio',
-                  imagen: '/assets/test/Banana.png',
-                })
-              "
-            >
-              Añadir
-            </button>
+            <button class="btn-add">Añadir</button>
           </div>
-          <!-- /HARDCODEADO -->
         </div>
       </div>
-
-      <button
-        class="arrow right"
-        (click)="nextOfertas()"
-        [disabled]="ofertasIndex >= ofertas.length - visibles"
-      >
-        &#8250;
-      </button>
     </div>
+    <ng-template #noOffers><p class="section-sub">No hay ofertas activas ahora mismo.</p></ng-template>
   </section>
 
   <!-- PRODUCTOS DE TEMPORADA -->
   <section class="section">
-    <h2 class="section-title">¡Productos de temporada!</h2>
-
-    <div class="carousel-wrapper">
-      <button class="arrow left" (click)="prevTemporada()" [disabled]="temporadaIndex === 0">
-        &#8249;
-      </button>
-
+    <h2 class="section-title">Productos disponibles</h2>
+    <div class="carousel-wrapper" *ngIf="!loading; else loadingProducts">
       <div class="carousel">
-        <div
-          class="cards-track"
-          [style.transform]="'translateX(-' + temporadaIndex * (100 / visibles) + '%)'"
-        >
-          <!-- HARDCODEADO -->
-          <div class="product-card">
-            <img src="/assets/test/Banana.png" alt="producto" class="product-img" />
+        <div class="cards-track">
+          <div class="product-card" *ngFor="let p of products">
+            <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="product-img" />
             <div class="product-info">
-              <span class="product-name">Nombre</span>
-              <span class="product-price">Precio</span>
+              <span class="product-name">{{ p.name }}</span>
+              <span class="product-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
+              <span class="product-discount">{{ p.description || 'Sin descripcion' }}</span>
+              <span class="product-discount">Stock: {{ p.stockQuantity }} kg</span>
             </div>
-            <button
-              class="btn-add"
-              (click)="
-                openDialog({
-                  nombre: 'Nombre',
-                  precio: 'Precio',
-                  imagen: '/assets/test/Banana.png',
-                })
-              "
-            >
-              Añadir
-            </button>
+            <button class="btn-add">Añadir</button>
           </div>
-          <!-- /HARDCODEADO -->
         </div>
       </div>
-
-      <button
-        class="arrow right"
-        (click)="nextTemporada()"
-        [disabled]="temporadaIndex >= temporada.length - visibles"
-      >
-        &#8250;
-      </button>
     </div>
+    <ng-template #loadingProducts><p class="section-sub">Cargando productos...</p></ng-template>
   </section>
 
   <!-- NUESTROS PRODUCTOS -->
   <section class="section nuestros">
     <h2 class="section-title-big">Nuestros productos</h2>
-
-    <div class="productos-grid">
-      <!-- HARDCODEADO -->
-      <div class="producto-card">
+    <div class="productos-grid" *ngIf="products.length > 0">
+      <div class="producto-card" *ngFor="let p of products">
         <div class="producto-top">
-          <img src="/assets/test/Banana.png" alt="producto" class="producto-img" />
+          <img [src]="getProductImage(p)" (error)="onProductImageError($event)" alt="producto" class="producto-img" />
           <div class="producto-info">
-            <span class="producto-name">Nombre</span>
-            <span class="producto-price">Precio</span>
+            <span class="producto-name">{{ p.name }}</span>
+            <span class="producto-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
           </div>
         </div>
-        <button
-          class="btn-add"
-          (click)="
-            openDialog({ nombre: 'Nombre', precio: 'Precio', imagen: '/assets/test/Banana.png' })
-          "
-        >
-          Añadir
-        </button>
+        <button class="btn-add">Añadir</button>
       </div>
-      <!-- /HARDCODEADO -->
     </div>
 
     <!-- llama al diálogo -->

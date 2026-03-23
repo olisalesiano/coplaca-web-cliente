@@ -13,7 +13,7 @@
     <div class="form-grid">
       <div class="form-group">
         <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" placeholder="Introduzca su nombre..." />
+        <input type="text" id="nombre" [(ngModel)]="firstName" placeholder="Introduzca su nombre..." />
       </div>
 
       <div class="form-group">
@@ -22,6 +22,7 @@
           <input
             [type]="showPassword ? 'text' : 'password'"
             id="password"
+            [(ngModel)]="password"
             placeholder="••••••••••••"
           />
           <button class="toggle-eye" type="button" (click)="togglePassword()">
@@ -50,21 +51,55 @@
 
       <div class="form-group">
         <label for="apellidos">Apellidos</label>
-        <input type="text" id="apellidos" placeholder="Introduzca sus apellidos..." />
+        <input type="text" id="apellidos" [(ngModel)]="lastName" placeholder="Introduzca sus apellidos..." />
       </div>
 
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" placeholder="Introduzca su email..." />
+        <input type="email" id="email" [(ngModel)]="email" placeholder="Introduzca su email..." />
       </div>
     </div>
 
-    <div class="form-group full-width">
-      <label for="ubicacion">Ubicación</label>
-      <input type="text" id="ubicacion" placeholder="Calle/Piso/Provincia" />
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="phone">Telefono</label>
+        <input type="text" id="phone" [(ngModel)]="phoneNumber" placeholder="Introduzca su telefono..." />
+      </div>
+      <div class="form-group">
+        <label for="street">Calle</label>
+        <input type="text" id="street" [(ngModel)]="street" placeholder="Calle" />
+      </div>
+      <div class="form-group">
+        <label for="streetNumber">Numero</label>
+        <input type="text" id="streetNumber" [(ngModel)]="streetNumber" placeholder="Numero" />
+      </div>
+      <div class="form-group">
+        <label for="apartment">Piso/Apto</label>
+        <input type="text" id="apartment" [(ngModel)]="apartment" placeholder="Piso/Apto" />
+      </div>
+      <div class="form-group">
+        <label for="city">Ciudad</label>
+        <input type="text" id="city" [(ngModel)]="city" placeholder="Ciudad" />
+      </div>
+      <div class="form-group">
+        <label for="province">Provincia</label>
+        <input type="text" id="province" [(ngModel)]="province" placeholder="Provincia" />
+      </div>
+      <div class="form-group">
+        <label for="postalCode">Codigo postal</label>
+        <input type="text" id="postalCode" [(ngModel)]="postalCode" placeholder="Codigo postal" />
+      </div>
+      <div class="form-group">
+        <label for="additionalInfo">Info adicional</label>
+        <input type="text" id="additionalInfo" [(ngModel)]="additionalInfo" placeholder="Referencia de entrega" />
+      </div>
     </div>
 
-    <button class="btn-login">Crear</button>
+    <button class="btn-login" (click)="register()" [disabled]="loading">
+      {{ loading ? 'Creando...' : 'Crear' }}
+    </button>
+
+    <p class="register-link" *ngIf="error">{{ error }}</p>
 
     <p class="register-link">
       ¿Ya tiene una cuenta? <a (click)="goToLogin()">Iniciar sesión...</a>

@@ -1,8 +1,9 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 <nav class="navbar">
-  <div class="navbar-logo" (click)="goToShop()">
+  <button class="navbar-logo" (click)="goToShop()" type="button">
     <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
-  </div>
+  </button>
+
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
     <a (click)="goToOrders()">Tus pedidos</a>
@@ -22,26 +23,19 @@
     </div>
 
     <div class="profile-data">
-      <div class="profile-field">
-        <span><strong>Nombre:</strong></span>
-        <input *ngIf="editando" [(ngModel)]="nombreTemp" class="profile-input" placeholder="Tu nombre" />
-        <span *ngIf="!editando">{{ nombre }}</span>
-      </div>
-      <div class="profile-field">
-        <span><strong>Apellidos:</strong></span>
-        <input *ngIf="editando" [(ngModel)]="apellidosTemp" class="profile-input" placeholder="Tus apellidos" />
-        <span *ngIf="!editando">{{ apellidos }}</span>
-      </div>
-      <div class="profile-field">
-        <span><strong>Email:</strong></span>
-        <input *ngIf="editando" [(ngModel)]="emailTemp" class="profile-input" placeholder="Tu email" type="email" />
-        <span *ngIf="!editando">{{ email }}</span>
-      </div>
-      <div class="profile-field">
-        <span><strong>Ubicación:</strong></span>
-        <input *ngIf="editando" [(ngModel)]="ubicacionTemp" class="profile-input" placeholder="Tu ubicación" />
-        <span *ngIf="!editando">{{ ubicacion }}</span>
-      </div>
+      <p><strong>Nombre:</strong> <input [(ngModel)]="firstName" /></p>
+      <p><strong>Apellidos:</strong> <input [(ngModel)]="lastName" /></p>
+      <p><strong>Email:</strong> {{ user?.email }}</p>
+      <p><strong>Telefono:</strong> <input [(ngModel)]="phoneNumber" /></p>
+      <p><strong>Calle:</strong> <input [(ngModel)]="street" /></p>
+      <p><strong>Numero:</strong> <input [(ngModel)]="streetNumber" /></p>
+      <p><strong>Piso/Apto:</strong> <input [(ngModel)]="apartment" /></p>
+      <p><strong>Ciudad:</strong> <input [(ngModel)]="city" /></p>
+      <p><strong>Provincia:</strong> <input [(ngModel)]="province" /></p>
+      <p><strong>Codigo postal:</strong> <input [(ngModel)]="postalCode" /></p>
+      <p><strong>Info adicional:</strong> <input [(ngModel)]="additionalInfo" /></p>
+      <p><strong>Almacen asignado:</strong> {{ user?.warehouseName || 'Sin asignar' }}</p>
+      <p *ngIf="message"><strong>{{ message }}</strong></p>
     </div>
   </div>
 

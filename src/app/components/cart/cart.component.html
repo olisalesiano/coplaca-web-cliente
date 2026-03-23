@@ -1,9 +1,9 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="navbar-logo" (click)="goToShop()">
+  <button class="navbar-logo" (click)="goToShop()" type="button">
     <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
-  </div>
+  </button>
 
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
@@ -24,36 +24,31 @@
       <h2 class="cart-title">Tu carrito</h2>
 
       <div class="cart-scroll">
-        <!-- HARDCODEADO -->
         <div class="cart-item" *ngFor="let item of cartItems">
-          <img src="/assets/test/Banana.png" alt="producto" class="cart-item-img" />
-          <span class="cart-item-name">{{ item.nombre }}</span>
+          <img [src]="item.imageUrl || '/assets/test/Banana.png'" alt="producto" class="cart-item-img" />
+          <span class="cart-item-name">{{ item.name }}</span>
           <div class="cart-item-details">
-            <span> Cantidad: {{ item.cantidad }} </span>
-            <span>Precio: {{ item.precio }}</span>
-            <span>Peso: {{ item.peso }}</span>
+            <span>
+              Cantidad:
+              <button class="btn-add" (click)="decrement(item)">-</button>
+              {{ item.quantityKg }} kg
+              <button class="btn-add" (click)="increment(item)">+</button>
+            </span>
+            <span>Precio: {{ item.unitPrice }} €/kg</span>
+            <span>Subtotal: {{ item.quantityKg * item.unitPrice | number:'1.2-2' }} €</span>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- SUGERENCIAS -->
-  <div class="sugerencias-section">
-    <p class="sugerencias-label">No pierdas la oportunidad:</p>
-    <div class="sugerencias-scroll">
-      <!-- HARDCODEADO -->
-      <div class="sug-card" *ngFor="let s of sugerencias">
-        <img src="/assets/test/Banana.png" alt="producto" class="sug-img" />
-        <span class="sug-name">{{ s.nombre }}</span>
-        <button class="btn-add">Añadir</button>
-      </div>
-    </div>
+  <div class="sugerencias-section" *ngIf="message">
+    <p class="sugerencias-label">{{ message }}</p>
   </div>
 
   <!-- FOOTER: total + pagar -->
   <div class="cart-footer">
-    <span class="total-label">Total pedido: {{ totalPedido }}</span>
+    <span class="total-label">Total pedido: {{ totalPedido | number:'1.2-2' }} €</span>
     <button class="btn-pagar" (click)="pagar()">Pagar</button>
   </div>
 </main>

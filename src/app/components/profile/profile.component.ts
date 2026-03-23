@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { FormsModule } from '@angular/forms';
+import { ApiService } from '../../core/api.service';
+import { AuthStore } from '../../core/auth.store';
+import { UserDTO } from '../../core/api.models';
 
 @Component({
   selector: 'app-profile',
@@ -12,69 +15,102 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./profile.component.css'],
 })
 export class ProfileComponent {
-  // saldo se guarda en la sesión para hacer testeo antes de que venga api
-  saldo: number = Number(sessionStorage.getItem('saldo') ?? '0');
-  dialogAbierto = false;
-  cantidadInput: number | null = null;
+  user: UserDTO | null = null;
+  firstName = '';
+  lastName = '';
+  phoneNumber = '';
+  street = '';
+  streetNumber = '';
+  apartment = '';
+  city = '';
+  province = '';
+  postalCode = '';
+  additionalInfo = '';
+  message = '';
 
-  // Edición de perfil
-  editando = false;
-  nombre = sessionStorage.getItem('nombre') ?? '';
-  apellidos = sessionStorage.getItem('apellidos') ?? '';
-  email = sessionStorage.getItem('email') ?? '';
-  ubicacion = sessionStorage.getItem('ubicacion') ?? '';
+  constructor(
+    private readonly router: Router,
+    private readonly apiService: ApiService,
+    private readonly authStore: AuthStore,
+  ) {
+    this.loadProfile();
+  }
 
-  // Temporales mientras se edita
-  nombreTemp = '';
-  apellidosTemp = '';
-  emailTemp = '';
-  ubicacionTemp = '';
+  loadProfile(): void {
+    this.apiService.getCurrentUser().subscribe({
+      next: (user) => {
+        this.user = user;
+        this.firstName = user.firstName;
+        this.lastName = user.lastName;
+        this.phoneNumber = user.phoneNumber ?? '';
+        this.street = user.address?.street ?? '';
+        this.streetNumber = user.address?.streetNumber ?? '';
+        this.apartment = user.address?.apartment ?? '';
+        this.city = user.address?.city ?? '';
+        this.province = user.address?.province ?? '';
+        this.postalCode = user.address?.postalCode ?? '';
+        this.additionalInfo = user.address?.additionalInfo ?? '';
+      },
+      error: () => {
+        this.message = 'No se pudo cargar tu perfil.';
+      },
+    });
+  }
 
+  goToShop(): void {
+    this.router.navigate(['/our-products']);
+  }
+  goToOrders(): void {
+    this.router.navigate(['/orders']);
+  }
+  goToCart(): void {
+    this.router.navigate(['/cart']);
+  }
+  goToProfile(): void {
+    this.router.navigate(['/profile']);
+  }
   editInfo(): void {
-    if (!this.editando) {
-      // Abre edición copiando valores actuales a los temporales
-      this.nombreTemp = this.nombre;
-      this.apellidosTemp = this.apellidos;
-      this.emailTemp = this.email;
-      this.ubicacionTemp = this.ubicacion;
-      this.editando = true;
-    } else {
-      // Guarda
-      this.nombre = this.nombreTemp;
-      this.apellidos = this.apellidosTemp;
-      this.email = this.emailTemp;
-      this.ubicacion = this.ubicacionTemp;
-      sessionStorage.setItem('nombre', this.nombre);
-      sessionStorage.setItem('apellidos', this.apellidos);
-      sessionStorage.setItem('email', this.email);
-      sessionStorage.setItem('ubicacion', this.ubicacion);
-      this.editando = false;
-    }
+    this.apiService
+      .updateCurrentUser({
+        firstName: this.firstName,
+        lastName: this.lastName,
+        phoneNumber: this.phoneNumber,
+        address: {
+          street: this.street,
+          streetNumber: this.streetNumber,
+          apartment: this.apartment,
+          city: this.city,
+          province: this.province,
+          postalCode: this.postalCode,
+          additionalInfo: this.additionalInfo,
+          latitude: 0,
+          longitude: 0,
+          isDefault: false,
+        },
+      })
+      .subscribe({
+        next: () => {
+          this.message = 'Perfil actualizado.';
+          this.loadProfile();
+        },
+        error: () => {
+          this.message = 'No se pudo actualizar el perfil.';
+        },
+      });
   }
 
-  abrirDialogoSaldo(): void {
-    this.cantidadInput = null;
-    this.dialogAbierto = true;
+  darDeBaja(): void {
+    this.apiService.deleteCurrentUser().subscribe({
+      next: () => {
+        this.authStore.clear();
+        void this.router.navigate(['/login']);
+      },
+      error: () => {
+        this.message = 'No se pudo tramitar la baja de cuenta.';
+      },
+    });
   }
-
-  cerrarDialogoSaldo(): void {
-    this.dialogAbierto = false;
+  irAPedidos(): void {
+    this.router.navigate(['/orders']);
   }
-
-  confirmarSaldo(): void {
-    if (this.cantidadInput && this.cantidadInput > 0) {
-      this.saldo += this.cantidadInput;
-      sessionStorage.setItem('saldo', this.saldo.toString());
-    }
-    this.dialogAbierto = false;
-  }
-
-  constructor(private router: Router) {}
-
-  goToShop(): void { this.router.navigate(['/our-products']); }
-  goToOrders(): void { this.router.navigate(['/orders']); }
-  goToCart(): void { this.router.navigate(['/cart']); }
-  goToProfile(): void { this.router.navigate(['/profile']); }
-  darDeBaja(): void { this.router.navigate(['/login']); }
-  irAPedidos(): void { this.router.navigate(['/orders']); }
 }

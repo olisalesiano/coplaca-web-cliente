@@ -1,52 +1,118 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatIconModule } from '@angular/material/icon';
-import { DialogComponent } from '../dlg/dialog.component';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { ApiService } from '../../core/api.service';
+import { CartStore } from '../../core/cart.store';
+import { ProductDTO } from '../../core/api.models';
+import { DialogComponent } from '../dlg/dialog.component';
 
 @Component({
   selector: 'app-our-products',
   standalone: true,
-  imports: [CommonModule, MatIconModule, DialogComponent],
+  imports: [CommonModule, FormsModule, MatIcon, DialogComponent],
   templateUrl: './our-products.component.html',
   styleUrls: ['./our-products.component.css'],
 })
-export class ourProductsComponent {
-  ofertasIndex = 0;
-  temporadaIndex = 0;
+export class OurProductsComponent implements OnInit {
+  private static readonly DEFAULT_PRODUCT_IMAGE = '/assets/test/Banana.png';
 
-  ofertas = Array(10).fill({
-    nombre: 'Nombre',
-    precio: 'Precio',
-    descuento: 'Precio con descuento',
-  });
-  temporada = Array(10).fill({ nombre: 'Nombre', precio: 'Precio' });
+  private static readonly PRODUCT_IMAGE_BY_KEYWORD: Record<string, string> = {
+    banana:
+      'https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg',
+    platano:
+      'https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg',
+    manzana:
+      'https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg',
+    pera:
+      'https://upload.wikimedia.org/wikipedia/commons/0/06/Pears.jpg',
+    naranja:
+      'https://upload.wikimedia.org/wikipedia/commons/c/c4/Orange-Fruit-Pieces.jpg',
+    limon:
+      'https://upload.wikimedia.org/wikipedia/commons/c/c1/Lemon-Whole-Split.jpg',
+    aguacate:
+      'https://upload.wikimedia.org/wikipedia/commons/c/c8/Avocado_Hass_-_single_and_halved.jpg',
+    tomate:
+      'https://upload.wikimedia.org/wikipedia/commons/8/89/Tomato_je.jpg',
+    papaya:
+      'https://upload.wikimedia.org/wikipedia/commons/5/50/Papaya_cross_section_BNC.jpg',
+    mango:
+      'https://upload.wikimedia.org/wikipedia/commons/9/90/Hapus_Mango.jpg',
+    pina:
+      'https://upload.wikimedia.org/wikipedia/commons/c/cb/Pineapple_and_cross_section.jpg',
+    melon:
+      'https://upload.wikimedia.org/wikipedia/commons/2/28/Cantaloupes.jpg',
+    sandia:
+      'https://upload.wikimedia.org/wikipedia/commons/f/fb/Watermelon_cross_BNC.jpg',
+  };
 
-  @ViewChild('addProductDialog') addProductDialog!: DialogComponent;
-  selectedProduct: any = null;
+  products: ProductDTO[] = [];
+  loading = false;
+  message = '';
+  searchQuery = '';
+  quantityByProduct: Record<number, number> = {};
 
-  openDialog(product: any): void {
-    this.addProductDialog.open(product);
+  constructor(
+    private readonly router: Router,
+    private readonly apiService: ApiService,
+    private readonly cartStore: CartStore,
+  ) {}
+
+  ngOnInit(): void {
+    this.loadProducts();
   }
 
-  visibles = 6;
+  loadProducts(): void {
+    this.loading = true;
+    this.message = '';
 
-  constructor(private router: Router) {}
+    this.apiService.getProducts(this.searchQuery).subscribe({
+      next: (products) => {
+        this.products = products;
 
-  prevOfertas(): void {
-    if (this.ofertasIndex > 0) this.ofertasIndex--;
+        for (const product of products) {
+          this.quantityByProduct[product.id] ??= 1;
+        }
+
+        if (products.length === 0) {
+          this.message = 'No se encontraron productos para esa busqueda.';
+        }
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.products = [];
+        this.message = 'No se pudieron cargar los productos desde la API Coplaca.';
+      },
+    });
   }
 
-  nextOfertas(): void {
-    if (this.ofertasIndex < this.ofertas.length - this.visibles) this.ofertasIndex++;
+  getOffers(): ProductDTO[] {
+    return this.products.filter(
+      (product) =>
+        Boolean(product.offerReason) ||
+        (product.discountPercentage !== undefined && Number(product.discountPercentage) > 0),
+    );
   }
 
-  prevTemporada(): void {
-    if (this.temporadaIndex > 0) this.temporadaIndex--;
-  }
+  addToCart(product: ProductDTO): void {
+    const quantityKg = this.quantityByProduct[product.id] ?? 1;
+    if (quantityKg <= 0) {
+      this.message = 'La cantidad por kilo debe ser mayor que 0.';
+      return;
+    }
 
-  nextTemporada(): void {
-    if (this.temporadaIndex < this.temporada.length - this.visibles) this.temporadaIndex++;
+    this.cartStore.addItem({
+      productId: product.id,
+      name: product.name,
+      unitPrice: Number(product.unitPrice),
+      imageUrl: this.getProductImage(product),
+      stockQuantity: Number(product.stockQuantity),
+      quantityKg,
+      offerReason: product.offerReason,
+    });
+    this.message = `${product.name} anadido al carrito (${quantityKg} kg).`;
   }
 
   goToProfile(): void {
@@ -62,6 +128,40 @@ export class ourProductsComponent {
   }
 
   goToShop(): void {
-    this.router.navigate(['/shop']);
+    this.loadProducts();
+  }
+
+  getProductImage(product: ProductDTO): string {
+    const imageFromApi = (product.imageUrl ?? '').trim();
+    if (imageFromApi.length > 0) {
+      return imageFromApi;
+    }
+
+    const normalizedName = this.normalizeText(product.name ?? '');
+    const matchedKeyword = Object.keys(OurProductsComponent.PRODUCT_IMAGE_BY_KEYWORD).find((keyword) =>
+      normalizedName.includes(keyword),
+    );
+
+    if (matchedKeyword) {
+      return OurProductsComponent.PRODUCT_IMAGE_BY_KEYWORD[matchedKeyword];
+    }
+
+    return OurProductsComponent.DEFAULT_PRODUCT_IMAGE;
+  }
+
+  onProductImageError(event: Event): void {
+    const target = event.target as HTMLImageElement | null;
+    if (!target) {
+      return;
+    }
+
+    target.src = OurProductsComponent.DEFAULT_PRODUCT_IMAGE;
+  }
+
+  private normalizeText(value: string): string {
+    return value
+      .normalize('NFD')
+      .replaceAll(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
   }
 }

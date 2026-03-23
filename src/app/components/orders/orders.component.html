@@ -1,9 +1,9 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 <!-- NAVBAR -->
 <nav class="navbar">
-  <div class="navbar-logo" (click)="goToShop()">
+  <button class="navbar-logo" (click)="goToShop()" type="button">
     <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
-  </div>
+  </button>
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
     <a (click)="goToOrders()">Tus pedidos</a>
@@ -21,46 +21,43 @@
 <main class="main-content">
   <div class="orders-card">
     <h2 class="orders-title">Pedidos</h2>
+    <p *ngIf="error">{{ error }}</p>
     <div class="orders-scroll">
-      <!-- HARDCODEADO -->
       <div class="order-item" *ngFor="let p of pedidos">
         <div class="order-row">
           <div class="order-left">
-            <span class="order-id">{{ p.id }}</span>
-            <span class="order-estado">{{ p.estado }}</span>
+            <span class="order-id">#{{ p.orderNumber || p.id }}</span>
+            <span class="order-estado">{{ p.status }}</span>
           </div>
           <div class="order-right">
-            <span class="order-fecha">{{ p.fecha }}</span>
-            <span class="order-total">Total pedido: {{ p.total }}</span>
+            <span class="order-fecha">{{ p.createdAt | date:'short' }}</span>
+            <span class="order-total">Total pedido: {{ p.totalPrice | number:'1.2-2' }} €</span>
           </div>
         </div>
         <button class="btn-detalles" (click)="verDetalles(p)">Ver detalles</button>
       </div>
-      <!-- /HARDCODEADO -->
     </div>
   </div>
 </main>
 
 <!-- DIALOG OVERLAY -->
-<div class="dialog-overlay" *ngIf="dialogVisible" (click)="cerrarDialog()">
-  <div class="dialog" (click)="$event.stopPropagation()">
+<div class="dialog-overlay" *ngIf="dialogVisible" (click)="cerrarDialog()" (keydown.enter)="cerrarDialog()">
+  <div class="dialog" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
     <!-- CABECERA -->
     <div class="dialog-header">
-      <span class="dialog-id">{{ pedidoSeleccionado?.id }}</span>
-      <span class="dialog-fecha">{{ pedidoSeleccionado?.fecha }}</span>
-      <span class="dialog-estado">{{ pedidoSeleccionado?.estado }}</span>
+      <span class="dialog-id">#{{ pedidoSeleccionado?.orderNumber || pedidoSeleccionado?.id }}</span>
+      <span class="dialog-fecha">{{ pedidoSeleccionado?.createdAt | date:'short' }}</span>
+      <span class="dialog-estado">{{ pedidoSeleccionado?.status }}</span>
     </div>
 
     <!-- PRODUCTOS -->
     <div class="dialog-products">
-      <!-- HARDCODEADO -->
-      <div class="dialog-product" *ngFor="let prod of detalleProductos">
+      <div class="dialog-product" *ngFor="let prod of pedidoSeleccionado?.items">
         <img src="/assets/test/Banana.png" alt="producto" class="dialog-product-img" />
-        <span class="dialog-product-name">{{ prod.nombre }}</span>
-        <span class="dialog-product-cantidad">{{ prod.cantidad }}</span>
-        <span class="dialog-product-precio">{{ prod.precioPeso }}</span>
+        <span class="dialog-product-name">{{ prod.productName }}</span>
+        <span class="dialog-product-cantidad">{{ prod.quantity }} kg</span>
+        <span class="dialog-product-precio">{{ prod.unitPrice | number:'1.2-2' }} €/kg</span>
       </div>
-      <!-- /HARDCODEADO -->
     </div>
 
     <!-- FOOTER -->

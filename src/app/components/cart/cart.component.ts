@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule, MatIcon } from '@angular/material/icon';
+import { ApiService } from '../../core/api.service';
+import { CartStore } from '../../core/cart.store';
+import { CartItem } from '../../core/api.models';
 
 @Component({
   selector: 'app-cart',
@@ -11,19 +14,34 @@ import { MatIconModule, MatIcon } from '@angular/material/icon';
   styleUrls: ['./cart.component.css'],
 })
 export class CartComponent {
-  // HARDCODEADO
-  cartItems = [
-    { nombre: 'Nombre 1', cantidad: '-', precio: '-€', peso: '-kg' },
-    { nombre: 'Nombre 1', cantidad: '-', precio: '-€', peso: '-kg' },
-    { nombre: 'Nombre 1', cantidad: '-', precio: '-€', peso: '-kg' },
-  ];
+  cartItems: CartItem[] = [];
+  totalPedido = 0;
+  message = '';
 
-  // HARDCODEADO
-  sugerencias = Array(11).fill({ nombre: 'Nombre', precio: 'Precio' });
+  constructor(
+    private readonly router: Router,
+    private readonly apiService: ApiService,
+    private readonly cartStore: CartStore,
+  ) {
+    this.refreshCart();
+  }
 
-  totalPedido = '-€';
+  refreshCart(): void {
+    this.cartItems = this.cartStore.getItems();
+    this.totalPedido = this.cartItems.reduce((acc, item) => acc + item.unitPrice * item.quantityKg, 0);
+  }
 
-  constructor(private router: Router) {}
+  increment(item: CartItem): void {
+    item.quantityKg = Number((item.quantityKg + 0.5).toFixed(2));
+    this.cartStore.saveItems(this.cartItems);
+    this.refreshCart();
+  }
+
+  decrement(item: CartItem): void {
+    item.quantityKg = Number(Math.max(0.5, item.quantityKg - 0.5).toFixed(2));
+    this.cartStore.saveItems(this.cartItems);
+    this.refreshCart();
+  }
 
   goToShop(): void {
     this.router.navigate(['/our-products']);
@@ -38,6 +56,26 @@ export class CartComponent {
     this.router.navigate(['/profile']);
   }
   pagar(): void {
-    this.router.navigate(['/checkout']);
+    if (this.cartItems.length === 0) {
+      this.message = 'Tu carrito esta vacio.';
+      return;
+    }
+
+    const items = this.cartItems.map((item) => ({
+      productId: item.productId,
+      quantity: item.quantityKg,
+    }));
+
+    this.apiService.createOrder(items).subscribe({
+      next: () => {
+        this.cartStore.clear();
+        this.refreshCart();
+        this.message = 'Pedido creado correctamente.';
+        void this.router.navigate(['/orders']);
+      },
+      error: () => {
+        this.message = 'No se pudo crear el pedido.';
+      },
+    });
   }
 }
