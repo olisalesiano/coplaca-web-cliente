@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -16,6 +16,7 @@ export class DialogComponent {
 
   @Input() confirmLabel: string = 'Aceptar';
   @Input() cancelLabel: string = 'Cancelar';
+  @Output() confirmed = new EventEmitter<{ product: any; cantidad: number }>();
 
   open(product: any): void {
     this.product = product;
@@ -28,8 +29,10 @@ export class DialogComponent {
   }
 
   confirm(): void {
-    console.log('Añadiendo', this.cantidad, 'x', this.product?.nombre);
-    // aquí conectarás con tu servicio de carrito
+    this.confirmed.emit({
+      product: this.product,
+      cantidad: this.cantidad,
+    });
     this.close();
   }
 
@@ -39,5 +42,18 @@ export class DialogComponent {
 
   decrement(): void {
     if (this.cantidad > 1) this.cantidad--;
+  }
+
+  getUnitPrice(): number {
+    return Number(this.product?.unitPrice ?? this.product?.precio ?? 0);
+  }
+
+  getUnitLabel(): string {
+    const unit = String(this.product?.unit ?? 'kg').trim();
+    return unit.length > 0 ? unit : 'kg';
+  }
+
+  getTotalPrice(): number {
+    return this.getUnitPrice() * this.cantidad;
   }
 }
