@@ -22,6 +22,12 @@ describe('CheckoutComponent', () => {
   });
 
   it('should set orderSuccess to true when confirmarPedido is called', () => {
+    // Setup: establecer dirección y saldo suficiente
+    component.direccion = '123 Calle Principal';
+    component.ciudad = 'Madrid';
+    component.codigoPostal = '28001';
+    component.saldoCuenta = 100;
+    
     component.confirmarPedido();
     expect(component.orderSuccess).toBe(true);
   });
