@@ -68,7 +68,7 @@ export class OurProductsComponent implements OnInit, OnDestroy {
   searchQuery = '';
   showFilters = false;
   selectedCategory = 'Todas';
-  onlyInStock = true;
+  onlyInStock = false;
   onlyOffers = false;
   onlyFresh = false;
   quantityByProduct: Record<number, number> = {};
@@ -78,7 +78,6 @@ export class OurProductsComponent implements OnInit, OnDestroy {
   private readonly searchInput$ = new Subject<string>();
   private readonly rotationTrigger$ = new Subject<void>();
   private lastSearchedQuery = '';
-  private rotationSubscription: ReturnType<typeof interval> | null = null;
 
   constructor(
     private readonly router: Router,
@@ -89,7 +88,32 @@ export class OurProductsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.setupReactiveSearch();
     this.setupProductRotation();
-    this.searchInput$.next('');
+    // Cargar todos los productos de inmediato sin esperar
+    this.loadAllProducts();
+  }
+
+  private loadAllProducts(): void {
+    this.loading = true;
+    this.message = '';
+    this.apiService.getProducts('').subscribe({
+      next: (products) => {
+        this.products = products;
+        
+        for (const product of products) {
+          this.quantityByProduct[product.id] ??= 1;
+        }
+
+        if (products.length === 0) {
+          this.message = 'No hay productos disponibles en este momento.';
+        }
+
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+        this.message = 'No se pudieron cargar los productos desde la API Coplaca.';
+      },
+    });
   }
 
   ngOnDestroy(): void {
