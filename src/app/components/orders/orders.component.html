@@ -2,11 +2,11 @@
 <!-- NAVBAR -->
 <nav class="navbar">
   <button class="navbar-logo" (click)="goToShop()" type="button">
-    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+    <img src="/assets/logo/image.png" alt="Coplaca logo" class="nav-logo-img" />
   </button>
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
-    <a (click)="goToOrders()">Tus pedidos</a>
+    <a class="active" (click)="goToOrders()">Tus pedidos</a>
     <a (click)="goToCart()">
       Tu carrito
       <mat-icon>shopping_cart</mat-icon>
@@ -67,14 +67,22 @@
     <div class="dialog-products">
       <div class="dialog-product" *ngFor="let prod of pedidoSeleccionado?.items">
         <img [src]="resolveProductImage(prod.productId)" alt="producto" class="dialog-product-img" />
-        <span class="dialog-product-name">{{ prod.productName }}</span>
-        <span class="dialog-product-cantidad">{{ prod.quantity }} kg</span>
-        <span class="dialog-product-precio">{{ prod.unitPrice | number:'1.2-2' }} €/kg</span>
+        <div class="dialog-product-details">
+          <span class="dialog-product-name">{{ prod.productName }}</span>
+          <div class="dialog-product-row">
+            <span class="dialog-product-cantidad">{{ prod.quantity }} kg × {{ prod.unitPrice | number:'1.2-2' }} €</span>
+            <span class="dialog-product-subtotal">{{ (prod.quantity * prod.unitPrice) | number:'1.2-2' }} €</span>
+          </div>
+        </div>
       </div>
     </div>
 
     <!-- FOOTER -->
     <div class="dialog-footer">
+      <div class="dialog-total-section">
+        <span class="dialog-total-label">Total pedido:</span>
+        <span class="dialog-total-amount">{{ pedidoSeleccionado?.totalPrice | number:'1.2-2' }} €</span>
+      </div>
       <button class="btn-cancelar" type="button" (click)="cancelarPedido()">Cerrar</button>
     </div>
   </div>
