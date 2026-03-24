@@ -2,11 +2,11 @@
 <!-- NAVBAR -->
 <nav class="navbar">
   <button class="navbar-logo" (click)="goToShop()" type="button">
-    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+    <img src="/assets/logo/image.png" alt="Coplaca logo" class="nav-logo-img" />
   </button>
 
   <div class="navbar-links">
-    <a (click)="goToShop()">Tienda</a>
+    <a class="active" (click)="goToShop()">Tienda</a>
     <a (click)="goToOrders()">Tus pedidos</a>
     <a (click)="goToCart()">
       Tu carrito
@@ -139,7 +139,13 @@
         <mat-icon>chevron_left</mat-icon>
       </button>
       <div class="offers-grid" #offersGridContainer>
-        <div class="offer-card-full" *ngFor="let offer of getDisplayOffers()">
+        <button
+          class="offer-card-full"
+          *ngFor="let offer of getDisplayOffers()"
+          type="button"
+          (click)="openProductDialog(offer.product)"
+          [attr.aria-label]="'Abrir oferta de ' + offer.product.name"
+        >
           <img
             [src]="getProductImage(offer.product)"
             (error)="onProductImageError($event)"
@@ -155,8 +161,8 @@
             <span class="offer-price-full">{{ offer.product.unitPrice }} €/{{ offer.product.unit || 'kg' }}</span>
             <span class="offer-stock">Stock: {{ offer.product.stockQuantity }} kg</span>
           </div>
-          <button class="btn-offer" type="button" (click)="openProductDialog(offer.product)">Añadir al carrito</button>
-        </div>
+          <span class="btn-offer">Ver y añadir</span>
+        </button>
       </div>
       <button class="scroll-btn scroll-right" type="button" (click)="scrollOffersRight()" aria-label="Scroll derecha">
         <mat-icon>chevron_right</mat-icon>
