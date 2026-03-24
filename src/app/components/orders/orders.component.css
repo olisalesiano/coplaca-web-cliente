@@ -26,16 +26,26 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  background: white;
-  border-radius: 12px;
-  border: 4px solid #e0a800;
-  padding: 0.3rem 0.8rem 0.3rem 0.4rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  filter: drop-shadow(0 3px 10px rgba(0, 0, 0, 0.28));
+  transition: transform 0.2s ease;
+}
+
+.navbar-logo:hover {
+  transform: scale(1.03);
 }
 
 .nav-logo-img {
-  width: 144px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
+  background: #ffffff;
+  border-radius: 50%;
+  padding: 6px;
+  box-sizing: border-box;
+  filter: brightness(1.05) contrast(1.1) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
 }
 
 .navbar-links {
@@ -59,6 +69,13 @@
 
 .navbar-links a:hover {
   color: white;
+}
+
+.navbar-links a.active {
+  color: #ffffff;
+  font-weight: 700;
+  border-bottom: 2px solid #f5c518;
+  padding-bottom: 0.15rem;
 }
 
 .profile-btn {
@@ -345,25 +362,63 @@
   object-fit: contain;
   flex-shrink: 0;
 }
+
+.dialog-product-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
 .dialog-product-name {
   font-size: 1rem;
   font-weight: 600;
-  flex: 1;
 }
+
+.dialog-product-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
 .dialog-product-cantidad {
-  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.9);
 }
-.dialog-product-precio {
-  font-size: 0.85rem;
+
+.dialog-product-subtotal {
+  font-weight: 600;
+  color: #7ef0d0;
 }
 
 /* FOOTER */
 .dialog-footer {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 1rem;
-  margin-top: 0.3rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dialog-total-section {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.dialog-total-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.dialog-total-amount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #7ef0d0;
 }
 
 .btn-cancelar {
