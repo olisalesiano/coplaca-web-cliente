@@ -1,7 +1,7 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 <nav class="navbar">
   <button class="navbar-logo" (click)="goToShop()" type="button">
-    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+    <img src="/assets/logo/image.png" alt="Coplaca logo" class="nav-logo-img" />
   </button>
 
   <div class="navbar-links">
@@ -9,34 +9,30 @@
     <a (click)="goToOrders()">Tus pedidos</a>
     <a (click)="goToCart()">Tu carrito <mat-icon>shopping_cart</mat-icon></a>
   </div>
-  <button class="profile-btn" (click)="goToProfile()">
+  <button class="profile-btn active" (click)="goToProfile()">
     <mat-icon>person</mat-icon>
   </button>
 </nav>
 
 <main class="main-content">
-
   <div class="profile-card">
     <div class="profile-header">
-      <div class="avatar"><mat-icon>person</mat-icon></div>
+      <div class="avatar">
+        <img
+          *ngIf="!profileImageError"
+          [src]="profileImageUrl"
+          [alt]="'Foto de ' + (firstName || 'usuario')"
+          class="avatar-image"
+          (error)="onProfileImageError()"
+        />
+        <mat-icon *ngIf="profileImageError">person</mat-icon>
+      </div>
       <h1 class="profile-title">¡Aquí tienes tu espacio!</h1>
     </div>
 
-    <div class="profile-data">
-      <p><strong>Nombre:</strong> <input [(ngModel)]="firstName" /></p>
-      <p><strong>Apellidos:</strong> <input [(ngModel)]="lastName" /></p>
-      <p><strong>Email:</strong> {{ user?.email }}</p>
-      <p><strong>Telefono:</strong> <input [(ngModel)]="phoneNumber" /></p>
-      <p><strong>Calle:</strong> <input [(ngModel)]="street" /></p>
-      <p><strong>Numero:</strong> <input [(ngModel)]="streetNumber" /></p>
-      <p><strong>Piso/Apto:</strong> <input [(ngModel)]="apartment" /></p>
-      <p><strong>Ciudad:</strong> <input [(ngModel)]="city" /></p>
-      <p><strong>Provincia:</strong> <input [(ngModel)]="province" /></p>
-      <p><strong>Codigo postal:</strong> <input [(ngModel)]="postalCode" /></p>
-      <p><strong>Info adicional:</strong> <input [(ngModel)]="additionalInfo" /></p>
-      <p><strong>Almacen asignado:</strong> {{ user?.warehouseName || 'Sin asignar' }}</p>
-      <p *ngIf="message"><strong>{{ message }}</strong></p>
-    </div>
+    <p class="profile-subtitle">Gestiona tu cuenta con los botones de abajo.</p>
+
+    <p class="status-message" *ngIf="message">{{ message }}</p>
   </div>
 
   <div class="saldo-row">
@@ -47,17 +43,85 @@
     </button>
   </div>
 
-  <button class="btn-edit" [class.btn-guardar]="editando" (click)="editInfo()">
-    {{ editando ? 'Guardar' : 'Editar información' }}
-  </button>
-
   <div class="btn-row">
-    <button class="btn-baja" (click)="darDeBaja()">Dar de baja</button>
-    <button class="btn-pedidos" (click)="irAPedidos()">Ir a pedidos &gt;</button>
+    <button class="btn-edit" type="button" (click)="startEdit()">Editar informacion</button>
+    <button class="btn-baja" type="button" (click)="darDeBaja()">Dar de baja</button>
+    <button class="btn-pedidos" type="button" (click)="irAPedidos()">Ir a pedidos &gt;</button>
   </div>
 
-  <div class="dialog-backdrop" *ngIf="dialogAbierto" (click)="cerrarDialogoSaldo()">
-    <div class="saldo-dialog" (click)="$event.stopPropagation()">
+  <div
+    class="dialog-backdrop"
+    *ngIf="editando"
+    (click)="closeEditDialog()"
+    (keydown.enter)="closeEditDialog()"
+  >
+    <div class="edit-dialog" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+      <div class="edit-dialog-header">
+        <h3>Editar informacion</h3>
+        <button class="close-btn" type="button" (click)="closeEditDialog()">✕</button>
+      </div>
+
+      <div class="profile-data">
+        <div class="profile-field">
+          <span class="field-label">Nombre</span>
+          <input class="profile-input" [(ngModel)]="firstName" />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Apellidos</span>
+          <input class="profile-input" [(ngModel)]="lastName" />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Email</span>
+          <input class="profile-input" [value]="user?.email || ''" disabled />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Telefono</span>
+          <input class="profile-input" [(ngModel)]="phoneNumber" />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Calle</span>
+          <input class="profile-input" [(ngModel)]="street" />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Numero</span>
+          <input class="profile-input" [(ngModel)]="streetNumber" />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Piso/Apto</span>
+          <input class="profile-input" [(ngModel)]="apartment" />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Ciudad</span>
+          <input class="profile-input" [(ngModel)]="city" />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Provincia</span>
+          <input class="profile-input" [(ngModel)]="province" />
+        </div>
+        <div class="profile-field">
+          <span class="field-label">Codigo postal</span>
+          <input class="profile-input" [(ngModel)]="postalCode" />
+        </div>
+        <div class="profile-field full-width">
+          <span class="field-label">Info adicional</span>
+          <input class="profile-input" [(ngModel)]="additionalInfo" />
+        </div>
+      </div>
+
+      <div class="edit-dialog-footer">
+        <button class="btn-edit btn-guardar" type="button" (click)="saveInfo()">Guardar</button>
+        <button class="btn-edit btn-cancel" type="button" (click)="closeEditDialog()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="dialog-backdrop"
+    *ngIf="dialogAbierto"
+    (click)="cerrarDialogoSaldo()"
+    (keydown.enter)="cerrarDialogoSaldo()"
+  >
+    <div class="saldo-dialog" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
       <div class="saldo-dialog-header">
         <h3>Añadir saldo</h3>
         <button class="close-btn" (click)="cerrarDialogoSaldo()">✕</button>
@@ -67,6 +131,73 @@
         <input type="number" [(ngModel)]="cantidadInput" placeholder="0.00" min="0" class="saldo-input" />
         <span class="euro-sign">€</span>
       </div>
+
+      <div class="metodo-pago-selector">
+        <span class="metodo-label">Metodo para anadir saldo</span>
+        <div class="metodo-opciones">
+          <button
+            type="button"
+            class="metodo-btn"
+            [class.activo]="metodoSaldo === 'paypal'"
+            (click)="seleccionarMetodoSaldo('paypal')"
+          >
+            PayPal
+          </button>
+          <button
+            type="button"
+            class="metodo-btn"
+            [class.activo]="metodoSaldo === 'tarjeta'"
+            (click)="seleccionarMetodoSaldo('tarjeta')"
+          >
+            Tarjeta
+          </button>
+        </div>
+      </div>
+
+      <div class="metodo-form" *ngIf="metodoSaldo === 'paypal'">
+        <input
+          type="email"
+          class="metodo-input"
+          [(ngModel)]="paypalEmail"
+          placeholder="Email de PayPal"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="metodo-form" *ngIf="metodoSaldo === 'tarjeta'">
+        <input
+          type="text"
+          class="metodo-input"
+          [(ngModel)]="cardNumber"
+          placeholder="Numero de tarjeta (16 digitos)"
+          autocomplete="cc-number"
+        />
+        <input
+          type="text"
+          class="metodo-input"
+          [(ngModel)]="cardName"
+          placeholder="Titular de la tarjeta"
+          autocomplete="cc-name"
+        />
+        <div class="metodo-input-row">
+          <input
+            type="text"
+            class="metodo-input"
+            [(ngModel)]="cardExpiry"
+            placeholder="MM/AA"
+            autocomplete="cc-exp"
+          />
+          <input
+            type="text"
+            class="metodo-input"
+            [(ngModel)]="cardCvv"
+            placeholder="CVV"
+            inputmode="numeric"
+            autocomplete="cc-csc"
+          />
+        </div>
+      </div>
+
       <div class="saldo-dialog-footer">
         <button class="btn confirm" (click)="confirmarSaldo()">Añadir</button>
         <button class="btn cancel" (click)="cerrarDialogoSaldo()">Cancelar</button>
