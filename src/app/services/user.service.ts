@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { resolveApiBaseUrl } from '../core/api-base-url';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = `${environment.apiUrl}/users`;
+  private readonly apiUrl = `${resolveApiBaseUrl()}/users`;
 
   constructor(private http: HttpClient) {}
 
@@ -16,7 +16,7 @@ export class UserService {
   }
 
   updateProfile(data: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/profile`, data);
+    return this.http.put<any>(`${this.apiUrl}/me`, data);
   }
 
   getAddresses(): Observable<any> {

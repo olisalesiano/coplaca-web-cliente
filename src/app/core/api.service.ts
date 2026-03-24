@@ -1,9 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { AuthStore } from './auth.store';
 import { LoginResponse, OrderDTO, ProductDTO, UserDTO } from './api.models';
-import { environment } from '../../environments/environment';
+import { resolveApiBaseUrl } from './api-base-url';
+
+interface ApiSuccessResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
 
 interface SignUpPayload {
   email: string;
@@ -27,7 +33,7 @@ interface SignUpPayload {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly baseUrl = this.resolveBaseUrl();
+  private readonly baseUrl = resolveApiBaseUrl();
 
   constructor(
     private readonly http: HttpClient,
@@ -44,10 +50,16 @@ export class ApiService {
 
   getProducts(query?: string): Observable<ProductDTO[]> {
     if (query && query.trim().length > 0) {
-      return this.http.get<ProductDTO[]>(`${this.baseUrl}/products/search?query=${encodeURIComponent(query.trim())}`);
+      return this.http
+        .get<ProductDTO[] | ApiSuccessResponse<ProductDTO[]>>(
+          `${this.baseUrl}/api/v1/products/search?query=${encodeURIComponent(query.trim())}`,
+        )
+        .pipe(map((response) => this.unwrapListResponse(response)));
     }
 
-    return this.http.get<ProductDTO[]>(`${this.baseUrl}/products`);
+    return this.http
+      .get<ProductDTO[] | ApiSuccessResponse<ProductDTO[]>>(`${this.baseUrl}/api/v1/products`)
+      .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
   getCurrentUser(): Observable<UserDTO> {
@@ -78,15 +90,22 @@ export class ApiService {
     );
   }
 
-  private resolveBaseUrl(): string {
-    const runtimeUrl = (globalThis as { __COPLACA_API_URL__?: string }).__COPLACA_API_URL__;
-    return (runtimeUrl ?? environment.apiUrl).replace(/\/+$/, '');
-  }
-
   private authHeaders(): HttpHeaders {
     const token = this.authStore.getToken();
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
+  }
+
+  private unwrapListResponse<T>(response: T[] | ApiSuccessResponse<T[]>): T[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    return [];
   }
 }

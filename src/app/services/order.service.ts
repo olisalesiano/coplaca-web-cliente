@@ -1,26 +1,33 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { resolveApiBaseUrl } from '../core/api-base-url';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OrderService {
-  private apiUrl = `${environment.apiUrl}/orders`;
+  private readonly apiUrl = `${resolveApiBaseUrl()}/orders`;
 
   constructor(private http: HttpClient) {}
 
   createOrder(items: Array<{ productId: number; quantity: number }>, shippingAddressId: number): Observable<any> {
-    return this.http.post<any>(this.apiUrl, { items, shippingAddressId });
+    return this.http.post<any>(this.apiUrl, {
+      paymentMethod: 'CARD',
+      paymentStatus: 'PENDING',
+      items,
+      shippingAddressId,
+    });
   }
 
   getMyOrders(status?: string): Observable<any> {
-    let params = new HttpParams();
-    if (status) {
-      params = params.set('status', status);
+    if (!status) {
+      return this.http.get<any>(`${this.apiUrl}/my`);
     }
-    return this.http.get<any>(this.apiUrl, { params });
+
+    let params = new HttpParams();
+    params = params.set('status', status);
+    return this.http.get<any>(`${this.apiUrl}/my`, { params });
   }
 
   getOrderDetails(orderId: number): Observable<any> {
