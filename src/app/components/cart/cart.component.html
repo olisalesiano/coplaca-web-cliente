@@ -2,13 +2,13 @@
 <!-- NAVBAR -->
 <nav class="navbar">
   <button class="navbar-logo" (click)="goToShop()" type="button">
-    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+    <img src="/assets/logo/image.png" alt="Coplaca logo" class="nav-logo-img" />
   </button>
 
   <div class="navbar-links">
     <a (click)="goToShop()">Tienda</a>
     <a (click)="goToOrders()">Tus pedidos</a>
-    <a (click)="goToCart()"> Tu carrito <mat-icon>shopping_cart</mat-icon></a>
+    <a class="active" (click)="goToCart()"> Tu carrito <mat-icon>shopping_cart</mat-icon></a>
   </div>
 
   <button class="profile-btn" (click)="goToProfile()">
@@ -77,5 +77,97 @@
   <div class="cart-footer">
     <span class="total-label">Total a pagar: {{ totalPedido | number:'1.2-2' }} €</span>
     <button class="btn-pagar" type="button" (click)="pagar()" [disabled]="cartItems.length === 0">Pagar</button>
+  </div>
+
+  <div
+    class="payment-dialog-backdrop"
+    *ngIf="paymentDialogOpen"
+    (click)="closePaymentDialog()"
+    (keydown.enter)="closePaymentDialog()"
+  >
+    <div class="payment-dialog" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+      <div class="payment-dialog-header">
+        <h3>Selecciona metodo de pago</h3>
+        <button class="close-btn" type="button" (click)="closePaymentDialog()">✕</button>
+      </div>
+
+      <div class="payment-methods">
+        <button
+          type="button"
+          class="payment-method-btn"
+          [class.active]="selectedPaymentMethod === 'fisico'"
+          (click)="selectPaymentMethod('fisico')"
+        >
+          Pagar en fisico
+        </button>
+        <button
+          type="button"
+          class="payment-method-btn"
+          [class.active]="selectedPaymentMethod === 'paypal'"
+          (click)="selectPaymentMethod('paypal')"
+        >
+          PayPal
+        </button>
+        <button
+          type="button"
+          class="payment-method-btn"
+          [class.active]="selectedPaymentMethod === 'tarjeta'"
+          (click)="selectPaymentMethod('tarjeta')"
+        >
+          Tarjeta
+        </button>
+      </div>
+
+      <div class="payment-fields" *ngIf="selectedPaymentMethod === 'paypal'">
+        <input
+          type="email"
+          class="payment-input"
+          [(ngModel)]="paypalEmail"
+          placeholder="Email de PayPal"
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="payment-fields" *ngIf="selectedPaymentMethod === 'tarjeta'">
+        <input
+          type="text"
+          class="payment-input"
+          [(ngModel)]="cardNumber"
+          placeholder="Numero de tarjeta (16 digitos)"
+          autocomplete="cc-number"
+        />
+        <input
+          type="text"
+          class="payment-input"
+          [(ngModel)]="cardName"
+          placeholder="Titular de la tarjeta"
+          autocomplete="cc-name"
+        />
+        <div class="payment-input-row">
+          <input
+            type="text"
+            class="payment-input"
+            [(ngModel)]="cardExpiry"
+            placeholder="MM/AA"
+            autocomplete="cc-exp"
+          />
+          <input
+            type="text"
+            class="payment-input"
+            [(ngModel)]="cardCvv"
+            placeholder="CVV"
+            inputmode="numeric"
+            autocomplete="cc-csc"
+          />
+        </div>
+      </div>
+
+      <div class="payment-dialog-footer">
+        <button class="btn-cancel-payment" type="button" (click)="closePaymentDialog()">Cancelar</button>
+        <button class="btn-confirm-payment" type="button" (click)="confirmarPago()">
+          Confirmar pago
+        </button>
+      </div>
+    </div>
   </div>
 </main>
