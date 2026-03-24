@@ -1,10 +1,9 @@
-import { Component, DestroyRef, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { Subject, of, interval } from 'rxjs';
-import { catchError, debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
+import { interval } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../core/api.service';
 import { CartStore } from '../../core/cart.store';
@@ -29,7 +28,7 @@ interface FallbackOffer {
   templateUrl: './our-products.component.html',
   styleUrls: ['./our-products.component.css'],
 })
-export class OurProductsComponent implements OnInit, OnDestroy {
+export class OurProductsComponent implements OnInit {
   @ViewChild('addProductDialog') addProductDialogRef?: DialogComponent;
   @ViewChild('offersGridContainer') offersGridContainer?: ElementRef<HTMLDivElement>;
   private static readonly DEFAULT_PRODUCT_IMAGE = '/assets/test/Banana.png';
@@ -75,9 +74,6 @@ export class OurProductsComponent implements OnInit, OnDestroy {
   rotatedProductsIndex: number = 0;
   rotationInterval: number = 10000; // 10 segundos
   private readonly destroyRef = inject(DestroyRef);
-  private readonly searchInput$ = new Subject<string>();
-  private readonly rotationTrigger$ = new Subject<void>();
-  private lastSearchedQuery = '';
 
   constructor(
     private readonly router: Router,
@@ -86,7 +82,6 @@ export class OurProductsComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.setupReactiveSearch();
     this.setupProductRotation();
     // Cargar todos los productos de inmediato sin esperar
     this.loadAllProducts();
@@ -116,22 +111,18 @@ export class OurProductsComponent implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.rotationTrigger$.complete();
-  }
-
   loadProducts(): void {
-    this.searchInput$.next(this.searchQuery);
+    this.rotatedProductsIndex = 0;
   }
 
   onSearchInput(value: string): void {
     this.searchQuery = value;
-    this.searchInput$.next(value);
+    this.loadProducts();
   }
 
   clearSearch(): void {
     this.searchQuery = '';
-    this.searchInput$.next('');
+    this.loadProducts();
   }
 
   toggleFilters(): void {
@@ -210,6 +201,16 @@ export class OurProductsComponent implements OnInit, OnDestroy {
 
   getReactiveProducts(): ProductDTO[] {
     return this.products.filter((product) => {
+      const query = this.normalizeText(this.searchQuery.trim());
+      if (query.length > 0) {
+        const searchableText = this.normalizeText(
+          `${product.name ?? ''} ${product.description ?? ''} ${product.categoryName ?? ''}`,
+        );
+        if (!searchableText.includes(query)) {
+          return false;
+        }
+      }
+
       if (this.selectedCategory !== 'Todas' && product.categoryName !== this.selectedCategory) {
         return false;
       }
@@ -282,47 +283,6 @@ export class OurProductsComponent implements OnInit, OnDestroy {
     this.searchQuery = '';
     this.loadProducts();
   }
-
-  private setupReactiveSearch(): void {
-    this.searchInput$
-      .pipe(
-        map((query) => query.trim()),
-        debounceTime(350),
-        distinctUntilChanged(),
-        tap((query) => {
-          this.lastSearchedQuery = query;
-          this.loading = true;
-          this.message = '';
-          this.rotatedProductsIndex = 0;
-        }),
-        switchMap((query) =>
-          this.apiService.getProducts(query).pipe(
-            catchError(() => {
-              this.message = 'No se pudieron cargar los productos desde la API Coplaca.';
-              return of([] as ProductDTO[]);
-            }),
-          ),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((products) => {
-        this.products = products;
-
-        for (const product of products) {
-          this.quantityByProduct[product.id] ??= 1;
-        }
-
-        if (products.length === 0) {
-          this.message =
-            this.lastSearchedQuery.length > 0
-              ? 'No se encontraron productos para esa busqueda.'
-              : 'No hay productos disponibles en este momento.';
-        }
-
-        this.loading = false;
-      });
-  }
-
   private setupProductRotation(): void {
     interval(this.rotationInterval)
       .pipe(takeUntilDestroyed(this.destroyRef))

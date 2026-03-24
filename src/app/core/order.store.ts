@@ -25,8 +25,29 @@ export class OrderStore {
 
   prependOrder(order: OrderDTO): void {
     const existing = this.getOrders();
-    const deduped = existing.filter((value) => value.id !== order.id);
+    const deduped = existing.filter(
+      (value) => value.id !== order.id && value.orderNumber !== order.orderNumber,
+    );
     this.saveOrders([order, ...deduped]);
+  }
+
+  mergeWithStored(ordersFromApi: OrderDTO[]): OrderDTO[] {
+    const local = this.getOrders();
+    const merged = [...ordersFromApi];
+
+    for (const localOrder of local) {
+      const alreadyPresent = merged.some(
+        (remoteOrder) =>
+          remoteOrder.id === localOrder.id ||
+          (Boolean(remoteOrder.orderNumber) && remoteOrder.orderNumber === localOrder.orderNumber),
+      );
+
+      if (!alreadyPresent) {
+        merged.push(localOrder);
+      }
+    }
+
+    return merged;
   }
 
   clear(): void {

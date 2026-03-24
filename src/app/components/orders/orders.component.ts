@@ -52,8 +52,9 @@ export class OrdersComponent {
 
     this.apiService.getMyOrders().subscribe({
       next: (orders) => {
-        this.pedidos = orders;
-        this.orderStore.saveOrders(orders);
+        const mergedOrders = this.orderStore.mergeWithStored(orders);
+        this.pedidos = mergedOrders;
+        this.orderStore.saveOrders(mergedOrders);
         this.loading = false;
       },
       error: () => {
