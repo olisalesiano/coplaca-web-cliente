@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../core/api.service';
 import { AuthStore } from '../../core/auth.store';
 import { UserDTO } from '../../core/api.models';
+import { AddressGeoService } from '../../core/address-geo.service';
 
 @Component({
   selector: 'app-profile',
@@ -27,6 +28,10 @@ export class ProfileComponent {
   province = '';
   postalCode = '';
   additionalInfo = '';
+  isResolvingPostalCode = false;
+  coordinates: { latitude: number; longitude: number } | null = null;
+  nearestWarehouseName = '';
+  nearestWarehouseDistanceKm: number | null = null;
   message = '';
   saldo = Number(sessionStorage.getItem('saldo') ?? '0');
   cantidadInput = '';
@@ -50,12 +55,17 @@ export class ProfileComponent {
     province: string;
     postalCode: string;
     additionalInfo: string;
+    coordinates: { latitude: number; longitude: number } | null;
+    nearestWarehouseName: string;
+    nearestWarehouseDistanceKm: number | null;
   } | null = null;
+  private postalCodeTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly router: Router,
     private readonly apiService: ApiService,
     private readonly authStore: AuthStore,
+    private readonly addressGeoService: AddressGeoService,
   ) {
     this.loadProfile();
   }
@@ -75,6 +85,15 @@ export class ProfileComponent {
         this.province = user.address?.province ?? '';
         this.postalCode = user.address?.postalCode ?? '';
         this.additionalInfo = user.address?.additionalInfo ?? '';
+        this.coordinates =
+          user.address?.latitude !== undefined && user.address?.longitude !== undefined
+            ? {
+                latitude: Number(user.address.latitude),
+                longitude: Number(user.address.longitude),
+              }
+            : null;
+        this.nearestWarehouseName = user.warehouseName ?? '';
+        this.nearestWarehouseDistanceKm = null;
         this.originalForm = this.getCurrentFormValues();
       },
       error: () => {
@@ -102,6 +121,11 @@ export class ProfileComponent {
   }
 
   closeEditDialog(): void {
+    if (this.postalCodeTimer) {
+      clearTimeout(this.postalCodeTimer);
+      this.postalCodeTimer = null;
+    }
+
     if (this.originalForm) {
       this.firstName = this.originalForm.firstName;
       this.lastName = this.originalForm.lastName;
@@ -113,12 +137,38 @@ export class ProfileComponent {
       this.province = this.originalForm.province;
       this.postalCode = this.originalForm.postalCode;
       this.additionalInfo = this.originalForm.additionalInfo;
+      this.coordinates = this.originalForm.coordinates;
+      this.nearestWarehouseName = this.originalForm.nearestWarehouseName;
+      this.nearestWarehouseDistanceKm = this.originalForm.nearestWarehouseDistanceKm;
     }
+
+    this.isResolvingPostalCode = false;
 
     this.editando = false;
   }
 
-  saveInfo(): void {
+  async saveInfo(): Promise<void> {
+    let resolvedCoordinates = this.coordinates;
+    resolvedCoordinates ??= await this.resolveCoordinatesByPostalCode(this.postalCode);
+    resolvedCoordinates ??= await this.addressGeoService.geocodeFromParts({
+      street: this.street,
+      streetNumber: this.streetNumber,
+      city: this.city,
+      province: this.province,
+      postalCode: this.postalCode,
+    });
+
+    if (resolvedCoordinates === null) {
+      this.message = 'No se pudo geolocalizar el domicilio. Ajusta la direccion.';
+      return;
+    }
+
+    this.coordinates = resolvedCoordinates;
+    await this.updateNearestWarehouse(
+      resolvedCoordinates.latitude,
+      resolvedCoordinates.longitude,
+    );
+
     this.apiService
       .updateCurrentUser({
         firstName: this.firstName,
@@ -132,8 +182,8 @@ export class ProfileComponent {
           province: this.province,
           postalCode: this.postalCode,
           additionalInfo: this.additionalInfo,
-          latitude: 0,
-          longitude: 0,
+          latitude: resolvedCoordinates.latitude,
+          longitude: resolvedCoordinates.longitude,
           isDefault: false,
         },
       })
@@ -286,6 +336,83 @@ export class ProfileComponent {
       province: this.province,
       postalCode: this.postalCode,
       additionalInfo: this.additionalInfo,
+      coordinates: this.coordinates,
+      nearestWarehouseName: this.nearestWarehouseName,
+      nearestWarehouseDistanceKm: this.nearestWarehouseDistanceKm,
     };
+  }
+
+  onPostalCodeChange(value: string): void {
+    this.postalCode = value;
+
+    if (this.postalCodeTimer) {
+      clearTimeout(this.postalCodeTimer);
+      this.postalCodeTimer = null;
+    }
+
+    const normalizedPostalCode = value.replaceAll(/\s+/g, '').trim();
+    if (normalizedPostalCode.length < 5) {
+      this.isResolvingPostalCode = false;
+      this.coordinates = null;
+      this.nearestWarehouseName = '';
+      this.nearestWarehouseDistanceKm = null;
+      return;
+    }
+
+    this.isResolvingPostalCode = true;
+    this.postalCodeTimer = setTimeout(() => {
+      void this.resolveCoordinatesByPostalCode(normalizedPostalCode, true);
+    }, 450);
+  }
+
+  private async resolveCoordinatesByPostalCode(
+    postalCodeValue: string,
+    updateNearest = false,
+  ): Promise<{ latitude: number; longitude: number } | null> {
+    const resolved = await this.addressGeoService.geocodeFromPostalCode(postalCodeValue);
+
+    if (!resolved) {
+      this.isResolvingPostalCode = false;
+      return null;
+    }
+
+    if (!this.city.trim() && resolved.city.trim()) {
+      this.city = resolved.city;
+    }
+    if (!this.province.trim() && resolved.province.trim()) {
+      this.province = resolved.province;
+    }
+    if (!this.street.trim() && resolved.street.trim()) {
+      this.street = resolved.street;
+    }
+    if (!this.streetNumber.trim() && resolved.streetNumber.trim()) {
+      this.streetNumber = resolved.streetNumber;
+    }
+
+    const coordinates = {
+      latitude: resolved.latitude,
+      longitude: resolved.longitude,
+    };
+
+    this.coordinates = coordinates;
+
+    if (updateNearest) {
+      await this.updateNearestWarehouse(coordinates.latitude, coordinates.longitude);
+    }
+
+    this.isResolvingPostalCode = false;
+    return coordinates;
+  }
+
+  private async updateNearestWarehouse(latitude: number, longitude: number): Promise<void> {
+    const nearest = await this.addressGeoService.getNearestWarehouse(latitude, longitude);
+    if (!nearest) {
+      this.nearestWarehouseName = '';
+      this.nearestWarehouseDistanceKm = null;
+      return;
+    }
+
+    this.nearestWarehouseName = nearest.warehouse.name;
+    this.nearestWarehouseDistanceKm = nearest.distanceKm;
   }
 }

@@ -100,11 +100,27 @@
         </div>
         <div class="profile-field">
           <span class="field-label">Codigo postal</span>
-          <input class="profile-input" [(ngModel)]="postalCode" />
+          <input class="profile-input" [ngModel]="postalCode" (ngModelChange)="onPostalCodeChange($event)" />
         </div>
         <div class="profile-field full-width">
           <span class="field-label">Info adicional</span>
           <input class="profile-input" [(ngModel)]="additionalInfo" />
+        </div>
+        <div class="profile-field full-width" *ngIf="isResolvingPostalCode">
+          <p class="address-helper">Resolviendo coordenadas por codigo postal...</p>
+        </div>
+        <div class="profile-field full-width" *ngIf="coordinates">
+          <span class="field-label">Coordenadas detectadas</span>
+          <p class="address-helper coords">
+            {{ coordinates.latitude | number:'1.5-5' }}, {{ coordinates.longitude | number:'1.5-5' }}
+          </p>
+        </div>
+        <div class="profile-field full-width" *ngIf="nearestWarehouseName">
+          <span class="field-label">Almacen mas cercano</span>
+          <p class="address-helper warehouse">
+            {{ nearestWarehouseName }}
+            <span *ngIf="nearestWarehouseDistanceKm !== null">(~{{ nearestWarehouseDistanceKm | number:'1.2-2' }} km)</span>
+          </p>
         </div>
       </div>
 
