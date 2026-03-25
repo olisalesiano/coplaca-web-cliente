@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { AuthStore } from './auth.store';
-import { LoginResponse, OrderDTO, ProductDTO, UserDTO } from './api.models';
+import { LoginResponse, OrderDTO, ProductDTO, UserDTO, WarehouseDTO } from './api.models';
 import { resolveApiBaseUrl } from './api-base-url';
 
 interface ApiSuccessResponse<T> {
@@ -63,19 +63,31 @@ export class ApiService {
   }
 
   getCurrentUser(): Observable<UserDTO> {
-    return this.http.get<UserDTO>(`${this.baseUrl}/users/me`, { headers: this.authHeaders() });
+    return this.http
+      .get<UserDTO | ApiSuccessResponse<UserDTO>>(`${this.baseUrl}/api/v1/users/me`, {
+        headers: this.authHeaders(),
+      })
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
   }
 
   updateCurrentUser(payload: unknown): Observable<UserDTO> {
-    return this.http.put<UserDTO>(`${this.baseUrl}/users/me`, payload, { headers: this.authHeaders() });
+    return this.http
+      .put<UserDTO | ApiSuccessResponse<UserDTO>>(`${this.baseUrl}/api/v1/users/me`, payload, {
+        headers: this.authHeaders(),
+      })
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
   }
 
   deleteCurrentUser(): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/users/me`, { headers: this.authHeaders() });
+    return this.http.delete<void>(`${this.baseUrl}/api/v1/users/me`, { headers: this.authHeaders() });
   }
 
   getMyOrders(): Observable<OrderDTO[]> {
-    return this.http.get<OrderDTO[]>(`${this.baseUrl}/orders/my`, { headers: this.authHeaders() });
+    return this.http
+      .get<OrderDTO[] | ApiSuccessResponse<OrderDTO[]>>(`${this.baseUrl}/api/v1/orders/me`, {
+        headers: this.authHeaders(),
+      })
+      .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
   createOrder(items: Array<{ productId: number; quantity: number }>): Observable<OrderDTO> {
@@ -88,6 +100,12 @@ export class ApiService {
       },
       { headers: this.authHeaders() },
     );
+  }
+
+  getWarehouses(): Observable<WarehouseDTO[]> {
+    return this.http
+      .get<WarehouseDTO[] | ApiSuccessResponse<WarehouseDTO[]>>(`${this.baseUrl}/api/v1/warehouses`)
+      .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
   private authHeaders(): HttpHeaders {
@@ -107,5 +125,15 @@ export class ApiService {
     }
 
     return [];
+  }
+
+  private unwrapSingleResponse<T>(response: T | ApiSuccessResponse<T>): T {
+    if (response && typeof response === 'object' && 'data' in response) {
+      if (response.data !== undefined) {
+        return response.data;
+      }
+    }
+
+    return response as T;
   }
 }

@@ -74,6 +74,15 @@ export interface OrderDTO {
   items: OrderItemDTO[];
 }
 
+export interface WarehouseDTO {
+  id: number;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  isActive?: boolean;
+}
+
 export interface CartItem {
   productId: number;
   name: string;

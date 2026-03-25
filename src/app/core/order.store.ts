@@ -1,12 +1,20 @@
 import { Injectable } from '@angular/core';
+import { AuthStore } from './auth.store';
 import { OrderDTO } from './api.models';
 
-const ORDERS_KEY = 'coplaca_orders';
+const ORDERS_PREFIX = 'coplaca_orders_user_';
+const LEGACY_ORDERS_KEY = 'coplaca_orders';
 
 @Injectable({ providedIn: 'root' })
 export class OrderStore {
+  constructor(private readonly authStore: AuthStore) {}
+
+  private getOrdersKey(): string {
+    return `${ORDERS_PREFIX}${this.authStore.getUserScope()}`;
+  }
+
   getOrders(): OrderDTO[] {
-    const raw = localStorage.getItem(ORDERS_KEY);
+    const raw = localStorage.getItem(this.getOrdersKey());
     if (!raw) {
       return [];
     }
@@ -20,7 +28,7 @@ export class OrderStore {
   }
 
   saveOrders(orders: OrderDTO[]): void {
-    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+    localStorage.setItem(this.getOrdersKey(), JSON.stringify(orders));
   }
 
   prependOrder(order: OrderDTO): void {
@@ -51,6 +59,7 @@ export class OrderStore {
   }
 
   clear(): void {
-    localStorage.removeItem(ORDERS_KEY);
+    localStorage.removeItem(this.getOrdersKey());
+    localStorage.removeItem(LEGACY_ORDERS_KEY);
   }
 }
