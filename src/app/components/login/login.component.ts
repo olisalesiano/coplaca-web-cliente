@@ -34,7 +34,7 @@ export class LoginComponent {
   login(): void {
     this.error = '';
     if (!this.email || !this.password) {
-      this.error = 'Debes introducir email y contrasena.';
+      this.error = 'Debes introducir email y contraseña.';
       return;
     }
 
