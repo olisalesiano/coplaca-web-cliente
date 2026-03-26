@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { ApiService } from '../../core/api.service';
-import { AuthStore } from '../../core/auth.store';
-import { UserDTO } from '../../core/api.models';
+import { ApiService } from '../../../core/api.service';
+import { AuthStore } from '../../../core/auth.store';
+import { UserDTO } from '../../../core/api.models';
 
 @Component({
   selector: 'app-profile',
@@ -83,18 +83,16 @@ export class ProfileComponent {
     });
   }
 
-  goToShop(): void {
-    this.router.navigate(['/our-products']);
-  }
   goToOrders(): void {
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/client/orders']);
   }
   goToCart(): void {
-    this.router.navigate(['/cart']);
+    this.router.navigate(['/client/cart']);
   }
   goToProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/client/profile']);
   }
+  goToOurProducts(): void { this.router.navigate(['/client/our-products']); }
   startEdit(): void {
     this.editando = true;
     this.message = '';
@@ -274,7 +272,7 @@ export class ProfileComponent {
     return expiry > new Date(now.getFullYear(), now.getMonth());
   }
 
-  private getCurrentFormValues() {
+  private getCurrentFormValues() { 
     return {
       firstName: this.firstName,
       lastName: this.lastName,

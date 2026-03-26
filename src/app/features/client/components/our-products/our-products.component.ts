@@ -6,9 +6,9 @@ import { MatIcon } from '@angular/material/icon';
 import { Subject, of, interval } from 'rxjs';
 import { catchError, debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ApiService } from '../../core/api.service';
-import { CartStore } from '../../core/cart.store';
-import { ProductDTO } from '../../core/api.models';
+import { ApiService } from '../../../../core/api.service';
+import { CartStore } from '../../../../core/cart.store';
+import { ProductDTO } from '../../../../core/api.models';
 import { DialogComponent } from '../dlg/dialog.component';
 
 interface DisplayOffer {
@@ -267,20 +267,21 @@ export class OurProductsComponent implements OnInit, OnDestroy {
   }
 
   goToProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/client/profile']);
   }
 
   goToCart(): void {
-    this.router.navigate(['/cart']);
+    this.router.navigate(['/client/cart']);
   }
 
   goToOrders(): void {
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/client/orders']);
   }
 
-  goToShop(): void {
+  goToOurProducts(): void {
     this.searchQuery = '';
     this.loadProducts();
+    this.router.navigate(['/client/our-products']);
   }
 
   private setupReactiveSearch(): void {

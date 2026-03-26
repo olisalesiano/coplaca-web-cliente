@@ -94,6 +94,7 @@
 
 .profile-btn:hover {
   background: #f0f0f0;
+  overflow: hidden;
 }
 
 /* ===== MAIN ===== */
@@ -107,6 +108,8 @@
   box-sizing: border-box;
   overflow: hidden; /* sin scroll de página */
   gap: 1rem;
+  overflow: hidden;
+  gap: 0.8rem;
 }
 
 /* ===== CARRITO ===== */
@@ -129,6 +132,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 1.2rem;
+  max-height: 320px;
 }
 
 .cart-title {

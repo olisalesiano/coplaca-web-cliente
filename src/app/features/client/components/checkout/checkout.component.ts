@@ -80,9 +80,9 @@ export class CheckoutComponent {
 
   constructor(private router: Router) {}
 
-  goToShop(): void { this.router.navigate(['/our-products']); }
-  goToOrders(): void { this.router.navigate(['/orders']); }
-  goToCart(): void { this.router.navigate(['/cart']); }
-  goToProfile(): void { this.router.navigate(['/profile']); }
-  goToHome(): void { this.router.navigate(['/our-products']); }
+  goToOurProducts(): void { this.router.navigate(['/client/our-products']); }
+  goToOrders(): void { this.router.navigate(['/client/orders']); }
+  goToCart(): void { this.router.navigate(['/client/cart']); }
+  goToProfile(): void { this.router.navigate(['/client/profile']); }
+  goToHome(): void { this.router.navigate(['/client/our-products']); }
 }

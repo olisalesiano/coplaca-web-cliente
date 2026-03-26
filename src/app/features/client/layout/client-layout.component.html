@@ -1,0 +1,21 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-logo" (click)="goToOurProducts()">
+    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" class="nav-logo-img" />
+  </div>
+
+  <div class="navbar-links">
+    <a (click)="goToOurProducts()">Tienda</a>
+    <a (click)="goToOrders()">Tus pedidos</a>
+    <a (click)="goToCart()">Tu carrito <mat-icon>shopping_cart</mat-icon></a>
+  </div>
+
+  <button class="profile-btn" (click)="goToProfile()">
+    <mat-icon>person</mat-icon>
+  </button>
+</nav>
+
+<!-- CONTENIDO DINÁMICO -->
+<main class="main-content">
+  <router-outlet></router-outlet>
+</main>
