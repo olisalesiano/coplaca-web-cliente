@@ -10,11 +10,39 @@ import { ClientLayoutComponent } from './features/client/layout/client-layout.co
 import { AuthGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
   { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'our-products', component: OurProductsComponent, canActivate: [AuthGuard] },
-  { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
-  { path: 'cart', component: CartComponent, canActivate: [AuthGuard] },
-  { path: 'orders', component: OrdersComponent, canActivate: [AuthGuard] },
+
+  // CLIENTE (todo dentro del layout)
+  {
+    path: 'client',
+    component: ClientLayoutComponent,
+    canActivate: [AuthGuard], // protege todo el módulo
+    children: [
+      { path: '', redirectTo: 'our-products', pathMatch: 'full' },
+      { path: 'our-products', component: OurProductsComponent },
+      { path: 'profile', component: ProfileComponent },
+      { path: 'cart', component: CartComponent },
+      { path: 'orders', component: OrdersComponent },
+      { path: 'checkout', component: CheckoutComponent },
+    ],
+  },
+
+  // ADMIN
+  {
+    path: 'admin',
+    canActivate: [AuthGuard],
+    children: [],
+  },
+
+  // LOGÍSTICA
+  {
+    path: 'logistics',
+    canActivate: [AuthGuard],
+    children: [],
+  },
+
+  // fallback
+  { path: '**', redirectTo: 'login' },
 ];

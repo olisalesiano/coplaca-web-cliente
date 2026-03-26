@@ -4,9 +4,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { ApiService } from '../../core/api.service';
-import { AuthStore } from '../../core/auth.store';
-import { AddressGeoService, AddressSuggestion } from '../../core/address-geo.service';
+import { ApiService } from '../../../core/api.service';
+import { AuthStore } from '../../../core/auth.store';
+import { AddressGeoService } from '../../../core/address-geo.service';
 
 @Component({
   selector: 'app-register',
@@ -277,7 +277,7 @@ export class RegisterComponent {
         next: (session) => {
           this.authStore.setSession(session);
           this.loading = false;
-          void this.router.navigate(['/our-products']);
+          void this.router.navigate(['/client/our-products']);
         },
         error: (httpError: unknown) => {
           this.loading = false;

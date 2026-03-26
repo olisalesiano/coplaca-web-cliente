@@ -44,7 +44,7 @@ export class LoginComponent {
       next: (session) => {
         this.authStore.setSession(session);
         this.loading = false;
-        void this.router.navigate(['/our-products']);
+        void this.router.navigate(['/client/our-products']);
       },
       error: (httpError: unknown) => {
         this.loading = false;
