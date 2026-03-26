@@ -148,17 +148,37 @@ Si una llamada devuelve 401, el interceptor limpia sesion y redirige a `login`.
 3. Recalcula coordenadas y almacen cercano por codigo postal/direccion.
 4. Permite baja de cuenta y gestion de saldo local (sessionStorage).
 
-## 7. Rutas de la app
+## 7. Rutas de la app y acceso por rol
 
-Definidas en `src/app/app.routes.ts`:
+Definidas en `src/app/app.routes.ts` y protegidas por `AuthGuard` + `data.roles`.
 
-- `/login` publica
-- `/register` publica
-- `/our-products` publica (catalogo visible desde el inicio)
-- `/profile` protegida por `AuthGuard`
-- `/cart` protegida por `AuthGuard`
-- `/orders` protegida por `AuthGuard`
-- `/` redirige a `/our-products`
+Pantallas publicas:
+
+- `/login`
+- `/register`
+
+Pantallas por rol:
+
+- Administrador (`ROLE_ADMIN`):
+	- `/admin/users`
+	- `/admin/stats`
+- Logistica (`ROLE_LOGISTICS`):
+	- `/logistics/orders`
+	- `/logistics/products`
+- Cliente (`ROLE_CUSTOMER`) y Repartidor (`ROLE_DELIVERY`):
+	- `/client/our-products`
+	- `/client/profile`
+	- `/client/cart`
+	- `/client/orders`
+	- `/client/checkout`
+
+Reglas de bloqueo:
+
+- Si el usuario no esta autenticado: redireccion a `/login`.
+- Si el usuario esta autenticado pero intenta entrar en un area de otro rol: redireccion a su home por rol.
+	- admin -> `/admin/users`
+	- logistica -> `/logistics/orders`
+	- cliente/repartidor -> `/client/our-products`
 
 ## 8. Endpoints consumidos (resumen)
 
@@ -174,6 +194,37 @@ Desde `ApiService`:
 - `GET /api/v1/orders/me`
 - `POST /orders`
 - `GET /api/v1/warehouses`
+
+Admin:
+
+- `GET /api/v1/admin/users`
+- `DELETE /api/v1/admin/users/{id}`
+- `POST /api/v1/admin/users/{id}/reactivate`
+- `GET /api/v1/admin/stats/top-products`
+
+Logistica:
+
+- `GET /api/v1/orders/warehouse/{warehouseId}/pending`
+- `GET /api/v1/warehouses/{id}/delivery-agents`
+- `PUT /api/v1/orders/{orderId}/assign/{deliveryAgentId}`
+- `PATCH /api/v1/products/{id}/stock?delta={n}`
+- `GET /api/v1/offers`
+- `POST /api/v1/offers`
+- `PUT /api/v1/offers/{id}`
+
+### Verificacion automatica de endpoints
+
+Para validar rapidamente disponibilidad de endpoints (y descubrir docs OpenAPI):
+
+```bash
+npm run check:endpoints
+```
+
+Opcionalmente puedes pasar base URL:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File ./scripts/check-backend-endpoints.ps1 -BaseUrl "http://localhost:8080"
+```
 
 Nota: existe una carpeta `src/app/services` con servicios adicionales (`auth.service`, `product.service`, `order.service`, `user.service`). La capa principal actualmente usada por los componentes es `src/app/core/api.service.ts`.
 
