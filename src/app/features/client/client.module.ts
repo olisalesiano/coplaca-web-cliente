@@ -34,7 +34,6 @@ import { ProfileComponent } from '../../shared/components/profile/profile.compon
     OurProductsComponent,
     CheckoutComponent,
     ClientLayoutComponent,
-    ProfileComponent,
   ],
 })
 export class ClientModule {}

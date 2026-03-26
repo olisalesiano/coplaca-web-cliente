@@ -169,6 +169,10 @@
   gap: 0.25rem;
 }
 
+.full-width {
+  grid-column: 1 / -1;
+}
+
 .field-label {
   font-size: 0.78rem;
   font-weight: 700;
@@ -191,6 +195,62 @@
 .profile-input:disabled {
   color: #2f3831;
   opacity: 1;
+}
+
+.address-helper {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #26452b;
+}
+
+.coords {
+  color: #0c4a6e;
+  font-weight: 600;
+}
+
+.warehouse {
+  color: #365314;
+  font-weight: 700;
+}
+
+.suggestions-box {
+  margin-top: 0.4rem;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: rgba(255, 255, 255, 0.96);
+}
+
+.suggestion-item {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid #e5e7eb;
+  background: transparent;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+}
+
+.suggestion-item:last-child {
+  border-bottom: 0;
+}
+
+.suggestion-item:hover {
+  background: #f8fafc;
+}
+
+.suggestion-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.suggestion-subtitle {
+  font-size: 0.74rem;
+  color: #475569;
 }
 
 .status-message {

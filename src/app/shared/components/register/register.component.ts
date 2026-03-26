@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { ApiService } from '../../../core/api.service';
 import { AuthStore } from '../../../core/auth.store';
+import { AddressGeoService, AddressSuggestion } from '../../../core/address-geo.service';
 
 @Component({
   selector: 'app-register',
@@ -27,6 +28,15 @@ export class RegisterComponent {
   province = '';
   postalCode = '';
   additionalInfo = '';
+  addressSearch = '';
+  addressSuggestions: AddressSuggestion[] = [];
+  isSearchingAddress = false;
+  coordinates: { latitude: number; longitude: number } | null = null;
+  nearestWarehouseName = '';
+  nearestWarehouseDistanceKm: number | null = null;
+  private addressSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private postalCodeTimer: ReturnType<typeof setTimeout> | null = null;
+  isResolvingPostalCode = false;
 
   loading = false;
   error = '';
@@ -40,7 +50,130 @@ export class RegisterComponent {
     private readonly router: Router,
     private readonly apiService: ApiService,
     private readonly authStore: AuthStore,
+    private readonly addressGeoService: AddressGeoService,
   ) {}
+
+  onAddressSearchChange(value: string): void {
+    this.addressSearch = value;
+    this.coordinates = null;
+    this.nearestWarehouseName = '';
+    this.nearestWarehouseDistanceKm = null;
+
+    if (this.addressSearchTimer) {
+      clearTimeout(this.addressSearchTimer);
+      this.addressSearchTimer = null;
+    }
+
+    const normalized = value.trim();
+    if (normalized.length < 3) {
+      this.addressSuggestions = [];
+      this.isSearchingAddress = false;
+      return;
+    }
+
+    this.isSearchingAddress = true;
+    this.addressSearchTimer = setTimeout(() => {
+      void this.loadAddressSuggestions(normalized);
+    }, 450);
+  }
+
+  async loadAddressSuggestions(query: string): Promise<void> {
+    const suggestions = await this.addressGeoService.searchSuggestions(query);
+    this.addressSuggestions = suggestions;
+    this.isSearchingAddress = false;
+  }
+
+  async selectAddressSuggestion(suggestion: AddressSuggestion): Promise<void> {
+    this.addressSearch = suggestion.displayName;
+    this.street = suggestion.street;
+    this.streetNumber = suggestion.streetNumber;
+    this.city = suggestion.city;
+    this.province = suggestion.province;
+    this.postalCode = suggestion.postalCode;
+    this.addressSuggestions = [];
+    this.coordinates = {
+      latitude: suggestion.latitude,
+      longitude: suggestion.longitude,
+    };
+
+    await this.updateNearestWarehouse(
+      this.coordinates.latitude,
+      this.coordinates.longitude,
+    );
+  }
+
+  onPostalCodeChange(value: string): void {
+    this.postalCode = value;
+
+    if (this.postalCodeTimer) {
+      clearTimeout(this.postalCodeTimer);
+      this.postalCodeTimer = null;
+    }
+
+    const normalized = value.replaceAll(/\s+/g, '').trim();
+    if (normalized.length < 5) {
+      this.isResolvingPostalCode = false;
+      this.coordinates = null;
+      this.nearestWarehouseName = '';
+      this.nearestWarehouseDistanceKm = null;
+      return;
+    }
+
+    this.isResolvingPostalCode = true;
+    this.postalCodeTimer = setTimeout(() => {
+      void this.resolveCoordinatesFromPostalCode(normalized);
+    }, 450);
+  }
+
+  private async resolveCoordinatesFromPostalCode(postalCode: string): Promise<void> {
+    const resolved = await this.addressGeoService.geocodeFromPostalCode(postalCode);
+
+    if (!resolved) {
+      this.isResolvingPostalCode = false;
+      return;
+    }
+
+    // Fill empty fields with resolved postal-code context without overriding user input.
+    if (!this.city.trim() && resolved.city.trim()) {
+      this.city = resolved.city;
+    }
+    if (!this.province.trim() && resolved.province.trim()) {
+      this.province = resolved.province;
+    }
+    if (!this.street.trim() && resolved.street.trim()) {
+      this.street = resolved.street;
+    }
+    if (!this.streetNumber.trim() && resolved.streetNumber.trim()) {
+      this.streetNumber = resolved.streetNumber;
+    }
+
+    this.coordinates = {
+      latitude: resolved.latitude,
+      longitude: resolved.longitude,
+    };
+
+    await this.updateNearestWarehouse(
+      this.coordinates.latitude,
+      this.coordinates.longitude,
+    );
+
+    this.isResolvingPostalCode = false;
+  }
+
+  private async updateNearestWarehouse(
+    latitude: number,
+    longitude: number,
+  ): Promise<void> {
+    const nearest = await this.addressGeoService.getNearestWarehouse(latitude, longitude);
+    if (!nearest) {
+      this.nearestWarehouseName = '';
+      this.nearestWarehouseDistanceKm = null;
+      return;
+    }
+
+    this.nearestWarehouseName = nearest.warehouse.name;
+    this.nearestWarehouseDistanceKm = nearest.distanceKm;
+  }
 
   togglePassword(): void {
     this.showPassword = !this.showPassword;
@@ -58,12 +191,12 @@ export class RegisterComponent {
     this.passwordErrors = [];
 
     // Check if password is not empty
-    if (!this.password || !this.password.trim()) {
+    if (!this.password?.trim()) {
       this.passwordErrors.push('La contraseña es requerida');
     }
 
     // Check if confirmation password is not empty
-    if (!this.confirmPassword || !this.confirmPassword.trim()) {
+    if (!this.confirmPassword?.trim()) {
       this.passwordErrors.push('La confirmación de contraseña es requerida');
     }
 
@@ -83,7 +216,7 @@ export class RegisterComponent {
     }
 
     // Check for at least one number
-    if (this.password && !/[0-9]/.test(this.password)) {
+    if (this.password && !/\d/.test(this.password)) {
       this.passwordErrors.push('La contraseña debe contener al menos un número');
     }
 
@@ -132,7 +265,7 @@ export class RegisterComponent {
     this.register();
   }
 
-  register(): void {
+  async register(): Promise<void> {
     this.error = '';
     const required = [
       this.firstName,
@@ -151,6 +284,26 @@ export class RegisterComponent {
       return;
     }
 
+    let resolvedCoordinates = this.coordinates;
+    resolvedCoordinates ??= await this.addressGeoService.geocodeFromParts({
+      street: this.street,
+      streetNumber: this.streetNumber,
+      city: this.city,
+      province: this.province,
+      postalCode: this.postalCode,
+    });
+
+    if (resolvedCoordinates === null) {
+      this.error = 'No se pudo geolocalizar el domicilio. Ajusta la direccion.';
+      return;
+    }
+
+    this.coordinates = resolvedCoordinates;
+    await this.updateNearestWarehouse(
+      resolvedCoordinates.latitude,
+      resolvedCoordinates.longitude,
+    );
+
     this.loading = true;
     this.apiService
       .signup({
@@ -168,8 +321,8 @@ export class RegisterComponent {
           postalCode: this.postalCode,
           province: this.province,
           additionalInfo: this.additionalInfo,
-          latitude: 0,
-          longitude: 0,
+          latitude: resolvedCoordinates.latitude,
+          longitude: resolvedCoordinates.longitude,
         },
       })
       .subscribe({

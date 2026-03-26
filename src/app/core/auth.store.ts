@@ -11,6 +11,36 @@ export class AuthStore {
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   }
 
+  getSession(): LoginResponse | null {
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(raw) as LoginResponse;
+    } catch {
+      return null;
+    }
+  }
+
+  getUserScope(): string {
+    const session = this.getSession();
+    if (!session) {
+      return 'guest';
+    }
+
+    if (session.id !== undefined && session.id !== null) {
+      return `id_${session.id}`;
+    }
+
+    if (session.email) {
+      return `email_${session.email.toLowerCase().replaceAll(/[^a-z0-9]/g, '_')}`;
+    }
+
+    return 'guest';
+  }
+
   getToken(): string {
     return localStorage.getItem(TOKEN_KEY) ?? '';
   }

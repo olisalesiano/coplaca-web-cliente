@@ -5,8 +5,10 @@ import { MatIconModule, MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/api.service';
 import { CartStore } from '../../../../core/cart.store';
-import { CartItem } from '../../../../core/api.models';
+import { CartItem, OrderDTO } from '../../../../core/api.models';
 import { OrderStore } from '../../../../core/order.store';
+
+type PaymentMethod = 'fisico' | 'paypal' | 'tarjeta';
 
 @Component({
   selector: 'app-cart',
@@ -21,7 +23,7 @@ export class CartComponent {
   totalPedido = 0;
   message = '';
   paymentDialogOpen = false;
-  selectedPaymentMethod: 'fisico' | 'paypal' | 'tarjeta' = 'fisico';
+  selectedPaymentMethod: PaymentMethod = 'fisico';
   paypalEmail = '';
   cardNumber = '';
   cardName = '';
@@ -103,7 +105,7 @@ export class CartComponent {
     this.paymentDialogOpen = false;
   }
 
-  selectPaymentMethod(method: 'fisico' | 'paypal' | 'tarjeta'): void {
+  selectPaymentMethod(method: PaymentMethod): void {
     this.selectedPaymentMethod = method;
   }
 
@@ -159,9 +161,43 @@ export class CartComponent {
         void this.router.navigate(['/orders']);
       },
       error: () => {
-        this.message = 'No se pudo crear el pedido.';
+        const localOrder = this.buildLocalOrderFromCart();
+        this.orderStore.prependOrder(localOrder);
+        this.cartStore.clear();
+        this.refreshCart();
+        this.message = 'Pedido guardado localmente. Se sincronizara cuando haya conexion.';
+        this.closePaymentDialog();
+        void this.router.navigate(['/orders']);
       },
     });
+  }
+
+  private buildLocalOrderFromCart(): OrderDTO {
+    const now = new Date();
+    const timestamp = now.getTime();
+    const paymentMethodMap: Record<PaymentMethod, string> = {
+      fisico: 'PHYSICAL',
+      paypal: 'PAYPAL',
+      tarjeta: 'CARD',
+    };
+
+    return {
+      id: -timestamp,
+      orderNumber: `LOCAL-${timestamp}`,
+      status: 'PENDING',
+      totalPrice: this.totalPedido,
+      paymentMethod: paymentMethodMap[this.selectedPaymentMethod],
+      paymentStatus: 'PENDING',
+      createdAt: now.toISOString(),
+      items: this.cartItems.map((item, index) => ({
+        id: index + 1,
+        productId: item.productId,
+        productName: item.name,
+        quantity: item.quantityKg,
+        unitPrice: item.unitPrice,
+        subtotal: this.getItemSubtotal(item),
+      })),
+    };
   }
 
   trackItem(_index: number, item: CartItem): number {

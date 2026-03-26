@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
+import { resolveApiBaseUrl } from '../core/api-base-url';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProductService {
-  private apiUrl = `${environment.apiUrl}/products`;
+  private readonly apiUrl = `${resolveApiBaseUrl()}/api/v1/products`;
 
   constructor(private http: HttpClient) {}
 
@@ -23,7 +23,7 @@ export class ProductService {
   }
 
   searchProducts(keyword: string): Observable<any> {
-    let params = new HttpParams().set('keyword', keyword);
+    const params = new HttpParams().set('query', keyword);
     return this.http.get<any>(`${this.apiUrl}/search`, { params });
   }
 

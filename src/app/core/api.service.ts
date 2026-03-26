@@ -1,9 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { AuthStore } from './auth.store';
-import { LoginResponse, OrderDTO, ProductDTO, UserDTO } from './api.models';
-import { environment } from '../../environments/environment';
+import { LoginResponse, OrderDTO, ProductDTO, UserDTO, WarehouseDTO } from './api.models';
+import { resolveApiBaseUrl } from './api-base-url';
+
+interface ApiSuccessResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
 
 interface SignUpPayload {
   email: string;
@@ -27,7 +33,7 @@ interface SignUpPayload {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private readonly baseUrl = this.resolveBaseUrl();
+  private readonly baseUrl = resolveApiBaseUrl();
 
   constructor(
     private readonly http: HttpClient,
@@ -44,26 +50,44 @@ export class ApiService {
 
   getProducts(query?: string): Observable<ProductDTO[]> {
     if (query && query.trim().length > 0) {
-      return this.http.get<ProductDTO[]>(`${this.baseUrl}/products/search?query=${encodeURIComponent(query.trim())}`);
+      return this.http
+        .get<ProductDTO[] | ApiSuccessResponse<ProductDTO[]>>(
+          `${this.baseUrl}/api/v1/products/search?query=${encodeURIComponent(query.trim())}`,
+        )
+        .pipe(map((response) => this.unwrapListResponse(response)));
     }
 
-    return this.http.get<ProductDTO[]>(`${this.baseUrl}/products`);
+    return this.http
+      .get<ProductDTO[] | ApiSuccessResponse<ProductDTO[]>>(`${this.baseUrl}/api/v1/products`)
+      .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
   getCurrentUser(): Observable<UserDTO> {
-    return this.http.get<UserDTO>(`${this.baseUrl}/users/me`, { headers: this.authHeaders() });
+    return this.http
+      .get<UserDTO | ApiSuccessResponse<UserDTO>>(`${this.baseUrl}/api/v1/users/me`, {
+        headers: this.authHeaders(),
+      })
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
   }
 
   updateCurrentUser(payload: unknown): Observable<UserDTO> {
-    return this.http.put<UserDTO>(`${this.baseUrl}/users/me`, payload, { headers: this.authHeaders() });
+    return this.http
+      .put<UserDTO | ApiSuccessResponse<UserDTO>>(`${this.baseUrl}/api/v1/users/me`, payload, {
+        headers: this.authHeaders(),
+      })
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
   }
 
   deleteCurrentUser(): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/users/me`, { headers: this.authHeaders() });
+    return this.http.delete<void>(`${this.baseUrl}/api/v1/users/me`, { headers: this.authHeaders() });
   }
 
   getMyOrders(): Observable<OrderDTO[]> {
-    return this.http.get<OrderDTO[]>(`${this.baseUrl}/orders/my`, { headers: this.authHeaders() });
+    return this.http
+      .get<OrderDTO[] | ApiSuccessResponse<OrderDTO[]>>(`${this.baseUrl}/api/v1/orders/me`, {
+        headers: this.authHeaders(),
+      })
+      .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
   createOrder(items: Array<{ productId: number; quantity: number }>): Observable<OrderDTO> {
@@ -78,9 +102,10 @@ export class ApiService {
     );
   }
 
-  private resolveBaseUrl(): string {
-    const runtimeUrl = (globalThis as { __COPLACA_API_URL__?: string }).__COPLACA_API_URL__;
-    return (runtimeUrl ?? environment.apiUrl).replace(/\/+$/, '');
+  getWarehouses(): Observable<WarehouseDTO[]> {
+    return this.http
+      .get<WarehouseDTO[] | ApiSuccessResponse<WarehouseDTO[]>>(`${this.baseUrl}/api/v1/warehouses`)
+      .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
   private authHeaders(): HttpHeaders {
@@ -88,5 +113,27 @@ export class ApiService {
     return new HttpHeaders({
       Authorization: `Bearer ${token}`,
     });
+  }
+
+  private unwrapListResponse<T>(response: T[] | ApiSuccessResponse<T[]>): T[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    return [];
+  }
+
+  private unwrapSingleResponse<T>(response: T | ApiSuccessResponse<T>): T {
+    if (response && typeof response === 'object' && 'data' in response) {
+      if (response.data !== undefined) {
+        return response.data;
+      }
+    }
+
+    return response as T;
   }
 }

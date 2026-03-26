@@ -104,6 +104,28 @@
         <label for="phone">Telefono</label>
         <input type="text" id="phone" [(ngModel)]="phoneNumber" placeholder="Introduzca su telefono..." />
       </div>
+      <div class="form-group full-span">
+        <label for="addressSearch">Buscar direccion (autocompletar)</label>
+        <input
+          type="text"
+          id="addressSearch"
+          [ngModel]="addressSearch"
+          (ngModelChange)="onAddressSearchChange($event)"
+          placeholder="Ej: Calle Real 12, Santa Cruz"
+        />
+        <p class="helper" *ngIf="isSearchingAddress">Buscando direcciones...</p>
+        <div class="suggestions-box" *ngIf="addressSuggestions.length > 0">
+          <button
+            class="suggestion-item"
+            type="button"
+            *ngFor="let suggestion of addressSuggestions"
+            (click)="selectAddressSuggestion(suggestion)"
+          >
+            <span class="suggestion-title">{{ suggestion.street || suggestion.displayName }}</span>
+            <span class="suggestion-subtitle">{{ suggestion.displayName }}</span>
+          </button>
+        </div>
+      </div>
       <div class="form-group">
         <label for="street">Calle</label>
         <input type="text" id="street" [(ngModel)]="street" placeholder="Calle" />
@@ -126,13 +148,30 @@
       </div>
       <div class="form-group">
         <label for="postalCode">Codigo postal</label>
-        <input type="text" id="postalCode" [(ngModel)]="postalCode" placeholder="Codigo postal" />
+        <input
+          type="text"
+          id="postalCode"
+          [ngModel]="postalCode"
+          (ngModelChange)="onPostalCodeChange($event)"
+          placeholder="Codigo postal"
+        />
       </div>
       <div class="form-group">
         <label for="additionalInfo">Info adicional</label>
         <input type="text" id="additionalInfo" [(ngModel)]="additionalInfo" placeholder="Referencia de entrega" />
       </div>
     </div>
+
+    <p class="helper coords" *ngIf="coordinates">
+      Coordenadas detectadas: {{ coordinates.latitude | number:'1.5-5' }}, {{ coordinates.longitude | number:'1.5-5' }}
+    </p>
+    <p class="helper coords" *ngIf="isResolvingPostalCode">
+      Resolviendo coordenadas por codigo postal...
+    </p>
+    <p class="helper warehouse" *ngIf="nearestWarehouseName">
+      Almacen mas cercano: {{ nearestWarehouseName }}
+      <span *ngIf="nearestWarehouseDistanceKm !== null">(~{{ nearestWarehouseDistanceKm | number:'1.2-2' }} km)</span>
+    </p>
 
     <button class="btn-login" (click)="openConfirmationModal()" [disabled]="loading">
       {{ loading ? 'Registrando...' : 'Registrarse' }}
