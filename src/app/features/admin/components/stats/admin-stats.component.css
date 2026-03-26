@@ -1,0 +1,48 @@
+.stats {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 22px rgba(15, 64, 34, 0.1);
+}
+
+header h1 {
+  color: #1f6d3d;
+  margin-bottom: 0.4rem;
+}
+
+header p {
+  color: #4d5b4f;
+  margin-bottom: 1rem;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.9rem;
+}
+
+.card {
+  border: 1px solid #dbe7de;
+  border-radius: 12px;
+  padding: 0.9rem;
+  background: linear-gradient(180deg, #fbfff7, #f5f8f3);
+}
+
+.rank {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #f0c019;
+  color: #1a1a1a;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+h2 {
+  margin: 0.6rem 0;
+  font-size: 1.05rem;
+}
+
+.error {
+  color: #a40020;
+}
