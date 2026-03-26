@@ -1,0 +1,41 @@
+<section class="panel">
+  <header>
+    <h1>Gestion de productos y ofertas</h1>
+    <p>Ajusta stock, crea ofertas y comunica el motivo de promocion para cada producto.</p>
+  </header>
+
+  <p *ngIf="loading">Cargando productos...</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+  <p class="warning" *ngIf="warning">{{ warning }}</p>
+  <p class="ok" *ngIf="message">{{ message }}</p>
+
+  <div class="grid" *ngIf="!loading">
+    <article class="card" *ngFor="let product of products; trackBy: trackByProductId">
+      <h2>{{ product.name }}</h2>
+      <p class="meta">Precio: {{ product.unitPrice | number : '1.2-2' }} EUR / {{ product.unit }}</p>
+
+      <label>
+        Stock actual
+        <input type="number" min="0" [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" [(ngModel)]="stockByProductId[product.id]" />
+      </label>
+      <button [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" (click)="updateStock(product)">
+        {{ isUpdatingStock(product.id) ? 'Actualizando...' : 'Actualizar stock' }}
+      </button>
+
+      <hr />
+
+      <label>
+        Motivo de oferta
+        <input type="text" [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" placeholder="Ej. abundancia o proxima caducidad" [(ngModel)]="offerReasonByProductId[product.id]" />
+      </label>
+
+      <label>
+        Descuento (%)
+        <input type="number" min="1" max="90" [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" [(ngModel)]="discountByProductId[product.id]" />
+      </label>
+      <button [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" (click)="updateOffer(product)">
+        {{ isUpdatingOffer(product.id) ? 'Guardando...' : 'Guardar oferta' }}
+      </button>
+    </article>
+  </div>
+</section>
