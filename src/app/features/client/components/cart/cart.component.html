@@ -1,12 +1,12 @@
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 <!-- NAVBAR -->
 <nav class="navbar">
-  <button class="navbar-logo" (click)="goToShop()" type="button">
+  <button class="navbar-logo" (click)="goToOurProducts()" type="button">
     <img src="/assets/logo/image.png" alt="Coplaca logo" class="nav-logo-img" />
   </button>
 
   <div class="navbar-links">
-    <a (click)="goToShop()">Tienda</a>
+    <a (click)="goToOurProducts()">Tienda</a>
     <a (click)="goToOrders()">Tus pedidos</a>
     <a class="active" (click)="goToCart()"> Tu carrito <mat-icon>shopping_cart</mat-icon></a>
   </div>
@@ -39,7 +39,7 @@
       <div class="cart-empty" *ngIf="cartItems.length === 0">
         <h3>Tu carrito esta vacio</h3>
         <p>Anade productos para verlos aqui y continuar con tu compra.</p>
-        <button class="btn-add" type="button" (click)="goToShop()">Ver productos</button>
+        <button class="btn-add" type="button" (click)="goToOurProducts()">Ver productos</button>
       </div>
 
       <div class="cart-scroll" *ngIf="cartItems.length > 0">

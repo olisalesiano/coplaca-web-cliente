@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { ApiService } from '../../core/api.service';
-import { AuthStore } from '../../core/auth.store';
+import { ApiService } from '../../../core/api.service';
+import { AuthStore } from '../../../core/auth.store';
 
 @Component({
   selector: 'app-register',
@@ -51,7 +51,7 @@ export class RegisterComponent {
   }
 
   goToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/client/login']);
   }
 
   private validatePassword(): boolean {

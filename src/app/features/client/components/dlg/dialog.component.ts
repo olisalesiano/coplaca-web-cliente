@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CartStore } from '../../core/cart.store';
+import { CartStore } from '../../../../core/cart.store';
 @Component({
   selector: 'app-dialog',
   standalone: true,
