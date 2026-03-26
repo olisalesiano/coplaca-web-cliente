@@ -1,0 +1,20 @@
+<nav class="admin-navbar">
+  <button class="brand" type="button" (click)="goToUsers()">
+    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
+    <span>Administracion</span>
+  </button>
+
+  <div class="links">
+    <a (click)="goToUsers()">Cuentas</a>
+    <a (click)="goToStats()">Estadisticas</a>
+  </div>
+
+  <button class="logout-btn" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Salir
+  </button>
+</nav>
+
+<main class="admin-main">
+  <router-outlet></router-outlet>
+</main>

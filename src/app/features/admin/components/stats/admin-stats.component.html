@@ -1,0 +1,18 @@
+<section class="stats">
+  <header>
+    <h1>Productos mas vendidos del ultimo mes</h1>
+    <p>Seguimiento de ventas para tomar decisiones de abastecimiento y ofertas.</p>
+  </header>
+
+  <p *ngIf="loading">Cargando estadisticas...</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <div class="cards" *ngIf="!loading && !error">
+    <article class="card" *ngFor="let item of topProducts; let i = index">
+      <span class="rank">#{{ i + 1 }}</span>
+      <h2>{{ item.productName }}</h2>
+      <p><strong>Unidades vendidas:</strong> {{ item.unitsSold }}</p>
+      <p *ngIf="item.totalRevenue !== undefined"><strong>Facturacion:</strong> {{ item.totalRevenue | currency : 'EUR' }}</p>
+    </article>
+  </div>
+</section>
