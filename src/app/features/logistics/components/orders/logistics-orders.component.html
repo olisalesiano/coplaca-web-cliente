@@ -1,0 +1,45 @@
+<section class="panel">
+  <header>
+    <h1>Pedidos pagados para asignacion</h1>
+    <p>Asigna manualmente cada pedido a un repartidor disponible en almacen.</p>
+  </header>
+
+  <p *ngIf="loading">Cargando pedidos y repartidores...</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+  <p class="warning" *ngIf="warning">{{ warning }}</p>
+  <p class="ok" *ngIf="message">{{ message }}</p>
+
+  <table *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Pedido</th>
+        <th>Cliente</th>
+        <th>Total</th>
+        <th>Almacen</th>
+        <th>Repartidor</th>
+        <th>Accion</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of orders; trackBy: trackByOrderId">
+        <td>{{ order.orderNumber || order.id }}</td>
+        <td>{{ order.customerName || 'Cliente Coplaca' }}</td>
+        <td>{{ order.totalPrice | number : '1.2-2' }} EUR</td>
+        <td>{{ order.warehouseName || 'No disponible' }}</td>
+        <td>
+          <select [disabled]="isAssigning(order.id)" [(ngModel)]="selectedDeliveryByOrder[order.id]">
+            <option [ngValue]="undefined">Seleccionar</option>
+            <option *ngFor="let worker of workers" [ngValue]="worker.id">
+              {{ worker.firstName }} {{ worker.lastName }}
+            </option>
+          </select>
+        </td>
+        <td>
+          <button [disabled]="isAssigning(order.id)" (click)="assignOrder(order.id)">
+            {{ isAssigning(order.id) ? 'Asignando...' : 'Asignar' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>
