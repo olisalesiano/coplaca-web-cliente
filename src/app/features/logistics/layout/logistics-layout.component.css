@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: radial-gradient(circle at top right, #f1ffe7 0%, #f6f8ff 44%, #fffef7 100%);
+}
+
+.logistics-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.2rem;
+  background: #2b5f3e;
+  color: #fff;
+}
+
+.brand {
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  cursor: pointer;
+  color: inherit;
+}
+
+.brand img {
+  height: 34px;
+  width: auto;
+  filter: brightness(0) invert(1);
+}
+
+.brand span {
+  font-weight: 600;
+}
+
+.links {
+  display: flex;
+  gap: 1rem;
+}
+
+.links a {
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.logout-btn {
+  border: none;
+  background: #f0c019;
+  color: #1a1a1a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.logistics-main {
+  padding: 1rem;
+}
+
+@media (max-width: 760px) {
+  .logistics-navbar {
+    flex-wrap: wrap;
+  }
+
+  .links {
+    width: 100%;
+    justify-content: space-around;
+    order: 3;
+  }
+}

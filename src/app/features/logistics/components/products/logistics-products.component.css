@@ -1,0 +1,90 @@
+.panel {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1rem;
+  box-shadow: 0 8px 22px rgba(15, 64, 34, 0.1);
+}
+
+header h1 {
+  color: #1f6d3d;
+  margin-bottom: 0.35rem;
+}
+
+header p {
+  color: #4d5b4f;
+  margin-bottom: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.9rem;
+}
+
+.card {
+  border: 1px solid #dbe7de;
+  border-radius: 12px;
+  padding: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  background: linear-gradient(180deg, #fcfff9, #f4f8f2);
+}
+
+.card h2 {
+  font-size: 1.05rem;
+  color: #1f6d3d;
+}
+
+.meta {
+  font-size: 0.92rem;
+  color: #4d5b4f;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-weight: 500;
+}
+
+input {
+  border: 1px solid #cad8ce;
+  border-radius: 8px;
+  padding: 0.4rem 0.5rem;
+}
+
+button {
+  border: none;
+  border-radius: 8px;
+  background: #f0c019;
+  color: #1a1a1a;
+  padding: 0.42rem 0.6rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+input:disabled,
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+hr {
+  border: none;
+  height: 1px;
+  background: #e9eee7;
+  margin: 0.35rem 0;
+}
+
+.error {
+  color: #a40020;
+}
+
+.ok {
+  color: #1d7b41;
+}
+
+.warning {
+  color: #9a5a00;
+}

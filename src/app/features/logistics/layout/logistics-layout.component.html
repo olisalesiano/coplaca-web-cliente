@@ -1,0 +1,20 @@
+<nav class="logistics-navbar">
+  <button class="brand" type="button" (click)="goToOrders()">
+    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
+    <span>Logistica</span>
+  </button>
+
+  <div class="links">
+    <a (click)="goToOrders()">Pedidos</a>
+    <a (click)="goToProducts()">Productos y ofertas</a>
+  </div>
+
+  <button class="logout-btn" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Salir
+  </button>
+</nav>
+
+<main class="logistics-main">
+  <router-outlet></router-outlet>
+</main>
