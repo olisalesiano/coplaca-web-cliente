@@ -1,11 +1,12 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { ApiService } from '../../core/api.service';
 import { AuthStore } from '../../core/auth.store';
-import { AddressGeoService, AddressSuggestion } from '../../core/address-geo.service';
+import { AddressGeoService } from '../../core/address-geo.service';
 
 @Component({
   selector: 'app-register',
@@ -28,13 +29,9 @@ export class RegisterComponent {
   province = '';
   postalCode = '';
   additionalInfo = '';
-  addressSearch = '';
-  addressSuggestions: AddressSuggestion[] = [];
-  isSearchingAddress = false;
   coordinates: { latitude: number; longitude: number } | null = null;
   nearestWarehouseName = '';
   nearestWarehouseDistanceKm: number | null = null;
-  private addressSearchTimer: ReturnType<typeof setTimeout> | null = null;
   private postalCodeTimer: ReturnType<typeof setTimeout> | null = null;
   isResolvingPostalCode = false;
 
@@ -52,55 +49,6 @@ export class RegisterComponent {
     private readonly authStore: AuthStore,
     private readonly addressGeoService: AddressGeoService,
   ) {}
-
-  onAddressSearchChange(value: string): void {
-    this.addressSearch = value;
-    this.coordinates = null;
-    this.nearestWarehouseName = '';
-    this.nearestWarehouseDistanceKm = null;
-
-    if (this.addressSearchTimer) {
-      clearTimeout(this.addressSearchTimer);
-      this.addressSearchTimer = null;
-    }
-
-    const normalized = value.trim();
-    if (normalized.length < 3) {
-      this.addressSuggestions = [];
-      this.isSearchingAddress = false;
-      return;
-    }
-
-    this.isSearchingAddress = true;
-    this.addressSearchTimer = setTimeout(() => {
-      void this.loadAddressSuggestions(normalized);
-    }, 450);
-  }
-
-  async loadAddressSuggestions(query: string): Promise<void> {
-    const suggestions = await this.addressGeoService.searchSuggestions(query);
-    this.addressSuggestions = suggestions;
-    this.isSearchingAddress = false;
-  }
-
-  async selectAddressSuggestion(suggestion: AddressSuggestion): Promise<void> {
-    this.addressSearch = suggestion.displayName;
-    this.street = suggestion.street;
-    this.streetNumber = suggestion.streetNumber;
-    this.city = suggestion.city;
-    this.province = suggestion.province;
-    this.postalCode = suggestion.postalCode;
-    this.addressSuggestions = [];
-    this.coordinates = {
-      latitude: suggestion.latitude,
-      longitude: suggestion.longitude,
-    };
-
-    await this.updateNearestWarehouse(
-      this.coordinates.latitude,
-      this.coordinates.longitude,
-    );
-  }
 
   onPostalCodeChange(value: string): void {
     this.postalCode = value;
@@ -312,7 +260,7 @@ export class RegisterComponent {
         firstName: this.firstName,
         lastName: this.lastName,
         phoneNumber: this.phoneNumber,
-        role: 'CUSTOMER',
+        role: 'ROLE_CUSTOMER',
         address: {
           street: this.street,
           streetNumber: this.streetNumber,
@@ -331,12 +279,49 @@ export class RegisterComponent {
           this.loading = false;
           void this.router.navigate(['/our-products']);
         },
-        error: () => {
+        error: (httpError: unknown) => {
           this.loading = false;
-          this.error = 'No se pudo completar el registro.';
+          this.error = this.extractErrorMessage(
+            httpError,
+            'No se pudo completar el registro. Revisa los datos e intenta de nuevo.',
+          );
           this.showConfirmationModal = false;
         },
       });
+  }
+
+  private extractErrorMessage(error: unknown, fallback: string): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return fallback;
+    }
+
+    const backendMessage = this.extractBackendMessage(error.error as { message?: string; error?: string } | string | null);
+    if (backendMessage) {
+      return backendMessage;
+    }
+
+    return error.status === 400
+      ? 'Registro invalido. Verifica email, direccion y contraseña.'
+      : fallback;
+  }
+
+  private extractBackendMessage(payload: { message?: string; error?: string } | string | null): string | null {
+    if (typeof payload === 'string') {
+      const text = payload.trim();
+      return text.length > 0 ? text : null;
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    const message = payload.message?.trim();
+    if (message) {
+      return message;
+    }
+
+    const errorText = payload.error?.trim();
+    return errorText || null;
   }
 }
 

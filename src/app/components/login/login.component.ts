@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
@@ -45,14 +46,50 @@ export class LoginComponent {
         this.loading = false;
         void this.router.navigate(['/our-products']);
       },
-      error: () => {
+      error: (httpError: unknown) => {
         this.loading = false;
-        this.error = 'No se pudo iniciar sesion. Revisa tus credenciales.';
+        this.error = this.extractLoginErrorMessage(httpError);
       },
     });
   }
 
   goToRegister(): void {
     this.router.navigate(['/register']);
+  }
+
+  private extractLoginErrorMessage(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'No se pudo iniciar sesion. Revisa tus credenciales.';
+    }
+
+    if (error.status === 401 || error.status === 400) {
+      return 'Contrasena incorrecta o email no registrado.';
+    }
+
+    const backendMessage = this.extractBackendMessage(error.error as { message?: string; error?: string } | string | null);
+    if (backendMessage) {
+      return backendMessage;
+    }
+
+    return 'No se pudo iniciar sesion. Revisa tus credenciales.';
+  }
+
+  private extractBackendMessage(payload: { message?: string; error?: string } | string | null): string | null {
+    if (typeof payload === 'string') {
+      const text = payload.trim();
+      return text.length > 0 ? text : null;
+    }
+
+    if (!payload || typeof payload !== 'object') {
+      return null;
+    }
+
+    const message = payload.message?.trim();
+    if (message) {
+      return message;
+    }
+
+    const errorText = payload.error?.trim();
+    return errorText || null;
   }
 }

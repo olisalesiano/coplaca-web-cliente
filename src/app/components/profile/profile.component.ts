@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
@@ -200,13 +201,21 @@ export class ProfileComponent {
   }
 
   darDeBaja(): void {
+    const confirmacion = globalThis.confirm('¿Estas seguro de que quieres darte de baja? Esta accion no se puede deshacer.');
+    if (!confirmacion) {
+      return;
+    }
+
     this.apiService.deleteCurrentUser().subscribe({
       next: () => {
         this.authStore.clear();
         void this.router.navigate(['/login']);
       },
-      error: () => {
-        this.message = 'No se pudo tramitar la baja de cuenta.';
+      error: (httpError: unknown) => {
+        this.message = this.extractErrorMessage(
+          httpError,
+          'No se pudo tramitar la baja de cuenta.',
+        );
       },
     });
   }
@@ -308,6 +317,28 @@ export class ProfileComponent {
 
   private isValidEmail(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  }
+
+  private extractErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof HttpErrorResponse) {
+      const payload = error.error as { message?: string; error?: string } | string | null;
+
+      if (typeof payload === 'string' && payload.trim().length > 0) {
+        return payload;
+      }
+
+      if (payload && typeof payload === 'object') {
+        if (payload.message && payload.message.trim().length > 0) {
+          return payload.message;
+        }
+
+        if (payload.error && payload.error.trim().length > 0) {
+          return payload.error;
+        }
+      }
+    }
+
+    return fallback;
   }
 
   private isValidExpiry(value: string): boolean {

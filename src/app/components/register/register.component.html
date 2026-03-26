@@ -104,28 +104,6 @@
         <label for="phone">Telefono</label>
         <input type="text" id="phone" [(ngModel)]="phoneNumber" placeholder="Introduzca su telefono..." />
       </div>
-      <div class="form-group full-span">
-        <label for="addressSearch">Buscar direccion (autocompletar)</label>
-        <input
-          type="text"
-          id="addressSearch"
-          [ngModel]="addressSearch"
-          (ngModelChange)="onAddressSearchChange($event)"
-          placeholder="Ej: Calle Real 12, Santa Cruz"
-        />
-        <p class="helper" *ngIf="isSearchingAddress">Buscando direcciones...</p>
-        <div class="suggestions-box" *ngIf="addressSuggestions.length > 0">
-          <button
-            class="suggestion-item"
-            type="button"
-            *ngFor="let suggestion of addressSuggestions"
-            (click)="selectAddressSuggestion(suggestion)"
-          >
-            <span class="suggestion-title">{{ suggestion.street || suggestion.displayName }}</span>
-            <span class="suggestion-subtitle">{{ suggestion.displayName }}</span>
-          </button>
-        </div>
-      </div>
       <div class="form-group">
         <label for="street">Calle</label>
         <input type="text" id="street" [(ngModel)]="street" placeholder="Calle" />
