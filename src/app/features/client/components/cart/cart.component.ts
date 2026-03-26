@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule, MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
-import { ApiService } from '../../core/api.service';
-import { CartStore } from '../../core/cart.store';
-import { CartItem, OrderDTO } from '../../core/api.models';
-import { OrderStore } from '../../core/order.store';
+import { ApiService } from '../../../../core/api.service';
+import { CartStore } from '../../../../core/cart.store';
+import { CartItem, OrderDTO } from '../../../../core/api.models';
+import { OrderStore } from '../../../../core/order.store';
 
 type PaymentMethod = 'fisico' | 'paypal' | 'tarjeta';
 
@@ -70,17 +70,17 @@ export class CartComponent {
     this.message = 'Carrito vaciado correctamente.';
   }
 
-  goToShop(): void {
-    this.router.navigate(['/our-products']);
+  goToOurProducts(): void {
+    this.router.navigate(['/client/our-products']);
   }
   goToOrders(): void {
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/client/orders']);
   }
   goToCart(): void {
-    this.router.navigate(['/cart']);
+    this.router.navigate(['/client/cart']);
   }
   goToProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/client/profile']);
   }
   pagar(): void {
     if (this.cartItems.length === 0) {

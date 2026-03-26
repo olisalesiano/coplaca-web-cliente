@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { ApiService } from '../../core/api.service';
-import { OrderDTO } from '../../core/api.models';
-import { OrderStore } from '../../core/order.store';
+import { ApiService } from '../../../../core/api.service';
+import { OrderDTO } from '../../../../core/api.models';
+import { OrderStore } from '../../../../core/order.store';
 
 @Component({
   selector: 'app-orders',
@@ -69,17 +69,17 @@ export class OrdersComponent {
     });
   }
 
-  goToShop(): void {
-    this.router.navigate(['/our-products']);
+  goToOurProducts(): void {
+    this.router.navigate(['/client/our-products']);
   }
   goToOrders(): void {
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/client/orders']);
   }
   goToCart(): void {
-    this.router.navigate(['/cart']);
+    this.router.navigate(['/client/cart']);
   }
   goToProfile(): void {
-    this.router.navigate(['/profile']);
+    this.router.navigate(['/client/profile']);
   }
 
   verDetalles(pedido: OrderDTO): void {
