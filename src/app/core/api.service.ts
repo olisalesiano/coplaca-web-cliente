@@ -2,7 +2,18 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { AuthStore } from './auth.store';
-import { LoginResponse, OrderDTO, ProductDTO, UserDTO, WarehouseDTO } from './api.models';
+import {
+  AdminUserDTO,
+  DeliveryWorkerDTO,
+  LogisticsOrderDTO,
+  LoginResponse,
+  OrderDTO,
+  ProductDTO,
+  SeasonalOfferDTO,
+  TopProductStatDTO,
+  UserDTO,
+  WarehouseDTO,
+} from './api.models';
 import { resolveApiBaseUrl } from './api-base-url';
 
 interface ApiSuccessResponse<T> {
@@ -106,6 +117,126 @@ export class ApiService {
     return this.http
       .get<WarehouseDTO[] | ApiSuccessResponse<WarehouseDTO[]>>(`${this.baseUrl}/api/v1/warehouses`)
       .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getAdminUsers(): Observable<AdminUserDTO[]> {
+    return this.http
+      .get<AdminUserDTO[] | ApiSuccessResponse<AdminUserDTO[]>>(
+        `${this.baseUrl}/api/v1/admin/users`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  updateAdminUserStatus(userId: number, enabled: boolean): Observable<void> {
+    if (enabled) {
+      return this.http.post<void>(
+        `${this.baseUrl}/api/v1/admin/users/${userId}/reactivate`,
+        {},
+        { headers: this.authHeaders() },
+      );
+    }
+
+    return this.http.delete<void>(`${this.baseUrl}/api/v1/admin/users/${userId}`, {
+      headers: this.authHeaders(),
+    });
+  }
+
+  getTopSellingProductsLastMonth(): Observable<TopProductStatDTO[]> {
+    return this.http
+      .get<Array<TopProductStatDTO | string> | ApiSuccessResponse<Array<TopProductStatDTO | string>>>(
+        `${this.baseUrl}/api/v1/admin/stats/top-products`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(
+        map((response) => this.unwrapListResponse(response)),
+        map((items) =>
+          items.map((item, index) =>
+            typeof item === 'string'
+              ? { productId: index + 1, productName: item, unitsSold: 0 }
+              : item,
+          ),
+        ),
+      );
+  }
+
+  getLogisticsOrders(warehouseId: number): Observable<LogisticsOrderDTO[]> {
+    return this.http
+      .get<LogisticsOrderDTO[] | ApiSuccessResponse<LogisticsOrderDTO[]>>(
+        `${this.baseUrl}/api/v1/orders/warehouse/${warehouseId}/pending`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getAvailableDeliveryWorkers(warehouseId: number): Observable<DeliveryWorkerDTO[]> {
+    return this.http
+      .get<DeliveryWorkerDTO[] | ApiSuccessResponse<DeliveryWorkerDTO[]>>(
+        `${this.baseUrl}/api/v1/warehouses/${warehouseId}/delivery-agents`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  assignOrderToDelivery(orderId: number, deliveryUserId: number): Observable<void> {
+    return this.http.put<void>(
+      `${this.baseUrl}/api/v1/orders/${orderId}/assign/${deliveryUserId}`,
+      {},
+      { headers: this.authHeaders() },
+    );
+  }
+
+  updateLogisticsProductStock(productId: number, delta: number): Observable<void> {
+    return this.http.patch<void>(
+      `${this.baseUrl}/api/v1/products/${productId}/stock?delta=${encodeURIComponent(delta)}`,
+      {},
+      { headers: this.authHeaders() },
+    );
+  }
+
+  getOffers(): Observable<SeasonalOfferDTO[]> {
+    return this.http
+      .get<SeasonalOfferDTO[] | ApiSuccessResponse<SeasonalOfferDTO[]>>(`${this.baseUrl}/api/v1/offers`, {
+        headers: this.authHeaders(),
+      })
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  createOffer(productId: number, reason: string, discountPercentage: number): Observable<void> {
+    const now = new Date();
+    const endDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    return this.http.post<void>(
+      `${this.baseUrl}/api/v1/offers`,
+      {
+        product: { id: productId },
+        reason,
+        discountPercentage,
+        startDate: now.toISOString(),
+        endDate: endDate.toISOString(),
+        active: true,
+      },
+      { headers: this.authHeaders() },
+    );
+  }
+
+  updateOffer(offerId: number, productId: number, reason: string, discountPercentage: number): Observable<void> {
+    const now = new Date();
+    const endDate = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+    return this.http.put<void>(
+      `${this.baseUrl}/api/v1/offers/${offerId}`,
+      {
+        id: offerId,
+        product: { id: productId },
+        reason,
+        discountPercentage,
+        startDate: now.toISOString(),
+        endDate: endDate.toISOString(),
+        active: true,
+      },
+      { headers: this.authHeaders() },
+    );
   }
 
   private authHeaders(): HttpHeaders {
