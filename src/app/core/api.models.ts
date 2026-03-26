@@ -83,6 +83,53 @@ export interface WarehouseDTO {
   isActive?: boolean;
 }
 
+export interface AdminUserDTO {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles: string[];
+  enabled: boolean;
+  warehouseName?: string;
+}
+
+export interface TopProductStatDTO {
+  productId: number;
+  productName: string;
+  unitsSold: number;
+  totalRevenue?: number;
+}
+
+export interface LogisticsOrderDTO {
+  id: number;
+  orderNumber: string;
+  status: string;
+  totalPrice: number;
+  customerName?: string;
+  createdAt?: string;
+  warehouseName?: string;
+}
+
+export interface DeliveryWorkerDTO {
+  id: number;
+  email?: string;
+  firstName: string;
+  lastName: string;
+  warehouseName?: string;
+  deliveryStatus?: 'AT_WAREHOUSE' | 'DELIVERING' | 'OFFLINE';
+  enabled?: boolean;
+}
+
+export interface SeasonalOfferDTO {
+  id: number;
+  productId: number;
+  discountPercentage: number;
+  reason: string;
+  startDate?: string;
+  endDate?: string;
+  active?: boolean;
+}
+
 export interface CartItem {
   productId: number;
   name: string;

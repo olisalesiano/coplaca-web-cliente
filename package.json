@@ -7,7 +7,8 @@
     "dev": "ng serve --port 4200 --open",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "check:endpoints": "powershell -ExecutionPolicy Bypass -File ./scripts/check-backend-endpoints.ps1"
   },
   "prettier": {
     "printWidth": 100,

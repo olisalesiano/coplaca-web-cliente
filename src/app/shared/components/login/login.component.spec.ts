@@ -25,6 +25,7 @@ describe('LoginComponent', () => {
           provide: AuthStore,
           useValue: {
             setSession: () => undefined,
+            getDefaultRouteForCurrentRole: () => '/client/our-products',
           },
         },
       ],

@@ -8,17 +8,24 @@ import { OrdersComponent } from './features/client/components/orders/orders.comp
 import { CheckoutComponent } from './features/client/components/checkout/checkout.component';
 import { ClientLayoutComponent } from './features/client/layout/client-layout.component';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminLayoutComponent } from './features/admin/layout/admin-layout.component';
+import { AdminUsersComponent } from './features/admin/components/users/admin-users.component';
+import { AdminStatsComponent } from './features/admin/components/stats/admin-stats.component';
+import { LogisticsLayoutComponent } from './features/logistics/layout/logistics-layout.component';
+import { LogisticsOrdersComponent } from './features/logistics/components/orders/logistics-orders.component';
+import { LogisticsProductsComponent } from './features/logistics/components/products/logistics-products.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
-  // CLIENTE (todo dentro del layout)
+  // CLIENTE
   {
     path: 'client',
     component: ClientLayoutComponent,
-    canActivate: [AuthGuard], // protege todo el módulo
+    canActivate: [AuthGuard],
+    data: { roles: ['customer', 'delivery'] },
     children: [
       { path: '', redirectTo: 'our-products', pathMatch: 'full' },
       { path: 'our-products', component: OurProductsComponent },
@@ -32,15 +39,27 @@ export const routes: Routes = [
   // ADMIN
   {
     path: 'admin',
+    component: AdminLayoutComponent,
     canActivate: [AuthGuard],
-    children: [],
+    data: { roles: ['admin'] },
+    children: [
+      { path: '', redirectTo: 'users', pathMatch: 'full' },
+      { path: 'users', component: AdminUsersComponent },
+      { path: 'stats', component: AdminStatsComponent },
+    ],
   },
 
   // LOGÍSTICA
   {
     path: 'logistics',
+    component: LogisticsLayoutComponent,
     canActivate: [AuthGuard],
-    children: [],
+    data: { roles: ['logistics'] },
+    children: [
+      { path: '', redirectTo: 'orders', pathMatch: 'full' },
+      { path: 'orders', component: LogisticsOrdersComponent },
+      { path: 'products', component: LogisticsProductsComponent },
+    ],
   },
 
   // fallback

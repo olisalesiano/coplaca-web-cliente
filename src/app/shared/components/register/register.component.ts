@@ -132,7 +132,7 @@ export class RegisterComponent {
   }
 
   goToLogin(): void {
-    this.router.navigate(['/client/login']);
+    this.router.navigate(['/login']);
   }
 
   private validatePassword(): boolean {
