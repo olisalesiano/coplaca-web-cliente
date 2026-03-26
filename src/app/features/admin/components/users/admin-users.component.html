@@ -1,0 +1,69 @@
+<section class="panel">
+  <header>
+    <h1>Gestion de cuentas internas</h1>
+    <p>Administra usuarios de logistica y repartidores. Puedes activar o desactivar cuentas segun operativa.</p>
+  </header>
+
+  <p class="status" *ngIf="loading">Cargando cuentas...</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+  <p class="warning" *ngIf="warning">{{ warning }}</p>
+  <p class="ok" *ngIf="message">{{ message }}</p>
+
+  <div class="columns" *ngIf="!loading">
+    <article>
+      <h2>Logistica</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Almacen</th>
+            <th>Estado</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of logisticsUsers; trackBy: trackByUserId">
+            <td>{{ user.firstName }} {{ user.lastName }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.warehouseName || 'No asignado' }}</td>
+            <td>{{ user.enabled ? 'Activa' : 'Desactivada' }}</td>
+            <td>
+              <button [disabled]="isProcessing(user.id)" (click)="toggleUserEnabled(user)">
+                {{ isProcessing(user.id) ? 'Guardando...' : (user.enabled ? 'Desactivar' : 'Activar') }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article>
+      <h2>Repartidores</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Almacen</th>
+            <th>Estado</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of deliveryUsers; trackBy: trackByUserId">
+            <td>{{ user.firstName }} {{ user.lastName }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.warehouseName || 'No asignado' }}</td>
+            <td>{{ user.enabled ? 'Activa' : 'Desactivada' }}</td>
+            <td>
+              <button [disabled]="isProcessing(user.id)" (click)="toggleUserEnabled(user)">
+                {{ isProcessing(user.id) ? 'Guardando...' : (user.enabled ? 'Desactivar' : 'Activar') }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+  </div>
+</section>
