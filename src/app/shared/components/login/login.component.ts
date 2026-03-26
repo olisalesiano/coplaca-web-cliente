@@ -4,8 +4,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
-import { ApiService } from '../../core/api.service';
-import { AuthStore } from '../../core/auth.store';
+import { ApiService } from '../../../core/api.service';
+import { AuthStore } from '../../../core/auth.store';
 
 @Component({
   selector: 'app-login',
@@ -35,7 +35,7 @@ export class LoginComponent {
   login(): void {
     this.error = '';
     if (!this.email || !this.password) {
-      this.error = 'Debes introducir email y contrasena.';
+      this.error = 'Debes introducir email y contraseña.';
       return;
     }
 

@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { MatIcon } from '@angular/material/icon';
 import { ApiService } from '../../core/api.service';
 import { AuthStore } from '../../core/auth.store';
-import { AddressGeoService } from '../../core/address-geo.service';
+import { AddressGeoService, AddressSuggestion } from '../../core/address-geo.service';
 
 @Component({
   selector: 'app-register',
@@ -132,7 +132,7 @@ export class RegisterComponent {
   }
 
   goToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/client/login']);
   }
 
   private validatePassword(): boolean {
