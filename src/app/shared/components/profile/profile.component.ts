@@ -6,6 +6,8 @@ import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { ApiService } from '../../../core/api.service';
 import { AuthStore } from '../../../core/auth.store';
+import { CartStore } from '../../../core/cart.store';
+import { OrderStore } from '../../../core/order.store';
 import { UserDTO } from '../../../core/api.models';
 import { AddressGeoService } from '../../../core/address-geo.service';
 
@@ -66,6 +68,8 @@ export class ProfileComponent {
     private readonly router: Router,
     private readonly apiService: ApiService,
     private readonly authStore: AuthStore,
+    private readonly cartStore: CartStore,
+    private readonly orderStore: OrderStore,
     private readonly addressGeoService: AddressGeoService,
   ) {
     this.loadProfile();
@@ -218,7 +222,15 @@ export class ProfileComponent {
     });
   }
   irAPedidos(): void {
-    this.router.navigate(['/orders']);
+    this.router.navigate(['/client/orders']);
+  }
+
+  cerrarSesion(): void {
+    this.orderStore.clear();
+    this.cartStore.clear();
+    this.authStore.clear();
+    sessionStorage.removeItem('saldo');
+    void this.router.navigate(['/login']);
   }
 
   abrirDialogoSaldo(): void {

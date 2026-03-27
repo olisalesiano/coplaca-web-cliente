@@ -369,9 +369,32 @@
 
 .btn-pedidos:hover { background-color: #c8ecd2; }
 
+.btn-logout {
+  flex: 1;
+  padding: 1rem;
+  background-color: #ffe8c2;
+  color: #5f3400;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-logout:hover {
+  background-color: #ffd9a0;
+}
+
 .btn-row .btn-edit,
 .btn-row .btn-baja,
-.btn-row .btn-pedidos {
+.btn-row .btn-pedidos,
+.btn-row .btn-logout {
   flex: 1;
 }
 
@@ -538,10 +561,6 @@
 .edit-dialog-header h3 {
   margin: 0;
   color: #1a1a1a;
-}
-
-.full-width {
-  grid-column: 1 / -1;
 }
 
 .edit-dialog-footer {

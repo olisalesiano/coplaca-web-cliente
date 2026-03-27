@@ -1,19 +1,3 @@
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-<nav class="navbar">
-  <button class="navbar-logo" (click)="goToOurProducts()" type="button">
-    <img src="/assets/logo/image.png" alt="Coplaca logo" class="nav-logo-img" />
-  </button>
-
-  <div class="navbar-links">
-    <a (click)="goToOurProducts()">Tienda</a>
-    <a (click)="goToOrders()">Tus pedidos</a>
-    <a (click)="goToCart()">Tu carrito <mat-icon>shopping_cart</mat-icon></a>
-  </div>
-  <button class="profile-btn active" (click)="goToProfile()">
-    <mat-icon>person</mat-icon>
-  </button>
-</nav>
-
 <main class="main-content">
   <div class="profile-card">
     <div class="profile-header">
@@ -38,15 +22,14 @@
   <div class="saldo-row">
     <span class="saldo-label">Saldo en cuenta:</span>
     <span class="saldo-amount">{{ saldo | number:'1.2-2' }} €</span>
-    <button class="btn-saldo" (click)="abrirDialogoSaldo()">
-      <mat-icon>add_circle</mat-icon> Añadir saldo
-    </button>
+    <button class="btn-saldo" (click)="abrirDialogoSaldo()"> Añadir saldo</button>
   </div>
 
   <div class="btn-row">
     <button class="btn-edit" type="button" (click)="startEdit()">Editar informacion</button>
     <button class="btn-baja" type="button" (click)="darDeBaja()">Dar de baja</button>
     <button class="btn-pedidos" type="button" (click)="irAPedidos()">Ir a pedidos &gt;</button>
+    <button class="btn-logout" type="button" (click)="cerrarSesion()">Cerrar sesion</button>
   </div>
 
   <div
