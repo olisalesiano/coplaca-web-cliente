@@ -103,7 +103,7 @@ export class ApiService {
 
   createOrder(items: Array<{ productId: number; quantity: number }>): Observable<OrderDTO> {
     return this.http.post<OrderDTO>(
-      `${this.baseUrl}/orders`,
+      `${this.baseUrl}/api/v1/orders`,
       {
         paymentMethod: 'CARD',
         paymentStatus: 'PENDING',
