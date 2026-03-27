@@ -41,7 +41,7 @@
   -webkit-backdrop-filter: blur(6px);
   border-radius: 20px;
   padding: 100px 60px 30px;
-  width: 50%;
+  width: min(920px, 95vw);
   text-align: center;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
@@ -429,4 +429,103 @@
   font-size: 0.85rem;
   margin: 0.3rem 0;
   line-height: 1.4;
+}
+
+@media (max-width: 1100px) {
+  .login-card {
+    padding: 92px 34px 28px;
+  }
+
+  .form-grid {
+    gap: 0 1rem;
+  }
+
+  .btn-login {
+    width: 72%;
+  }
+}
+
+@media (max-width: 820px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .login-card {
+    width: 96vw;
+    border-radius: 16px;
+    padding: 86px 20px 28px;
+  }
+
+  .title {
+    font-size: 1.9rem;
+  }
+
+  .subtitle {
+    margin-bottom: 1.4rem;
+  }
+
+  .btn-login {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .logo-container {
+    width: 112px;
+    height: 112px;
+    margin-bottom: -56px;
+  }
+
+  .image-logo {
+    width: 70px;
+    height: 70px;
+  }
+
+  .login-card {
+    padding: 78px 16px 22px;
+  }
+
+  .title {
+    font-size: 1.55rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .form-group label {
+    font-size: 0.92rem;
+  }
+
+  .form-group input {
+    padding: 0.68rem 0.92rem;
+    font-size: 0.9rem;
+  }
+
+  .modal-overlay {
+    padding: 0.8rem;
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    width: 100%;
+    max-width: none;
+    border-radius: 14px;
+    padding: 1rem;
+  }
+
+  .modal-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .btn-modal {
+    width: 100%;
+  }
 }
