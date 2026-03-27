@@ -1075,6 +1075,47 @@
 }
 
 @media (max-width: 600px) {
+  .main-content {
+    padding: 1rem 0.65rem;
+  }
+
+  .section {
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.55rem;
+  }
+
+  .section-sub {
+    font-size: 1rem;
+  }
+
+  .section-title-big {
+    font-size: 2rem;
+  }
+
+  .search-shell {
+    padding: 0.55rem;
+    border-radius: 12px;
+  }
+
+  .search-btn,
+  .filter-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .productos-grid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .nuestros-section {
+    padding: 1rem 0.8rem;
+    border-radius: 14px;
+  }
+
   .available-products-grid {
     grid-template-columns: 1fr;
   }
@@ -1121,6 +1162,53 @@
   .btn-offer {
     padding: 0.5rem 1.2rem;
     font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .navbar {
+    height: auto;
+    min-height: 68px;
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .navbar-links {
+    width: 100%;
+    order: 3;
+    justify-content: space-between;
+    margin-right: 0;
+    gap: 0.85rem;
+  }
+
+  .navbar-links a {
+    font-size: 0.92rem;
+  }
+
+  .profile-btn {
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 560px) {
+  .navbar {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .nav-logo-img {
+    width: 46px;
+    height: 46px;
+  }
+
+  .navbar-links {
+    justify-content: space-around;
+    gap: 0.55rem;
+  }
+
+  .navbar-links a {
+    font-size: 0.84rem;
   }
 }
 
