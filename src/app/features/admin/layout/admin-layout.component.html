@@ -1,20 +1,33 @@
-<nav class="admin-navbar">
-  <button class="brand" type="button" (click)="goToUsers()">
-    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
-    <span>Administracion</span>
-  </button>
+<div class="admin-shell">
+  <header class="admin-navbar">
+    <button class="brand" type="button" routerLink="/admin/users">
+      <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
+      <div class="brand-copy">
+        <strong>Panel COPLACA</strong>
+        <span>Administracion interna</span>
+      </div>
+    </button>
 
-  <div class="links">
-    <a (click)="goToUsers()">Cuentas</a>
-    <a (click)="goToStats()">Estadisticas</a>
-  </div>
+    <nav class="links">
+      <button type="button" routerLink="/admin/users" routerLinkActive="active-link">Cuentas</button>
+      <button type="button" routerLink="/admin/stats" routerLinkActive="active-link">Estadisticas</button>
+      <button type="button" routerLink="/admin/profile" routerLinkActive="active-link">Perfil</button>
+    </nav>
 
-  <button class="logout-btn" (click)="logout()">
-    <mat-icon>logout</mat-icon>
-    Salir
-  </button>
-</nav>
+    <div class="admin-actions">
+      <button class="profile-chip" type="button" routerLink="/admin/profile">
+        <mat-icon>person</mat-icon>
+        <span>{{ adminDisplayName }}</span>
+      </button>
 
-<main class="admin-main">
-  <router-outlet></router-outlet>
-</main>
+      <button class="logout-btn" type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Salir
+      </button>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <router-outlet></router-outlet>
+  </main>
+</div>
