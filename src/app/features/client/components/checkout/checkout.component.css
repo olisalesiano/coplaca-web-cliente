@@ -435,3 +435,82 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+@media (max-width: 1024px) {
+  :host {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .main-content {
+    padding: 1.2rem 1.1rem;
+    overflow: visible;
+    flex-direction: column;
+  }
+
+  .left-col,
+  .right-col {
+    width: 100%;
+    overflow: visible;
+  }
+
+  .right-col {
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-content {
+    gap: 0.9rem;
+    padding: 0.9rem 0.65rem;
+  }
+
+  .section-card {
+    border-radius: 14px;
+    padding: 1rem 0.85rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .order-item {
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    padding: 0.45rem 0.7rem;
+  }
+
+  .order-item-name {
+    width: 100%;
+  }
+
+  .order-item-price {
+    margin-left: auto;
+  }
+
+  .balance-block {
+    padding: 0.85rem 0.9rem;
+    gap: 0.7rem;
+  }
+
+  .balance-amount {
+    font-size: 1.15rem;
+  }
+
+  .btn-change,
+  .btn-pagar {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .success-card {
+    width: min(360px, 94vw);
+    border-radius: 16px;
+    padding: 1.6rem 1.1rem;
+  }
+
+  .success-title {
+    font-size: 1.3rem;
+  }
+}
