@@ -1,0 +1,68 @@
+<section class="panel" *ngIf="!loading; else loadingTpl">
+  <header class="hero">
+    <h1>Perfil operativo de logistica</h1>
+    <p>Resumen personal y del almacen para seguimiento diario.</p>
+  </header>
+
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <section class="identity" *ngIf="user && !error">
+    <article>
+      <span>Nombre</span>
+      <strong>{{ fullName }}</strong>
+    </article>
+    <article>
+      <span>Email</span>
+      <strong>{{ user.email }}</strong>
+    </article>
+    <article>
+      <span>Almacen</span>
+      <strong>{{ warehouseLabel }}</strong>
+    </article>
+    <article>
+      <span>Telefono</span>
+      <strong>{{ user.phoneNumber || 'No informado' }}</strong>
+    </article>
+  </section>
+
+  <section class="stats" *ngIf="!error">
+    <article class="card">
+      <span>Pedidos totales</span>
+      <strong>{{ totalOrders }}</strong>
+    </article>
+    <article class="card">
+      <span>Confirmados</span>
+      <strong>{{ confirmedOrders }}</strong>
+    </article>
+    <article class="card">
+      <span>Asignados</span>
+      <strong>{{ assignedOrders }}</strong>
+    </article>
+    <article class="card">
+      <span>En reparto</span>
+      <strong>{{ inTransitOrders }}</strong>
+    </article>
+    <article class="card">
+      <span>Entregados</span>
+      <strong>{{ deliveredOrders }}</strong>
+    </article>
+    <article class="card">
+      <span>Repartidores disponibles</span>
+      <strong>{{ availableWorkers }}</strong>
+    </article>
+    <article class="card">
+      <span>Repartidores ocupados</span>
+      <strong>{{ busyWorkers }}</strong>
+    </article>
+    <article class="card revenue">
+      <span>Facturacion mensual</span>
+      <strong>{{ totalRevenue | number : '1.2-2' }} EUR</strong>
+    </article>
+  </section>
+</section>
+
+<ng-template #loadingTpl>
+  <section class="panel">
+    <p class="loading">Cargando perfil de logistica...</p>
+  </section>
+</ng-template>
