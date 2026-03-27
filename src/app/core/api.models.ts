@@ -52,6 +52,14 @@ export interface ProductDTO {
   discountPercentage?: number;
 }
 
+export interface ProductCategoryDTO {
+  id: number;
+  name: string;
+  description?: string;
+  imageUrl?: string;
+  productCount?: number;
+}
+
 export interface OrderItemDTO {
   id: number;
   productId: number;
@@ -106,6 +114,7 @@ export interface LogisticsOrderDTO {
   status: string;
   totalPrice: number;
   customerName?: string;
+  deliveryAgentName?: string;
   createdAt?: string;
   warehouseName?: string;
 }
