@@ -1,45 +1,81 @@
 <section class="panel">
-  <header>
-    <h1>Pedidos pagados para asignacion</h1>
-    <p>Asigna manualmente cada pedido a un repartidor disponible en almacen.</p>
+  <header class="hero">
+    <h1>Asignacion de pedidos a repartidores</h1>
+    <p>Asigna pedidos confirmados al personal disponible con una vista clara y operativa.</p>
   </header>
 
-  <p *ngIf="loading">Cargando pedidos y repartidores...</p>
+  <section class="summary" *ngIf="!loading">
+    <article class="summary-card">
+      <span>Total pedidos del almacen</span>
+      <strong>{{ totalOrdersCount }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Pedidos por asignar</span>
+      <strong>{{ pendingOrdersCount }}</strong>
+    </article>
+    <article class="summary-card">
+      <span>Repartidores disponibles</span>
+      <strong>{{ availableWorkersCount }}</strong>
+    </article>
+    <article class="summary-card sales">
+      <span>Importe por asignar</span>
+      <strong>{{ pendingOrdersAmount | number : '1.2-2' }} EUR</strong>
+    </article>
+  </section>
+
+  <p *ngIf="loading" class="loading">Cargando pedidos y repartidores...</p>
   <p class="error" *ngIf="error">{{ error }}</p>
   <p class="warning" *ngIf="warning">{{ warning }}</p>
   <p class="ok" *ngIf="message">{{ message }}</p>
 
-  <table *ngIf="!loading">
-    <thead>
-      <tr>
-        <th>Pedido</th>
-        <th>Cliente</th>
-        <th>Total</th>
-        <th>Almacen</th>
-        <th>Repartidor</th>
-        <th>Accion</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let order of orders; trackBy: trackByOrderId">
-        <td>{{ order.orderNumber || order.id }}</td>
-        <td>{{ order.customerName || 'Cliente Coplaca' }}</td>
-        <td>{{ order.totalPrice | number : '1.2-2' }} EUR</td>
-        <td>{{ order.warehouseName || 'No disponible' }}</td>
-        <td>
-          <select [disabled]="isAssigning(order.id)" [(ngModel)]="selectedDeliveryByOrder[order.id]">
-            <option [ngValue]="undefined">Seleccionar</option>
-            <option *ngFor="let worker of workers" [ngValue]="worker.id">
-              {{ worker.firstName }} {{ worker.lastName }}
-            </option>
-          </select>
-        </td>
-        <td>
-          <button [disabled]="isAssigning(order.id)" (click)="assignOrder(order.id)">
-            {{ isAssigning(order.id) ? 'Asignando...' : 'Asignar' }}
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <section class="empty-state" *ngIf="!loading && orders.length === 0 && !error">
+    <h2>No hay pedidos en este almacen</h2>
+    <p>
+      En cuanto entren pedidos nuevos, apareceran aqui con su estado para poder gestionarlos en tiempo real.
+    </p>
+  </section>
+
+  <div class="table-wrap" *ngIf="!loading && orders.length > 0">
+    <table>
+      <thead>
+        <tr>
+          <th>Pedido</th>
+          <th>Estado</th>
+          <th>Cliente</th>
+          <th>Repartidor</th>
+          <th>Total</th>
+          <th>Almacen</th>
+          <th>Asignar repartidor</th>
+          <th>Accion</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let order of orders; trackBy: trackByOrderId">
+          <td>
+            <strong>{{ order.orderNumber || order.id }}</strong>
+          </td>
+          <td>
+            <span [class]="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
+          </td>
+          <td>{{ order.customerName || 'Cliente Coplaca' }}</td>
+          <td>{{ order.deliveryAgentName || 'Sin asignar' }}</td>
+          <td>{{ order.totalPrice | number : '1.2-2' }} EUR</td>
+          <td>{{ order.warehouseName || 'No disponible' }}</td>
+          <td>
+            <select [disabled]="isAssigning(order.id) || !canAssign(order)" [(ngModel)]="selectedDeliveryByOrder[order.id]">
+              <option [ngValue]="undefined">Seleccionar repartidor</option>
+              <option *ngFor="let worker of workers" [ngValue]="worker.id">
+                {{ worker.firstName }} {{ worker.lastName }}
+              </option>
+            </select>
+          </td>
+          <td>
+            <button class="assign-btn" [disabled]="isAssigning(order.id) || !canAssign(order)" (click)="assignOrder(order.id)">
+              {{ isAssigning(order.id) ? 'Asignando...' : canAssign(order) ? 'Asignar pedido' : 'No asignable' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </section>
