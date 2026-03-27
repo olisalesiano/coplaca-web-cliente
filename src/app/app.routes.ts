@@ -11,9 +11,12 @@ import { AuthGuard } from './guards/auth.guard';
 import { AdminLayoutComponent } from './features/admin/layout/admin-layout.component';
 import { AdminUsersComponent } from './features/admin/components/users/admin-users.component';
 import { AdminStatsComponent } from './features/admin/components/stats/admin-stats.component';
+import { AdminProfileComponent } from './features/admin/components/profile/admin-profile.component';
 import { LogisticsLayoutComponent } from './features/logistics/layout/logistics-layout.component';
+import { LogisticsDashboardComponent } from './features/logistics/components/dashboard/logistics-dashboard.component';
 import { LogisticsOrdersComponent } from './features/logistics/components/orders/logistics-orders.component';
 import { LogisticsProductsComponent } from './features/logistics/components/products/logistics-products.component';
+import { LogisticsProfileComponent } from './features/logistics/components/profile/logistics-profile.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -46,6 +49,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'users', pathMatch: 'full' },
       { path: 'users', component: AdminUsersComponent },
       { path: 'stats', component: AdminStatsComponent },
+      { path: 'profile', component: AdminProfileComponent },
     ],
   },
 
@@ -56,9 +60,11 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
     data: { roles: ['logistics'] },
     children: [
-      { path: '', redirectTo: 'orders', pathMatch: 'full' },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: LogisticsDashboardComponent },
       { path: 'orders', component: LogisticsOrdersComponent },
       { path: 'products', component: LogisticsProductsComponent },
+      { path: 'profile', component: LogisticsProfileComponent },
     ],
   },
 
