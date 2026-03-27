@@ -40,18 +40,21 @@
   >
     <div class="edit-dialog" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
       <div class="edit-dialog-header">
-        <h3>Editar informacion</h3>
-        <button class="close-btn" type="button" (click)="closeEditDialog()">✕</button>
+        <div>
+          <h3>Editar informacion</h3>
+          <p class="edit-dialog-subtitle">Actualiza tus datos personales y direccion de envio.</p>
+        </div>
+        <button class="close-btn" type="button" [disabled]="savingProfile" (click)="closeEditDialog()">✕</button>
       </div>
 
       <div class="profile-data">
         <div class="profile-field">
           <span class="field-label">Nombre</span>
-          <input class="profile-input" [(ngModel)]="firstName" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="firstName" />
         </div>
         <div class="profile-field">
           <span class="field-label">Apellidos</span>
-          <input class="profile-input" [(ngModel)]="lastName" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="lastName" />
         </div>
         <div class="profile-field">
           <span class="field-label">Email</span>
@@ -59,35 +62,40 @@
         </div>
         <div class="profile-field">
           <span class="field-label">Telefono</span>
-          <input class="profile-input" [(ngModel)]="phoneNumber" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="phoneNumber" />
         </div>
         <div class="profile-field">
           <span class="field-label">Calle</span>
-          <input class="profile-input" [(ngModel)]="street" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="street" />
         </div>
         <div class="profile-field">
           <span class="field-label">Numero</span>
-          <input class="profile-input" [(ngModel)]="streetNumber" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="streetNumber" />
         </div>
         <div class="profile-field">
           <span class="field-label">Piso/Apto</span>
-          <input class="profile-input" [(ngModel)]="apartment" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="apartment" />
         </div>
         <div class="profile-field">
           <span class="field-label">Ciudad</span>
-          <input class="profile-input" [(ngModel)]="city" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="city" />
         </div>
         <div class="profile-field">
           <span class="field-label">Provincia</span>
-          <input class="profile-input" [(ngModel)]="province" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="province" />
         </div>
         <div class="profile-field">
           <span class="field-label">Codigo postal</span>
-          <input class="profile-input" [ngModel]="postalCode" (ngModelChange)="onPostalCodeChange($event)" />
+          <input
+            class="profile-input"
+            [disabled]="savingProfile"
+            [ngModel]="postalCode"
+            (ngModelChange)="onPostalCodeChange($event)"
+          />
         </div>
         <div class="profile-field full-width">
           <span class="field-label">Info adicional</span>
-          <input class="profile-input" [(ngModel)]="additionalInfo" />
+          <input class="profile-input" [disabled]="savingProfile" [(ngModel)]="additionalInfo" />
         </div>
         <div class="profile-field full-width" *ngIf="isResolvingPostalCode">
           <p class="address-helper">Resolviendo coordenadas por codigo postal...</p>
@@ -108,8 +116,12 @@
       </div>
 
       <div class="edit-dialog-footer">
-        <button class="btn-edit btn-guardar" type="button" (click)="saveInfo()">Guardar</button>
-        <button class="btn-edit btn-cancel" type="button" (click)="closeEditDialog()">Cerrar</button>
+        <button class="btn btn-confirm" type="button" [disabled]="savingProfile" (click)="saveInfo()">
+          {{ savingProfile ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+        <button class="btn btn-cancel" type="button" [disabled]="savingProfile" (click)="closeEditDialog()">
+          Cancelar
+        </button>
       </div>
     </div>
   </div>
