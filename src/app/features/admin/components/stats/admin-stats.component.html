@@ -4,6 +4,15 @@
     <p>Seguimiento de ventas para tomar decisiones de abastecimiento y ofertas.</p>
   </header>
 
+  <div class="health-check" [class.connected]="databaseStatus === 'CONNECTED'" [class.error]="databaseStatus === 'ERROR'">
+    <strong>Base de datos:</strong>
+    <span class="status-badge" [class.success]="databaseStatus === 'CONNECTED'" [class.error]="databaseStatus === 'ERROR'">
+      {{ databaseStatus }}
+    </span>
+    <span class="message">{{ databaseMessage }}</span>
+    <span class="count" *ngIf="databaseStatus === 'CONNECTED'">{{ usersInDatabase }} usuarios registrados</span>
+  </div>
+
   <p *ngIf="loading">Cargando estadisticas...</p>
   <p class="error" *ngIf="error">{{ error }}</p>
 
