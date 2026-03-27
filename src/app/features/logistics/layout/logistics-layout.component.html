@@ -1,20 +1,34 @@
-<nav class="logistics-navbar">
-  <button class="brand" type="button" (click)="goToOrders()">
-    <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
-    <span>Logistica</span>
-  </button>
+<div class="logistics-shell">
+  <header class="logistics-navbar">
+    <button class="brand" type="button" (click)="goToDashboard()">
+      <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
+      <div class="brand-copy">
+        <strong>Panel COPLACA</strong>
+        <span>Operacion de logistica</span>
+      </div>
+    </button>
 
-  <div class="links">
-    <a (click)="goToOrders()">Pedidos</a>
-    <a (click)="goToProducts()">Productos y ofertas</a>
-  </div>
+    <nav class="links">
+      <button type="button" routerLink="/logistics/dashboard" routerLinkActive="active-link">Panel</button>
+      <button type="button" routerLink="/logistics/orders" routerLinkActive="active-link">Pedidos</button>
+      <button type="button" routerLink="/logistics/products" routerLinkActive="active-link">Productos</button>
+      <button type="button" routerLink="/logistics/profile" routerLinkActive="active-link">Perfil</button>
+    </nav>
 
-  <button class="logout-btn" (click)="logout()">
-    <mat-icon>logout</mat-icon>
-    Salir
-  </button>
-</nav>
+    <div class="logistics-actions">
+      <button class="profile-chip" type="button" (click)="goToProfile()">
+        <mat-icon>person</mat-icon>
+        <span>{{ logisticsDisplayName }}</span>
+      </button>
 
-<main class="logistics-main">
-  <router-outlet></router-outlet>
-</main>
+      <button class="logout-btn" type="button" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Salir
+      </button>
+    </div>
+  </header>
+
+  <main class="logistics-main">
+    <router-outlet></router-outlet>
+  </main>
+</div>
