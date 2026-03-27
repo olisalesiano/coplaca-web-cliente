@@ -14,11 +14,15 @@ export class AdminStatsComponent implements OnInit {
   topProducts: TopProductStatDTO[] = [];
   loading = false;
   error = '';
+  databaseStatus = '';
+  databaseMessage = '';
+  usersInDatabase = 0;
 
   constructor(private readonly apiService: ApiService) {}
 
   ngOnInit(): void {
     this.loadStats();
+    this.checkDatabaseHealth();
   }
 
   loadStats(): void {
@@ -33,6 +37,20 @@ export class AdminStatsComponent implements OnInit {
       error: () => {
         this.loading = false;
         this.error = 'No se pudieron cargar las estadisticas del ultimo mes.';
+      },
+    });
+  }
+
+  checkDatabaseHealth(): void {
+    this.apiService.checkAdminHealth().subscribe({
+      next: (response: Record<string, unknown>) => {
+        this.databaseStatus = String(response['database'] || 'UNKNOWN');
+        this.databaseMessage = String(response['message'] || 'Estado desconocido');
+        this.usersInDatabase = Number(response['usersInDatabase']) || 0;
+      },
+      error: () => {
+        this.databaseStatus = 'ERROR';
+        this.databaseMessage = 'No se puede verificar la conexión a la base de datos.';
       },
     });
   }
