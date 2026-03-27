@@ -1,0 +1,108 @@
+<section class="admin-profile-page">
+  <p class="loading" *ngIf="loading">Cargando perfil y resumen...</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <div class="profile-grid" *ngIf="!loading && user">
+    <article class="card profile-card">
+      <div class="avatar">{{ (user.firstName || 'A').slice(0, 1) }}</div>
+
+      <div class="identity">
+        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+        <p>{{ user.email }}</p>
+      </div>
+
+      <div class="role-pill">{{ rolesLabel }}</div>
+
+      <dl class="details">
+        <div>
+          <dt>Telefono</dt>
+          <dd>{{ user.phoneNumber || 'No registrado' }}</dd>
+        </div>
+        <div>
+          <dt>Estado</dt>
+          <dd>{{ user.enabled ? 'Activo' : 'Desactivado' }}</dd>
+        </div>
+        <div>
+          <dt>Almacen asignado</dt>
+          <dd>{{ user.warehouseName || 'No asignado' }}</dd>
+        </div>
+      </dl>
+
+      <div class="address" *ngIf="user.address as address">
+        <h2>Direccion</h2>
+        <p>{{ address.street }} {{ address.streetNumber }}</p>
+        <p *ngIf="address.apartment">{{ address.apartment }}</p>
+        <p>{{ address.postalCode }} · {{ address.city }}</p>
+        <p>{{ address.province }}</p>
+      </div>
+    </article>
+
+    <article class="card metrics-card">
+      <h2>Resumen operativo</h2>
+
+      <div class="metrics">
+        <div class="metric highlight">
+          <span>Cuentas internas activas</span>
+          <strong>{{ activeInternalCount }}</strong>
+        </div>
+        <div class="metric">
+          <span>Personal logistica</span>
+          <strong>{{ logisticsCount }}</strong>
+        </div>
+        <div class="metric">
+          <span>Repartidores</span>
+          <strong>{{ deliveryCount }}</strong>
+        </div>
+        <div class="metric">
+          <span>Cuentas desactivadas</span>
+          <strong>{{ disabledCount }}</strong>
+        </div>
+        <div class="metric">
+          <span>Almacenes activos</span>
+          <strong>{{ activeWarehousesCount }}</strong>
+        </div>
+        <div class="metric">
+          <span>Productos activos</span>
+          <strong>{{ totalProducts }}</strong>
+        </div>
+        <div class="metric">
+          <span>Ofertas activas</span>
+          <strong>{{ activeOffers }}</strong>
+        </div>
+        <div class="metric">
+          <span>Pedidos del mes</span>
+          <strong>{{ totalOrders }}</strong>
+        </div>
+        <div class="metric">
+          <span>Pedidos completados</span>
+          <strong>{{ completedOrders }}</strong>
+        </div>
+        <div class="metric">
+          <span>Pedidos de hoy</span>
+          <strong>{{ ordersToday }}</strong>
+        </div>
+        <div class="metric sales">
+          <span>Ventas del mes</span>
+          <strong>{{ totalRevenue | number:'1.2-2' }} EUR</strong>
+        </div>
+        <div class="metric">
+          <span>Ticket medio</span>
+          <strong>{{ averageOrderValue | number:'1.2-2' }} EUR</strong>
+        </div>
+      </div>
+
+      <h3>Top productos</h3>
+      <ul class="top-list" *ngIf="topProducts.length > 0; else noStats">
+        <li *ngFor="let product of topProducts; let index = index">
+          <span class="position">#{{ index + 1 }}</span>
+          <span class="name">{{ product.productName }}</span>
+          <span class="units">{{ product.unitsSold }} uds</span>
+        </li>
+      </ul>
+
+      <ng-template #noStats>
+        <p class="hint">No hay estadisticas disponibles por ahora.</p>
+      </ng-template>
+    </article>
+  </div>
+</section>

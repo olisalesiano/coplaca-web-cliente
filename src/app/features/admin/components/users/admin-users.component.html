@@ -1,69 +1,137 @@
 <section class="panel">
   <header>
-    <h1>Gestion de cuentas internas</h1>
-    <p>Administra usuarios de logistica y repartidores. Puedes activar o desactivar cuentas segun operativa.</p>
+    <h1>Gestion de cuentas</h1>
+    <p>Filtra, busca y gestiona cuentas con acciones directas de edicion y eliminacion.</p>
   </header>
+
+  <section class="toolbar" *ngIf="!loading">
+    <label>
+      Buscar por nombre o email
+      <input type="text" placeholder="Ej: juan o juan@coplaca.com" [(ngModel)]="searchTerm" />
+    </label>
+
+    <label>
+      Filtrar por rol
+      <select [(ngModel)]="selectedRoleFilter">
+        <option value="ALL">Todos</option>
+        <option value="LOGISTICS">Logistica</option>
+        <option value="DELIVERY">Repartidores</option>
+        <option value="CUSTOMER">Clientes</option>
+      </select>
+    </label>
+
+    <label>
+      Filtrar por estado
+      <select [(ngModel)]="selectedStatusFilter">
+        <option value="ALL">Todos</option>
+        <option value="ACTIVE">Activas</option>
+        <option value="DISABLED">Desactivadas</option>
+      </select>
+    </label>
+  </section>
 
   <p class="status" *ngIf="loading">Cargando cuentas...</p>
   <p class="error" *ngIf="error">{{ error }}</p>
   <p class="warning" *ngIf="warning">{{ warning }}</p>
   <p class="ok" *ngIf="message">{{ message }}</p>
 
-  <div class="columns" *ngIf="!loading">
-    <article>
-      <h2>Logistica</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Almacen</th>
-            <th>Estado</th>
-            <th>Accion</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of logisticsUsers; trackBy: trackByUserId">
-            <td>{{ user.firstName }} {{ user.lastName }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.warehouseName || 'No asignado' }}</td>
-            <td>{{ user.enabled ? 'Activa' : 'Desactivada' }}</td>
-            <td>
-              <button [disabled]="isProcessing(user.id)" (click)="toggleUserEnabled(user)">
-                {{ isProcessing(user.id) ? 'Guardando...' : (user.enabled ? 'Desactivar' : 'Activar') }}
+  <section class="table-wrap" *ngIf="!loading">
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Almacen</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let user of filteredUsers; trackBy: trackByUserId">
+          <td>{{ user.firstName }} {{ user.lastName }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ getRoleLabel(user) }}</td>
+          <td>{{ user.warehouseName || 'No asignado' }}</td>
+          <td>
+            <span class="pill" [class.off]="!user.enabled">{{ user.enabled ? 'Activa' : 'Desactivada' }}</span>
+          </td>
+          <td>
+            <div class="actions">
+              <button class="edit" [disabled]="isProcessing(user.id)" (click)="editUser(user)">Editar</button>
+              <button class="delete" [disabled]="isProcessing(user.id) || !user.enabled" (click)="deleteUser(user)">
+                {{ isProcessing(user.id) ? 'Eliminando...' : 'Eliminar' }}
               </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </article>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
 
-    <article>
-      <h2>Repartidores</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Almacen</th>
-            <th>Estado</th>
-            <th>Accion</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let user of deliveryUsers; trackBy: trackByUserId">
-            <td>{{ user.firstName }} {{ user.lastName }}</td>
-            <td>{{ user.email }}</td>
-            <td>{{ user.warehouseName || 'No asignado' }}</td>
-            <td>{{ user.enabled ? 'Activa' : 'Desactivada' }}</td>
-            <td>
-              <button [disabled]="isProcessing(user.id)" (click)="toggleUserEnabled(user)">
-                {{ isProcessing(user.id) ? 'Guardando...' : (user.enabled ? 'Desactivar' : 'Activar') }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <section class="empty" *ngIf="filteredUsers.length === 0">
+      <h2>Sin resultados</h2>
+      <p>No hay cuentas que coincidan con el filtro y busqueda aplicados.</p>
+    </section>
+  </section>
+
+  <section
+    class="modal-backdrop"
+    *ngIf="isEditDialogOpen"
+    (click)="cancelEdit()"
+    (keydown.escape)="cancelEdit()"
+  >
+    <article class="modal" tabindex="-1" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div class="modal-title-wrap">
+          <h2>Editar usuario</h2>
+          <p>Actualiza informacion de contacto, rol y estado de la cuenta.</p>
+        </div>
+        <button class="close" type="button" [disabled]="processingUserId !== null" (click)="cancelEdit()">✕</button>
+      </header>
+
+      <div class="modal-grid">
+        <label class="field">
+          Nombre
+          <input type="text" [disabled]="processingUserId !== null" [(ngModel)]="editForm.firstName" />
+        </label>
+        <label class="field">
+          Apellido
+          <input type="text" [disabled]="processingUserId !== null" [(ngModel)]="editForm.lastName" />
+        </label>
+        <label class="field">
+          Email
+          <input type="email" [disabled]="processingUserId !== null" [(ngModel)]="editForm.email" />
+        </label>
+        <label class="field">
+          Telefono
+          <input type="text" [disabled]="processingUserId !== null" [(ngModel)]="editForm.phoneNumber" />
+        </label>
+        <label class="field">
+          Rol
+          <select [disabled]="processingUserId !== null" [(ngModel)]="editForm.role">
+            <option value="ADMIN">Administrador</option>
+            <option value="LOGISTICS">Logistica</option>
+            <option value="DELIVERY">Repartidor</option>
+            <option value="CUSTOMER">Cliente</option>
+          </select>
+        </label>
+        <label class="field">
+          Almacen
+          <input type="text" [value]="editForm.warehouseName" disabled />
+        </label>
+      </div>
+
+      <label class="switch">
+        <input type="checkbox" [disabled]="processingUserId !== null" [(ngModel)]="editForm.enabled" />
+        <span>Cuenta activa</span>
+      </label>
+
+      <footer class="modal-actions">
+        <button class="cancel modal-btn" type="button" [disabled]="processingUserId !== null" (click)="cancelEdit()">Cancelar</button>
+        <button class="save modal-btn" type="button" [disabled]="processingUserId !== null" (click)="saveEdit()">
+          {{ processingUserId !== null ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </footer>
     </article>
-  </div>
+  </section>
 </section>

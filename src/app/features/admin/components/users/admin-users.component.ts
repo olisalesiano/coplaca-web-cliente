@@ -1,19 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/api.service';
-import { AdminUserDTO } from '../../../../core/api.models';
+import { AdminUserDTO, UserDTO } from '../../../../core/api.models';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-users.component.html',
   styleUrls: ['./admin-users.component.css'],
 })
 export class AdminUsersComponent implements OnInit {
-  logisticsUsers: AdminUserDTO[] = [];
-  deliveryUsers: AdminUserDTO[] = [];
+  users: AdminUserDTO[] = [];
+  searchTerm = '';
+  selectedRoleFilter: 'ALL' | 'LOGISTICS' | 'DELIVERY' | 'CUSTOMER' = 'ALL';
+  selectedStatusFilter: 'ALL' | 'ACTIVE' | 'DISABLED' = 'ALL';
+  isEditDialogOpen = false;
+  editingUserId: number | null = null;
+  editForm = {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    role: 'CUSTOMER' as 'ADMIN' | 'LOGISTICS' | 'DELIVERY' | 'CUSTOMER',
+    enabled: true,
+    warehouseName: '',
+  };
   loading = false;
   processingUserId: number | null = null;
   error = '';
@@ -26,19 +40,20 @@ export class AdminUsersComponent implements OnInit {
     this.loadUsers();
   }
 
-  loadUsers(): void {
+  loadUsers(preserveMessage = false): void {
     this.loading = true;
     this.error = '';
     this.warning = '';
-    this.message = '';
+    if (!preserveMessage) {
+      this.message = '';
+    }
 
     this.apiService.getAdminUsers().subscribe({
       next: (users) => {
-        this.logisticsUsers = users.filter((user) => this.hasRole(user, 'ROLE_LOGISTICS'));
-        this.deliveryUsers = users.filter((user) => this.hasRole(user, 'ROLE_DELIVERY'));
+        this.users = users;
 
-        if (this.logisticsUsers.length === 0 && this.deliveryUsers.length === 0) {
-          this.warning = 'No hay cuentas internas de logistica o reparto para mostrar.';
+        if (this.users.length === 0) {
+          this.warning = 'No hay cuentas para mostrar.';
         }
 
         this.loading = false;
@@ -50,14 +65,169 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  toggleUserEnabled(user: AdminUserDTO): void {
+  editUser(user: AdminUserDTO): void {
+    this.error = '';
+    this.warning = '';
+    this.message = '';
+    // Modal abre al instante para mejor UX, datos cargan en segundo plano
+    this.editingUserId = user.id;
+    this.isEditDialogOpen = true;
+    this.apiService.getAdminUserById(user.id).subscribe({
+      next: (detail) => {
+        this.openEditDialog(detail);
+      },
+      error: (httpError: unknown) => {
+        this.error = this.extractErrorMessage(httpError, 'No se pudo cargar el detalle.');
+        this.cancelEdit();
+      },
+    });
+  }
+
+  private openEditDialog(detail: UserDTO): void {
+    if (detail.id !== this.editingUserId) {
+      return; // Cerrado mientras cargaba en segundo plano
+    }
+    const role = this.resolvePrimaryRole(detail.roles ?? []);
+    this.editForm = {
+      firstName: detail.firstName ?? '',
+      lastName: detail.lastName ?? '',
+      email: detail.email ?? '',
+      phoneNumber: detail.phoneNumber ?? '',
+      role,
+      enabled: detail.enabled,
+      warehouseName: detail.warehouseName ?? 'No asignado',
+    };
+  }
+
+  cancelEdit(): void {
+    this.isEditDialogOpen = false;
+    this.editingUserId = null;
+    this.editForm = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      role: 'CUSTOMER',
+      enabled: true,
+      warehouseName: '',
+    };
+  }
+
+  @HostListener('window:keydown.escape')
+  onEscapePressed(): void {
+    if (!this.isEditDialogOpen) {
+      return;
+    }
+
+    this.cancelEdit();
+  }
+
+  saveEdit(): void {
+    if (this.editingUserId === null) {
+      return;
+    }
+
     if (this.processingUserId !== null) {
       this.warning = 'Hay una operacion en curso. Espera a que termine para continuar.';
       return;
     }
 
-    const actionText = user.enabled ? 'desactivar' : 'reactivar';
-    const confirmed = confirm(`Vas a ${actionText} la cuenta de ${user.email}. Esta accion afecta el acceso del usuario. ¿Deseas continuar?`);
+    const firstName = this.editForm.firstName.trim();
+    const lastName = this.editForm.lastName.trim();
+    const email = this.editForm.email.trim().toLowerCase();
+    const phoneNumber = this.editForm.phoneNumber.trim();
+
+    if (!firstName || !lastName || !email) {
+      this.error = 'Nombre, apellido y email son obligatorios.';
+      return;
+    }
+
+    this.processingUserId = this.editingUserId;
+    this.error = '';
+    this.warning = '';
+    this.message = '';
+
+    this.apiService.getAdminUserById(this.editingUserId).subscribe({
+      next: (beforeUpdate) => {
+        const previousRole = this.resolvePrimaryRole(beforeUpdate.roles ?? []);
+        const previousEnabled = beforeUpdate.enabled;
+
+        this.apiService
+          .updateAdminUser(this.editingUserId!, {
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+          })
+          .subscribe({
+            next: () => {
+              this.applyRoleAndStatusChanges(previousRole, previousEnabled, email);
+            },
+            error: (httpError: unknown) => {
+              this.processingUserId = null;
+              this.error = this.extractErrorMessage(httpError, 'No se pudo actualizar la cuenta.');
+            },
+          });
+      },
+      error: (httpError: unknown) => {
+        this.processingUserId = null;
+        this.error = this.extractErrorMessage(httpError, 'No se pudo recuperar el estado actual del usuario.');
+      },
+    });
+  }
+
+  private applyRoleAndStatusChanges(previousRole: string, previousEnabled: boolean, email: string): void {
+    const roleChanged = this.editForm.role !== previousRole;
+    const statusChanged = this.editForm.enabled !== previousEnabled;
+
+    const continueWithStatusUpdate = (): void => {
+      if (!statusChanged) {
+        this.finishEditSuccess(email);
+        return;
+      }
+
+      this.apiService.updateAdminUserStatus(this.editingUserId!, this.editForm.enabled).subscribe({
+        next: () => this.finishEditSuccess(email),
+        error: (httpError: unknown) => {
+          this.processingUserId = null;
+          this.error = this.extractErrorMessage(httpError, 'Se actualizo el perfil pero no el estado.');
+        },
+      });
+    };
+
+    if (!roleChanged) {
+      continueWithStatusUpdate();
+      return;
+    }
+
+    this.apiService
+      .updateAdminUserRoles(this.editingUserId!, [this.editForm.role])
+      .subscribe({
+        next: () => continueWithStatusUpdate(),
+        error: (httpError: unknown) => {
+          this.processingUserId = null;
+          this.error = this.extractErrorMessage(httpError, 'Se actualizo el perfil pero no el rol.');
+        },
+      });
+  }
+
+  private finishEditSuccess(email: string): void {
+    this.processingUserId = null;
+    this.isEditDialogOpen = false;
+    this.editingUserId = null;
+    this.message = `Cuenta ${email} actualizada correctamente.`;
+    this.loadUsers(true);
+  }
+
+  deleteUser(user: AdminUserDTO): void {
+    if (this.processingUserId !== null) {
+      this.warning = 'Hay una operacion en curso. Espera a que termine para continuar.';
+      return;
+    }
+
+    const confirmed = confirm(
+      `Vas a eliminar la cuenta de ${user.email}. Si el usuario tiene algo pendiente no se permitira borrar. ¿Estas seguro?`,
+    );
     if (!confirmed) {
       this.warning = 'Accion cancelada por seguridad.';
       return;
@@ -67,13 +237,11 @@ export class AdminUsersComponent implements OnInit {
     this.message = '';
     this.error = '';
     this.warning = '';
-    this.apiService.updateAdminUserStatus(user.id, !user.enabled).subscribe({
+    this.apiService.deleteAdminUser(user.id).subscribe({
       next: () => {
-        user.enabled = !user.enabled;
-        this.message = user.enabled
-          ? `Cuenta ${user.email} reactivada correctamente.`
-          : `Cuenta ${user.email} desactivada correctamente.`;
+        this.message = `Cuenta ${user.email} eliminada correctamente.`;
         this.processingUserId = null;
+        this.loadUsers(true);
       },
       error: (httpError: unknown) => {
         this.processingUserId = null;
@@ -90,8 +258,66 @@ export class AdminUsersComponent implements OnInit {
     return user.id;
   }
 
+  get filteredUsers(): AdminUserDTO[] {
+    const term = this.searchTerm.trim().toLowerCase();
+
+    return this.users.filter((user) => {
+      const roleMatch = this.selectedRoleFilter === 'ALL' || this.hasRole(user, this.selectedRoleFilter);
+      let statusMatch = true;
+      if (this.selectedStatusFilter === 'ACTIVE') {
+        statusMatch = user.enabled;
+      } else if (this.selectedStatusFilter === 'DISABLED') {
+        statusMatch = !user.enabled;
+      }
+
+      const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.toLowerCase();
+      const email = (user.email ?? '').toLowerCase();
+      const searchMatch =
+        term.length === 0 ||
+        fullName.includes(term) ||
+        email.includes(term);
+
+      return roleMatch && statusMatch && searchMatch;
+    });
+  }
+
+  getRoleLabel(user: AdminUserDTO): string {
+    if (this.hasRole(user, 'ADMIN')) {
+      return 'Administrador';
+    }
+    if (this.hasRole(user, 'LOGISTICS')) {
+      return 'Logistica';
+    }
+    if (this.hasRole(user, 'DELIVERY')) {
+      return 'Repartidor';
+    }
+    if (this.hasRole(user, 'CUSTOMER')) {
+      return 'Cliente';
+    }
+    return 'Otro';
+  }
+
+  private resolvePrimaryRole(roles: string[]): 'ADMIN' | 'LOGISTICS' | 'DELIVERY' | 'CUSTOMER' {
+    const normalized = new Set(roles.map((role) => role.toUpperCase().replace(/^ROLE_/, '')));
+    if (normalized.has('ADMIN')) {
+      return 'ADMIN';
+    }
+    if (normalized.has('LOGISTICS')) {
+      return 'LOGISTICS';
+    }
+    if (normalized.has('DELIVERY')) {
+      return 'DELIVERY';
+    }
+    return 'CUSTOMER';
+  }
+
   private hasRole(user: AdminUserDTO, expectedRole: string): boolean {
-    return user.roles?.some((role) => role.toUpperCase() === expectedRole) ?? false;
+    const normalizedExpectedRole = expectedRole.toUpperCase().replace(/^ROLE_/, '');
+    return (
+      user.roles?.some(
+        (role) => role.toUpperCase().replace(/^ROLE_/, '') === normalizedExpectedRole,
+      ) ?? false
+    );
   }
 
   private extractErrorMessage(error: unknown, fallback: string): string {
