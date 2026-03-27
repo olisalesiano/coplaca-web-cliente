@@ -590,7 +590,39 @@
 }
 
 @media (max-width: 900px) {
+  :host {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .navbar {
+    height: auto;
+    min-height: 68px;
+    padding: 0.8rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .navbar-links {
+    width: 100%;
+    order: 3;
+    justify-content: space-between;
+    margin-right: 0;
+    gap: 0.8rem;
+  }
+
+  .navbar-links a {
+    font-size: 0.92rem;
+  }
+
+  .profile-btn {
+    width: 42px;
+    height: 42px;
+  }
+
   .main-content {
+    overflow: visible;
     padding: 1.2rem 1.15rem 0.6rem;
   }
 
@@ -624,6 +656,80 @@
   .btn-pagar {
     width: 100%;
     max-width: 380px;
+  }
+}
+
+@media (max-width: 560px) {
+  .navbar {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .navbar-links {
+    justify-content: space-around;
+    gap: 0.5rem;
+  }
+
+  .navbar-links a {
+    font-size: 0.84rem;
+    gap: 0.25rem;
+  }
+
+  .nav-logo-img {
+    width: 46px;
+    height: 46px;
+  }
+
+  .main-content {
+    padding: 0.9rem 0.65rem 0.55rem;
+  }
+
+  .cart-card {
+    border-radius: 16px;
+    padding: 1rem 0.9rem;
+    max-height: none;
+  }
+
+  .cart-title {
+    font-size: 1.5rem;
+  }
+
+  .cart-summary {
+    padding: 0.5rem 0.7rem;
+  }
+
+  .cart-item {
+    padding: 0.65rem 0.75rem;
+  }
+
+  .cart-item-img {
+    width: 52px;
+    height: 52px;
+  }
+
+  .cart-item-actions {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .btn-remove {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .payment-dialog {
+    width: 100%;
+    border-radius: 14px;
+    padding: 0.9rem;
+  }
+
+  .payment-dialog-footer {
+    flex-direction: column;
+  }
+
+  .btn-cancel-payment,
+  .btn-confirm-payment {
+    width: 100%;
   }
 }
 
