@@ -1,39 +1,185 @@
 <section class="panel">
-  <header>
+  <header class="hero">
     <h1>Gestion de productos y ofertas</h1>
-    <p>Ajusta stock, crea ofertas y comunica el motivo de promocion para cada producto.</p>
+    <p>Actualiza precio, stock y promociones con un flujo operativo seguro y trazable.</p>
   </header>
 
-  <p *ngIf="loading">Cargando productos...</p>
+  <div class="create-actions">
+    <button class="primary add-btn" [disabled]="showCreateForm" (click)="openCreateForm()">Añadir</button>
+  </div>
+
+  <section class="create-card" *ngIf="showCreateForm">
+    <div class="create-card-header">
+      <h2>Alta de producto</h2>
+      <button class="secondary" [disabled]="creatingProduct" (click)="closeCreateForm()">Cerrar</button>
+    </div>
+    <p>Crea nuevos productos para el catalogo operativo del almacen.</p>
+    <div class="create-grid">
+      <label>
+        Nombre
+        <input type="text" [(ngModel)]="createForm.name" [disabled]="creatingProduct" placeholder="Ej. Naranja valenciana" />
+      </label>
+      <label>
+        Categoria
+        <select [(ngModel)]="createForm.categoryId" [disabled]="creatingProduct">
+          <option [ngValue]="0">Seleccionar categoria</option>
+          <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+        </select>
+      </label>
+      <label>
+        Unidad
+        <input type="text" [(ngModel)]="createForm.unit" [disabled]="creatingProduct" placeholder="kg, ud, caja" />
+      </label>
+      <label>
+        Precio unitario (EUR)
+        <input type="number" min="0.01" step="0.01" [(ngModel)]="createForm.unitPrice" [disabled]="creatingProduct" />
+      </label>
+      <label>
+        Stock inicial
+        <input type="number" min="0" step="0.001" [(ngModel)]="createForm.stockQuantity" [disabled]="creatingProduct" />
+      </label>
+      <label>
+        Origen
+        <input type="text" [(ngModel)]="createForm.origin" [disabled]="creatingProduct" placeholder="Ej. Huelva" />
+      </label>
+      <label class="full-width">
+        Descripcion
+        <input type="text" [(ngModel)]="createForm.description" [disabled]="creatingProduct" placeholder="Detalles del producto" />
+      </label>
+      <label class="full-width">
+        URL imagen (opcional)
+        <input type="text" [(ngModel)]="createForm.imageUrl" [disabled]="creatingProduct" placeholder="https://..." />
+      </label>
+    </div>
+    <button class="primary create-btn" [disabled]="creatingProduct" (click)="createProduct()">
+      {{ creatingProduct ? 'Creando...' : 'Crear producto' }}
+    </button>
+  </section>
+
+  <p *ngIf="loading" class="loading">Cargando productos...</p>
   <p class="error" *ngIf="error">{{ error }}</p>
   <p class="warning" *ngIf="warning">{{ warning }}</p>
   <p class="ok" *ngIf="message">{{ message }}</p>
 
-  <div class="grid" *ngIf="!loading">
-    <article class="card" *ngFor="let product of products; trackBy: trackByProductId">
-      <h2>{{ product.name }}</h2>
-      <p class="meta">Precio: {{ product.unitPrice | number : '1.2-2' }} EUR / {{ product.unit }}</p>
+  <section class="filters-card" *ngIf="!loading">
+    <div class="search-wrap">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Buscar por nombre, descripcion o categoria..."
+        aria-label="Buscar productos"
+      />
+    </div>
+    <div class="filters-grid">
+      <label>
+        Categoria
+        <select [(ngModel)]="selectedCategoryFilter">
+          <option *ngFor="let category of categoryFilters" [ngValue]="category">{{ category }}</option>
+        </select>
+      </label>
 
       <label>
-        Stock actual
-        <input type="number" min="0" [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" [(ngModel)]="stockByProductId[product.id]" />
+        Oferta
+        <select [(ngModel)]="offerFilter">
+          <option value="all">Todas</option>
+          <option value="with">Solo con oferta</option>
+          <option value="without">Sin oferta</option>
+        </select>
       </label>
-      <button [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" (click)="updateStock(product)">
+
+      <label>
+        Stock
+        <select [(ngModel)]="stockFilter">
+          <option value="all">Todos</option>
+          <option value="in">Con stock</option>
+          <option value="low">Stock bajo</option>
+          <option value="out">Sin stock</option>
+        </select>
+      </label>
+
+      <button class="secondary clear-btn" type="button" (click)="clearFilters()">Limpiar filtros</button>
+    </div>
+  </section>
+
+  <p class="warning" *ngIf="!loading && products.length > 0 && filteredProducts.length === 0">
+    No hay productos que cumplan los filtros seleccionados.
+  </p>
+
+  <div class="grid" *ngIf="!loading">
+    <article class="card" *ngFor="let product of filteredProducts; let i = index; trackBy: trackByProductId" [ngClass]="getCardClasses(product, i)">
+      <div class="head-row">
+        <h2>{{ product.name }}</h2>
+        <span class="unit">{{ product.unit }}</span>
+      </div>
+      <div class="badges-row">
+        <span class="badge category">{{ getCategoryLabel(product) }}</span>
+        <span class="badge offer" *ngIf="offersByProductId[product.id] as offer">Oferta {{ offer.discountPercentage }}%</span>
+        <span class="badge stock low" *ngIf="stockByProductId[product.id] > 0 && stockByProductId[product.id] < 30">Stock bajo</span>
+        <span class="badge stock out" *ngIf="stockByProductId[product.id] <= 0">Sin stock</span>
+      </div>
+      <p class="meta">Precio actual: {{ product.unitPrice | number : '1.2-2' }} EUR</p>
+
+      <div class="section-title">Operacion comercial</div>
+      <label>
+        Nuevo precio (EUR)
+        <input
+          type="number"
+          min="0.01"
+          step="0.01"
+          [disabled]="isUpdatingStock(product.id) || isUpdatingPrice(product.id) || isUpdatingOffer(product.id)"
+          [(ngModel)]="priceByProductId[product.id]"
+        />
+      </label>
+      <button
+        class="primary"
+        [disabled]="isUpdatingStock(product.id) || isUpdatingPrice(product.id) || isUpdatingOffer(product.id)"
+        (click)="updatePrice(product)"
+      >
+        {{ isUpdatingPrice(product.id) ? 'Actualizando...' : 'Actualizar precio' }}
+      </button>
+
+      <div class="section-title">Operacion de inventario</div>
+      <label>
+        Stock actual
+        <input
+          type="number"
+          min="0"
+          [disabled]="isUpdatingStock(product.id) || isUpdatingPrice(product.id) || isUpdatingOffer(product.id)"
+          [(ngModel)]="stockByProductId[product.id]"
+        />
+      </label>
+      <button
+        [disabled]="isUpdatingStock(product.id) || isUpdatingPrice(product.id) || isUpdatingOffer(product.id)"
+        (click)="updateStock(product)"
+      >
         {{ isUpdatingStock(product.id) ? 'Actualizando...' : 'Actualizar stock' }}
       </button>
 
-      <hr />
-
+      <div class="section-title">Operacion promocional</div>
       <label>
         Motivo de oferta
-        <input type="text" [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" placeholder="Ej. abundancia o proxima caducidad" [(ngModel)]="offerReasonByProductId[product.id]" />
+        <input
+          type="text"
+          [disabled]="isUpdatingStock(product.id) || isUpdatingPrice(product.id) || isUpdatingOffer(product.id)"
+          placeholder="Ej. campana semanal o rotacion de stock"
+          [(ngModel)]="offerReasonByProductId[product.id]"
+        />
       </label>
 
       <label>
         Descuento (%)
-        <input type="number" min="1" max="90" [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" [(ngModel)]="discountByProductId[product.id]" />
+        <input
+          type="number"
+          min="1"
+          max="90"
+          [disabled]="isUpdatingStock(product.id) || isUpdatingPrice(product.id) || isUpdatingOffer(product.id)"
+          [(ngModel)]="discountByProductId[product.id]"
+        />
       </label>
-      <button [disabled]="isUpdatingStock(product.id) || isUpdatingOffer(product.id)" (click)="updateOffer(product)">
+      <button
+        [disabled]="isUpdatingStock(product.id) || isUpdatingPrice(product.id) || isUpdatingOffer(product.id)"
+        (click)="updateOffer(product)"
+      >
         {{ isUpdatingOffer(product.id) ? 'Guardando...' : 'Guardar oferta' }}
       </button>
     </article>

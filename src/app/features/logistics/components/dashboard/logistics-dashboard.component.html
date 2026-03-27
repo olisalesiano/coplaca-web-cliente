@@ -1,0 +1,67 @@
+<section class="logistics-dashboard">
+  <p class="loading" *ngIf="loading">Cargando panel logistico...</p>
+  <p class="error" *ngIf="error">{{ error }}</p>
+
+  <div class="grid" *ngIf="!loading && !error">
+    <article class="card profile">
+      <h1>Panel de Logistica</h1>
+      <p class="sub">Resumen operativo del almacen: {{ warehouseLabel }}</p>
+
+      <div class="pill-row">
+        <span class="pill">Cuenta activa: {{ user?.enabled ? 'SI' : 'NO' }}</span>
+        <span class="pill">Pedidos pendientes: {{ pendingOrders.length }}</span>
+      </div>
+
+      <div class="kpis two">
+        <div class="kpi">
+          <span>Personal logistica activo</span>
+          <strong>{{ activeLogisticsUsersCount }}</strong>
+        </div>
+        <div class="kpi">
+          <span>Repartidores activos</span>
+          <strong>{{ activeDeliveryUsers.length }}</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="card orders">
+      <h2>Pedidos por estado</h2>
+      <div class="kpis three">
+        <div class="kpi">
+          <span>Pendientes</span>
+          <strong>{{ pendingOrders.length }}</strong>
+        </div>
+        <div class="kpi">
+          <span>Confirmados</span>
+          <strong>{{ confirmedOrders.length }}</strong>
+        </div>
+        <div class="kpi">
+          <span>En transito</span>
+          <strong>{{ inTransitOrders.length }}</strong>
+        </div>
+      </div>
+
+      <p class="hint">Pedidos del mes: {{ totalOrdersMonth }} · Completados: {{ completedOrdersMonth }}</p>
+    </article>
+
+    <article class="card inventory">
+      <h2>Productos y ventas</h2>
+      <div class="kpis three">
+        <div class="kpi">
+          <span>Productos activos</span>
+          <strong>{{ totalProducts }}</strong>
+        </div>
+        <div class="kpi">
+          <span>Ofertas activas</span>
+          <strong>{{ activeOffers }}</strong>
+        </div>
+        <div class="kpi sales">
+          <span>Ventas del mes</span>
+          <strong>{{ revenueMonth | number:'1.2-2' }} EUR</strong>
+        </div>
+      </div>
+
+      <p class="hint">Valor economico pendiente: {{ pendingRevenue | number:'1.2-2' }} EUR</p>
+    </article>
+  </div>
+</section>

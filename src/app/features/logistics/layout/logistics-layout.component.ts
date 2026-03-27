@@ -17,12 +17,30 @@ export class LogisticsLayoutComponent {
     private readonly authStore: AuthStore,
   ) {}
 
+  get logisticsDisplayName(): string {
+    const session = this.authStore.getSession();
+    if (!session) {
+      return 'Logistica';
+    }
+
+    const fullName = `${session.firstName ?? ''} ${session.lastName ?? ''}`.trim();
+    return fullName.length > 0 ? fullName : session.email;
+  }
+
+  goToDashboard(): void {
+    this.router.navigate(['/logistics/dashboard']);
+  }
+
   goToOrders(): void {
     this.router.navigate(['/logistics/orders']);
   }
 
   goToProducts(): void {
     this.router.navigate(['/logistics/products']);
+  }
+
+  goToProfile(): void {
+    this.router.navigate(['/logistics/profile']);
   }
 
   logout(): void {
