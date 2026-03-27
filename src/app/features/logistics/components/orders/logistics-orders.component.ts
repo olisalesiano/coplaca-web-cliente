@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -13,12 +13,14 @@ import { DeliveryWorkerDTO, LogisticsOrderDTO } from '../../../../core/api.model
   templateUrl: './logistics-orders.component.html',
   styleUrls: ['./logistics-orders.component.css'],
 })
-export class LogisticsOrdersComponent implements OnInit {
+export class LogisticsOrdersComponent implements OnInit, OnDestroy {
   orders: LogisticsOrderDTO[] = [];
   workers: DeliveryWorkerDTO[] = [];
   selectedDeliveryByOrder: Record<number, number> = {};
   loading = false;
   assigningOrderId: number | null = null;
+  warehouseId: number | null = null;
+  private autoRefreshHandle: ReturnType<typeof setInterval> | null = null;
   error = '';
   warning = '';
   message = '';
@@ -26,10 +28,17 @@ export class LogisticsOrdersComponent implements OnInit {
   constructor(private readonly apiService: ApiService) {}
 
   ngOnInit(): void {
-    this.loadData();
+    this.resolveWarehouseAndLoad();
   }
 
-  loadData(): void {
+  ngOnDestroy(): void {
+    if (this.autoRefreshHandle) {
+      clearInterval(this.autoRefreshHandle);
+      this.autoRefreshHandle = null;
+    }
+  }
+
+  private resolveWarehouseAndLoad(): void {
     this.loading = true;
     this.error = '';
     this.warning = '';
@@ -42,32 +51,52 @@ export class LogisticsOrdersComponent implements OnInit {
           this.error = 'No tienes almacen asignado para operar en logistica.';
           return;
         }
-
-        forkJoin({
-          orders: this.apiService.getLogisticsOrders(user.warehouseId),
-          workers: this.apiService.getAvailableDeliveryWorkers(user.warehouseId),
-        }).subscribe({
-          next: ({ orders, workers }) => {
-            this.orders = orders;
-            this.workers = workers;
-
-            if (orders.length === 0) {
-              this.warning = 'No hay pedidos pendientes en tu almacen.';
-            } else if (workers.length === 0) {
-              this.warning = 'No hay repartidores disponibles. No podras asignar pedidos hasta que haya personal activo.';
-            }
-
-            this.loading = false;
-          },
-          error: (httpError: unknown) => {
-            this.loading = false;
-            this.error = this.extractErrorMessage(httpError, 'No se pudo cargar la operativa de pedidos.');
-          },
-        });
+        this.warehouseId = user.warehouseId;
+        this.loadData();
+        if (!this.autoRefreshHandle) {
+          this.autoRefreshHandle = setInterval(() => {
+            this.loadData(true);
+          }, 15000);
+        }
       },
       error: (httpError: unknown) => {
         this.loading = false;
         this.error = this.extractErrorMessage(httpError, 'No se pudo resolver el almacen asociado al usuario.');
+      },
+    });
+  }
+
+  loadData(silentRefresh = false): void {
+    if (!this.warehouseId) {
+      return;
+    }
+
+    this.loading = !silentRefresh;
+    this.error = '';
+    this.warning = '';
+    if (!silentRefresh) {
+      this.message = '';
+    }
+
+    forkJoin({
+      orders: this.apiService.getLogisticsAllOrders(this.warehouseId),
+      workers: this.apiService.getAvailableDeliveryWorkers(this.warehouseId),
+    }).subscribe({
+      next: ({ orders, workers }) => {
+        this.orders = orders;
+        this.workers = workers;
+
+        if (orders.length === 0) {
+          this.warning = 'No hay pedidos registrados en tu almacen.';
+        } else if (this.assignableOrders.length > 0 && workers.length === 0) {
+          this.warning = 'No hay repartidores disponibles. No podras asignar pedidos confirmados hasta que haya personal activo.';
+        }
+
+        this.loading = false;
+      },
+      error: (httpError: unknown) => {
+        this.loading = false;
+        this.error = this.extractErrorMessage(httpError, 'No se pudo cargar la operativa de pedidos.');
       },
     });
   }
@@ -100,7 +129,7 @@ export class LogisticsOrdersComponent implements OnInit {
       next: () => {
         this.assigningOrderId = null;
         this.message = `Pedido ${orderId} asignado correctamente.`;
-        this.orders = this.orders.filter((order) => order.id !== orderId);
+        this.loadData(true);
       },
       error: (httpError: unknown) => {
         this.assigningOrderId = null;
@@ -113,8 +142,55 @@ export class LogisticsOrdersComponent implements OnInit {
     return this.assigningOrderId === orderId;
   }
 
+  canAssign(order: LogisticsOrderDTO): boolean {
+    return this.normalizeStatus(order.status) === 'CONFIRMED';
+  }
+
+  statusLabel(status: string | undefined): string {
+    const normalized = this.normalizeStatus(status);
+    const labels: Record<string, string> = {
+      PENDING: 'Pendiente',
+      CONFIRMED: 'Confirmado',
+      ASSIGNED: 'Asignado',
+      ACCEPTED: 'Aceptado por reparto',
+      IN_TRANSIT: 'En reparto',
+      DELIVERED: 'Entregado',
+      CANCELLED: 'Cancelado',
+    };
+    return labels[normalized] ?? 'Estado no definido';
+  }
+
+  statusClass(status: string | undefined): string {
+    const normalized = this.normalizeStatus(status).toLowerCase().replace(/_/g, '-');
+    return `status-badge ${normalized}`;
+  }
+
+  get pendingOrdersCount(): number {
+    return this.assignableOrders.length;
+  }
+
+  get totalOrdersCount(): number {
+    return this.orders.length;
+  }
+
+  get availableWorkersCount(): number {
+    return this.workers.length;
+  }
+
+  get pendingOrdersAmount(): number {
+    return this.assignableOrders.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0);
+  }
+
+  get assignableOrders(): LogisticsOrderDTO[] {
+    return this.orders.filter((order) => this.canAssign(order));
+  }
+
   trackByOrderId(_: number, order: LogisticsOrderDTO): number {
     return order.id;
+  }
+
+  private normalizeStatus(status: string | undefined): string {
+    return (status ?? '').trim().toUpperCase();
   }
 
   private extractErrorMessage(error: unknown, fallback: string): string {
