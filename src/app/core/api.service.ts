@@ -8,6 +8,7 @@ import {
   LogisticsOrderDTO,
   LoginResponse,
   OrderDTO,
+  ProductCategoryDTO,
   ProductDTO,
   SeasonalOfferDTO,
   TopProductStatDTO,
@@ -20,6 +21,19 @@ interface ApiSuccessResponse<T> {
   success: boolean;
   message?: string;
   data?: T;
+}
+
+interface AdminOrderStatsDTO {
+  totalOrders: number;
+  completedOrders: number;
+  averageOrderValue: number;
+  revenue: number;
+}
+
+interface AdminUserStatsDTO {
+  totalUsers: number;
+  activeUsers: number;
+  byRole: Record<string, number>;
 }
 
 interface SignUpPayload {
@@ -71,6 +85,43 @@ export class ApiService {
     return this.http
       .get<ProductDTO[] | ApiSuccessResponse<ProductDTO[]>>(`${this.baseUrl}/api/v1/products`)
       .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getProductCategories(): Observable<ProductCategoryDTO[]> {
+    return this.http
+      .get<ProductCategoryDTO[] | ApiSuccessResponse<ProductCategoryDTO[]>>(
+        `${this.baseUrl}/api/v1/categories`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  createLogisticsProduct(payload: {
+    name: string;
+    description: string;
+    unit: string;
+    unitPrice: number;
+    stockQuantity: number;
+    imageUrl?: string;
+    origin?: string;
+    nutritionInfo?: string;
+    categoryId: number;
+  }): Observable<void> {
+    return this.http.post<void>(
+      `${this.baseUrl}/api/v1/products`,
+      {
+        name: payload.name,
+        description: payload.description,
+        unit: payload.unit,
+        unitPrice: payload.unitPrice,
+        stockQuantity: payload.stockQuantity,
+        imageUrl: payload.imageUrl || null,
+        origin: payload.origin || null,
+        nutritionInfo: payload.nutritionInfo || null,
+        category: { id: payload.categoryId },
+      },
+      { headers: this.authHeaders() },
+    );
   }
 
   getCurrentUser(): Observable<UserDTO> {
@@ -128,6 +179,59 @@ export class ApiService {
       .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
+  getAdminUserById(userId: number): Observable<UserDTO> {
+    return this.http
+      .get<UserDTO | ApiSuccessResponse<UserDTO>>(`${this.baseUrl}/api/v1/users/${userId}`, {
+        headers: this.authHeaders(),
+      })
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
+  }
+
+  getAdminActiveUsers(): Observable<AdminUserDTO[]> {
+    return this.http
+      .get<AdminUserDTO[] | ApiSuccessResponse<AdminUserDTO[]>>(
+        `${this.baseUrl}/api/v1/admin/users/active`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getAdminDisabledUsers(): Observable<AdminUserDTO[]> {
+    return this.http
+      .get<AdminUserDTO[] | ApiSuccessResponse<AdminUserDTO[]>>(
+        `${this.baseUrl}/api/v1/admin/users/disabled`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getAdminOrderStats(period: 'day' | 'week' | 'month' = 'month'): Observable<AdminOrderStatsDTO> {
+    return this.http
+      .get<AdminOrderStatsDTO | ApiSuccessResponse<AdminOrderStatsDTO>>(
+        `${this.baseUrl}/api/v1/admin/stats/orders?period=${encodeURIComponent(period)}`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
+  }
+
+  getAdminUserStats(): Observable<AdminUserStatsDTO> {
+    return this.http
+      .get<AdminUserStatsDTO | ApiSuccessResponse<AdminUserStatsDTO>>(
+        `${this.baseUrl}/api/v1/admin/stats/users`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
+  }
+
+  getAdminOrdersToday(): Observable<Array<Record<string, unknown>>> {
+    return this.http
+      .get<Array<Record<string, unknown>> | ApiSuccessResponse<Array<Record<string, unknown>>>>(
+        `${this.baseUrl}/api/v1/admin/orders/today`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
   updateAdminUserStatus(userId: number, enabled: boolean): Observable<void> {
     if (enabled) {
       return this.http.post<void>(
@@ -142,20 +246,49 @@ export class ApiService {
     });
   }
 
+  updateAdminUser(
+    userId: number,
+    payload: { email?: string; firstName?: string; lastName?: string; phoneNumber?: string },
+  ): Observable<AdminUserDTO> {
+    return this.http
+      .put<AdminUserDTO | ApiSuccessResponse<AdminUserDTO>>(
+        `${this.baseUrl}/api/v1/users/${userId}`,
+        payload,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
+  }
+
+  updateAdminUserRoles(userId: number, roles: string[]): Observable<UserDTO> {
+    return this.http
+      .put<UserDTO | ApiSuccessResponse<UserDTO>>(
+        `${this.baseUrl}/api/v1/admin/users/${userId}/roles`,
+        roles,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
+  }
+
+  deleteAdminUser(userId: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/api/v1/admin/users/${userId}`, {
+      headers: this.authHeaders(),
+    });
+  }
+
   getTopSellingProductsLastMonth(): Observable<TopProductStatDTO[]> {
     return this.http
-      .get<Array<TopProductStatDTO | string> | ApiSuccessResponse<Array<TopProductStatDTO | string>>>(
+      .get<Array<Record<string, unknown>> | ApiSuccessResponse<Array<Record<string, unknown>>>>(
         `${this.baseUrl}/api/v1/admin/stats/top-products`,
         { headers: this.authHeaders() },
       )
       .pipe(
         map((response) => this.unwrapListResponse(response)),
         map((items) =>
-          items.map((item, index) =>
-            typeof item === 'string'
-              ? { productId: index + 1, productName: item, unitsSold: 0 }
-              : item,
-          ),
+          items.map<TopProductStatDTO>((item) => ({
+            productId: Number(item['productId']) || 0,
+            productName: String(item['productName'] || ''),
+            unitsSold: Number(item['unitsSold']) || 0,
+          })),
         ),
       );
   }
@@ -167,6 +300,45 @@ export class ApiService {
         { headers: this.authHeaders() },
       )
       .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getLogisticsAllOrders(warehouseId: number): Observable<LogisticsOrderDTO[]> {
+    return this.http
+      .get<LogisticsOrderDTO[] | ApiSuccessResponse<LogisticsOrderDTO[]>>(
+        `${this.baseUrl}/api/v1/orders/warehouse/${warehouseId}/all`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getLogisticsConfirmedOrders(warehouseId: number): Observable<LogisticsOrderDTO[]> {
+    return this.http
+      .get<LogisticsOrderDTO[] | ApiSuccessResponse<LogisticsOrderDTO[]>>(
+        `${this.baseUrl}/api/v1/orders/warehouse/${warehouseId}/confirmed`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getLogisticsInTransitOrders(warehouseId: number): Observable<LogisticsOrderDTO[]> {
+    return this.http
+      .get<LogisticsOrderDTO[] | ApiSuccessResponse<LogisticsOrderDTO[]>>(
+        `${this.baseUrl}/api/v1/orders/warehouse/${warehouseId}/in-transit`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapListResponse(response)));
+  }
+
+  getLogisticsWarehouseStats(
+    warehouseId: number,
+    period: 'day' | 'week' | 'month' = 'month',
+  ): Observable<Record<string, number>> {
+    return this.http
+      .get<Record<string, number> | ApiSuccessResponse<Record<string, number>>>(
+        `${this.baseUrl}/api/v1/orders/warehouse/${warehouseId}/stats?period=${encodeURIComponent(period)}`,
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
   }
 
   getAvailableDeliveryWorkers(warehouseId: number): Observable<DeliveryWorkerDTO[]> {
@@ -189,6 +361,14 @@ export class ApiService {
   updateLogisticsProductStock(productId: number, delta: number): Observable<void> {
     return this.http.patch<void>(
       `${this.baseUrl}/api/v1/products/${productId}/stock?delta=${encodeURIComponent(delta)}`,
+      {},
+      { headers: this.authHeaders() },
+    );
+  }
+
+  updateLogisticsProductPrice(productId: number, newUnitPrice: number): Observable<void> {
+    return this.http.patch<void>(
+      `${this.baseUrl}/api/v1/products/${productId}/price?value=${encodeURIComponent(newUnitPrice)}`,
       {},
       { headers: this.authHeaders() },
     );
@@ -235,6 +415,13 @@ export class ApiService {
         endDate: endDate.toISOString(),
         active: true,
       },
+      { headers: this.authHeaders() },
+    );
+  }
+
+  checkAdminHealth(): Observable<Record<string, unknown>> {
+    return this.http.get<Record<string, unknown>>(
+      `${this.baseUrl}/api/v1/admin/health`,
       { headers: this.authHeaders() },
     );
   }
