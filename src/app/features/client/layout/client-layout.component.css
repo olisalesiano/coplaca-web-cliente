@@ -24,15 +24,14 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  background: white;
-  border-radius: 12px;
+  background: transparent;
+  border-radius: 10px;
   border: 4px solid #e0a800;
-  padding: 0.3rem 0.8rem 0.3rem 0.4rem;
 }
 
 .nav-logo-img {
-  width: 144px;
-  height: 48px;
+  width: 60px;
+  height: 40px;
   object-fit: contain;
 }
 
