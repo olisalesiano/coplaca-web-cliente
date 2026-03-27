@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthStore } from '../../../core/auth.store';
 
@@ -13,20 +13,21 @@ import { AuthStore } from '../../../core/auth.store';
 })
 export class AdminLayoutComponent {
   constructor(
-    private readonly router: Router,
     private readonly authStore: AuthStore,
   ) {}
 
-  goToUsers(): void {
-    this.router.navigate(['/admin/users']);
-  }
+  get adminDisplayName(): string {
+    const session = this.authStore.getSession();
+    if (!session) {
+      return 'Administrador';
+    }
 
-  goToStats(): void {
-    this.router.navigate(['/admin/stats']);
+    const fullName = `${session.firstName ?? ''} ${session.lastName ?? ''}`.trim();
+    return fullName.length > 0 ? fullName : session.email;
   }
 
   logout(): void {
     this.authStore.clear();
-    this.router.navigate(['/login']);
+    window.location.href = '/login';
   }
 }
