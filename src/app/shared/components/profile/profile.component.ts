@@ -46,6 +46,7 @@ export class ProfileComponent {
   cardCvv = '';
   profileImageError = false;
   editando = false;
+  savingProfile = false;
   dialogAbierto = false;
   private originalForm: {
     firstName: string;
@@ -124,6 +125,10 @@ export class ProfileComponent {
   }
 
   closeEditDialog(): void {
+    if (this.savingProfile) {
+      return;
+    }
+
     if (this.postalCodeTimer) {
       clearTimeout(this.postalCodeTimer);
       this.postalCodeTimer = null;
@@ -151,6 +156,11 @@ export class ProfileComponent {
   }
 
   async saveInfo(): Promise<void> {
+    if (this.savingProfile) {
+      return;
+    }
+
+    this.savingProfile = true;
     let resolvedCoordinates = this.coordinates;
     resolvedCoordinates ??= await this.resolveCoordinatesByPostalCode(this.postalCode);
     resolvedCoordinates ??= await this.addressGeoService.geocodeFromParts({
@@ -163,6 +173,7 @@ export class ProfileComponent {
 
     if (resolvedCoordinates === null) {
       this.message = 'No se pudo geolocalizar el domicilio. Ajusta la direccion.';
+      this.savingProfile = false;
       return;
     }
 
@@ -192,11 +203,13 @@ export class ProfileComponent {
       })
       .subscribe({
         next: () => {
+          this.savingProfile = false;
           this.editando = false;
           this.message = 'Perfil actualizado.';
           this.loadProfile();
         },
         error: () => {
+          this.savingProfile = false;
           this.message = 'No se pudo actualizar el perfil.';
         },
       });
