@@ -11,6 +11,7 @@ import { catchError, forkJoin, of } from 'rxjs';
   templateUrl: './admin-profile.component.html',
   styleUrls: ['./admin-profile.component.css'],
 })
+// Vista de perfil admin con resumen ejecutivo de operacion y usuarios.
 export class AdminProfileComponent implements OnInit {
   loading = false;
   error = '';
@@ -31,6 +32,7 @@ export class AdminProfileComponent implements OnInit {
 
   constructor(private readonly apiService: ApiService) {}
 
+  // Inicializa perfil y metricas del dashboard administrativo.
   ngOnInit(): void {
     this.loadProfileData();
   }
@@ -63,6 +65,7 @@ export class AdminProfileComponent implements OnInit {
     return this.warehouses.filter((warehouse) => warehouse.isActive !== false).length;
   }
 
+  // Carga usuario autenticado y desencadena consultas agregadas del dashboard.
   private loadProfileData(): void {
     this.loading = true;
     this.error = '';
@@ -79,6 +82,7 @@ export class AdminProfileComponent implements OnInit {
     });
   }
 
+  // Consolida datos de multiples endpoints para construir KPIs de administracion.
   private loadDashboardData(): void {
     forkJoin({
       users: this.apiService.getAdminUsers().pipe(catchError(() => of([]))),
