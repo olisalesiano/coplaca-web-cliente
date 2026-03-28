@@ -11,6 +11,9 @@ export class AuthGuard implements CanActivate {
     private readonly router: Router,
   ) {}
 
+  // Permite navegar solo cuando:
+  // 1) existe sesion activa, y
+  // 2) el usuario tiene alguno de los roles definidos en route.data.roles.
   canActivate(route: ActivatedRouteSnapshot): boolean {
     if (!this.authStore.isLoggedIn()) {
       this.router.navigate(['/login']);
@@ -22,6 +25,7 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
+    // Usuario autenticado pero sin permisos: redirige a su area por defecto.
     this.router.navigate([this.authStore.getDefaultRouteForCurrentRole()]);
     return false;
   }
