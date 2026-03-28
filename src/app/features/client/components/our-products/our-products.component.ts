@@ -28,6 +28,7 @@ interface FallbackOffer {
   templateUrl: './our-products.component.html',
   styleUrls: ['./our-products.component.css'],
 })
+// Catalogo del cliente: filtros, ofertas, seleccion de cantidad y alta al carrito.
 export class OurProductsComponent implements OnInit {
   @ViewChild('addProductDialog') addProductDialogRef?: DialogComponent;
   @ViewChild('offersGridContainer') offersGridContainer?: ElementRef<HTMLDivElement>;
@@ -81,12 +82,14 @@ export class OurProductsComponent implements OnInit {
     private readonly cartStore: CartStore,
   ) {}
 
+  // Inicializa rotacion visual y carga de catalogo.
   ngOnInit(): void {
     this.setupProductRotation();
     // Cargar todos los productos de inmediato sin esperar
     this.loadAllProducts();
   }
 
+  // Carga catalogo completo y normaliza cantidades por producto.
   private loadAllProducts(): void {
     this.loading = true;
     this.message = '';
@@ -152,6 +155,7 @@ export class OurProductsComponent implements OnInit {
     );
   }
 
+  // Construye oferta visible combinando oferta real de API con fallback local.
   getDisplayOffers(): DisplayOffer[] {
     return this.getReactiveProducts()
       .map((product) => {
@@ -235,6 +239,7 @@ export class OurProductsComponent implements OnInit {
     return this.getReactiveProducts().filter((product) => this.isFreshProduct(product));
   }
 
+  // Agrega producto al carrito con la cantidad seleccionada en kilos.
   addToCart(product: ProductDTO): void {
     const quantityKg = this.quantityByProduct[product.id] ?? 1;
     if (quantityKg <= 0) {
