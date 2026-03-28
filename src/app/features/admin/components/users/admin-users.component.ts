@@ -12,6 +12,7 @@ import { AdminUserDTO, UserDTO } from '../../../../core/api.models';
   templateUrl: './admin-users.component.html',
   styleUrls: ['./admin-users.component.css'],
 })
+// Gestion de usuarios internos: listado, filtros, edicion, roles y activacion/baja.
 export class AdminUsersComponent implements OnInit {
   users: AdminUserDTO[] = [];
   searchTerm = '';
@@ -36,10 +37,12 @@ export class AdminUsersComponent implements OnInit {
 
   constructor(private readonly apiService: ApiService) {}
 
+  // Carga inicial del modulo de usuarios.
   ngOnInit(): void {
     this.loadUsers();
   }
 
+  // Recupera cuentas desde backend y actualiza mensajes de estado para la UI.
   loadUsers(preserveMessage = false): void {
     this.loading = true;
     this.error = '';
@@ -65,6 +68,7 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
+  // Abre modal de edicion y carga detalle completo del usuario seleccionado.
   editUser(user: AdminUserDTO): void {
     this.error = '';
     this.warning = '';
@@ -122,6 +126,7 @@ export class AdminUsersComponent implements OnInit {
     this.cancelEdit();
   }
 
+  // Guarda cambios de perfil y despues aplica cambios de rol/estado si corresponde.
   saveEdit(): void {
     if (this.editingUserId === null) {
       return;
@@ -176,6 +181,7 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
+  // Secuencia de actualizacion segura: rol y estado se aplican en pasos independientes.
   private applyRoleAndStatusChanges(previousRole: string, previousEnabled: boolean, email: string): void {
     const roleChanged = this.editForm.role !== previousRole;
     const statusChanged = this.editForm.enabled !== previousEnabled;
@@ -219,6 +225,7 @@ export class AdminUsersComponent implements OnInit {
     this.loadUsers(true);
   }
 
+  // Elimina definitivamente una cuenta tras confirmacion del administrador.
   deleteUser(user: AdminUserDTO): void {
     if (this.processingUserId !== null) {
       this.warning = 'Hay una operacion en curso. Espera a que termine para continuar.';

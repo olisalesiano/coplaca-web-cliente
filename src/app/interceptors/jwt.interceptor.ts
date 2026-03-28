@@ -18,9 +18,11 @@ export class JwtInterceptor implements HttpInterceptor {
     private readonly router: Router,
   ) {}
 
+  // Inserta token bearer en cada request y controla expiracion/autorizacion.
   intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     const token = this.authStore.getToken();
 
+    // Adjunta Authorization solo cuando existe token en sesion.
     if (token) {
       request = request.clone({
         setHeaders: {
@@ -31,6 +33,7 @@ export class JwtInterceptor implements HttpInterceptor {
 
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
+        // Un 401 invalida sesion local y redirige al login.
         if (error.status === 401) {
           this.authStore.clear();
           this.router.navigate(['/login']);

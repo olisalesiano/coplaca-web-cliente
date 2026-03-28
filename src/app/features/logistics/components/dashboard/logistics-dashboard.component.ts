@@ -11,6 +11,7 @@ import { DeliveryWorkerDTO, LogisticsOrderDTO, UserDTO } from '../../../../core/
   templateUrl: './logistics-dashboard.component.html',
   styleUrls: ['./logistics-dashboard.component.css'],
 })
+// Dashboard logistico con indicadores de pedidos, reparto y capacidad operativa.
 export class LogisticsDashboardComponent implements OnInit {
   loading = false;
   error = '';
@@ -30,6 +31,7 @@ export class LogisticsDashboardComponent implements OnInit {
 
   constructor(private readonly apiService: ApiService) {}
 
+  // Carga inicial del tablero.
   ngOnInit(): void {
     this.loadDashboard();
   }
@@ -38,6 +40,7 @@ export class LogisticsDashboardComponent implements OnInit {
     return this.user?.warehouseName || 'No asignado';
   }
 
+  // Obtiene usuario, valida almacen asignado y luego arma todas las metricas.
   private loadDashboard(): void {
     this.loading = true;
     this.error = '';

@@ -18,6 +18,7 @@ import { AddressGeoService } from '../../../core/address-geo.service';
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
 })
+// Perfil del cliente: datos personales, direccion geolocalizada y saldo de cuenta.
 export class ProfileComponent {
   readonly metodosSaldo = ['paypal', 'tarjeta'] as const;
   user: UserDTO | null = null;
@@ -76,6 +77,7 @@ export class ProfileComponent {
     this.loadProfile();
   }
 
+  // Carga el perfil del usuario autenticado y rellena el formulario editable.
   loadProfile(): void {
     this.apiService.getCurrentUser().subscribe({
       next: (user) => {
@@ -155,6 +157,7 @@ export class ProfileComponent {
     this.editando = false;
   }
 
+  // Guarda cambios de perfil validando y resolviendo coordenadas de direccion.
   async saveInfo(): Promise<void> {
     if (this.savingProfile) {
       return;
@@ -292,6 +295,7 @@ export class ProfileComponent {
     this.profileImageError = true;
   }
 
+  // Gestion de saldo virtual para pruebas de checkout en entorno cliente.
   confirmarSaldo(): void {
     const cantidad = Number(this.cantidadInput) || 0;
     if (cantidad <= 0) {

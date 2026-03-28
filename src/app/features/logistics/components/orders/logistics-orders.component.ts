@@ -13,6 +13,7 @@ import { DeliveryWorkerDTO, LogisticsOrderDTO } from '../../../../core/api.model
   templateUrl: './logistics-orders.component.html',
   styleUrls: ['./logistics-orders.component.css'],
 })
+// Operativa de pedidos logistica: carga, refresco automatico y asignacion a repartidores.
 export class LogisticsOrdersComponent implements OnInit, OnDestroy {
   orders: LogisticsOrderDTO[] = [];
   workers: DeliveryWorkerDTO[] = [];
@@ -27,10 +28,12 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
 
   constructor(private readonly apiService: ApiService) {}
 
+  // Inicializa almacen y activa refresco periodico.
   ngOnInit(): void {
     this.resolveWarehouseAndLoad();
   }
 
+  // Libera intervalo de refresco al salir del componente.
   ngOnDestroy(): void {
     if (this.autoRefreshHandle) {
       clearInterval(this.autoRefreshHandle);
@@ -38,6 +41,7 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Resuelve el almacen del usuario autenticado antes de consultar pedidos.
   private resolveWarehouseAndLoad(): void {
     this.loading = true;
     this.error = '';
@@ -66,6 +70,7 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Carga pedidos + repartidores para pintar estado operativo actual.
   loadData(silentRefresh = false): void {
     if (!this.warehouseId) {
       return;
@@ -101,6 +106,7 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Asigna pedido confirmado a un repartidor seleccionado.
   assignOrder(orderId: number): void {
     if (this.assigningOrderId !== null) {
       this.warning = 'Ya hay una asignacion en curso. Espera a que termine.';

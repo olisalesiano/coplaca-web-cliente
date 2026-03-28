@@ -17,6 +17,7 @@ type PaymentMethod = 'fisico' | 'paypal' | 'tarjeta';
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.css'],
 })
+// Carrito del cliente: cantidades, validacion de pago y creacion de pedido.
 export class CartComponent {
   readonly metodosPago = ['fisico', 'paypal', 'tarjeta'] as const;
   cartItems: CartItem[] = [];
@@ -39,6 +40,7 @@ export class CartComponent {
     this.refreshCart();
   }
 
+  // Recalcula lineas y total del carrito desde almacenamiento local.
   refreshCart(): void {
     this.cartItems = this.cartStore.getItems();
     this.totalPedido = this.cartItems.reduce((acc, item) => acc + this.getItemSubtotal(item), 0);
@@ -109,6 +111,7 @@ export class CartComponent {
     this.selectedPaymentMethod = method;
   }
 
+  // Valida datos de pago segun metodo elegido y lanza la creacion de pedido.
   confirmarPago(): void {
     if (this.selectedPaymentMethod === 'paypal' && !this.isValidEmail(this.paypalEmail)) {
       this.message = 'Introduce un email valido para pagar con PayPal.';
@@ -141,6 +144,7 @@ export class CartComponent {
     this.createOrder();
   }
 
+  // Intenta crear pedido en API; si falla, registra pedido local de respaldo.
   private createOrder(): void {
 
     const items = this.cartItems.map((item) => ({
