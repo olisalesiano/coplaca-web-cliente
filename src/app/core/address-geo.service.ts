@@ -107,6 +107,7 @@ export class AddressGeoService {
 
   constructor(private readonly apiService: ApiService) {}
 
+  // Busca sugerencias de direccion con estrategia de fallback entre proveedores.
   async searchSuggestions(query: string): Promise<AddressSuggestion[]> {
     const normalized = query.trim();
     if (normalized.length < 3) {
@@ -141,6 +142,7 @@ export class AddressGeoService {
     }
   }
 
+  // Resuelve coordenadas a partir de campos de direccion estructurados.
   async geocodeFromParts(payload: {
     street: string;
     streetNumber: string;
@@ -169,6 +171,7 @@ export class AddressGeoService {
     };
   }
 
+  // Resuelve direccion aproximada desde codigo postal.
   async geocodeFromPostalCode(postalCode: string): Promise<AddressSuggestion | null> {
     const normalizedPostalCode = postalCode.replaceAll(/\s+/g, '').trim();
     if (normalizedPostalCode.length < 5) {
@@ -182,6 +185,7 @@ export class AddressGeoService {
     return suggestions[0] ?? null;
   }
 
+  // Calcula el almacen activo mas cercano usando distancia geodesica.
   async getNearestWarehouse(
     latitude: number,
     longitude: number,
