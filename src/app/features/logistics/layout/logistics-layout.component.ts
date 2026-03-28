@@ -11,12 +11,14 @@ import { AuthStore } from '../../../core/auth.store';
   templateUrl: './logistics-layout.component.html',
   styleUrls: ['./logistics-layout.component.css'],
 })
+// Layout principal de logistica: menu operativo y navegacion entre modulos.
 export class LogisticsLayoutComponent {
   constructor(
     private readonly router: Router,
     private readonly authStore: AuthStore,
   ) {}
 
+  // Nombre mostrado en cabecera para usuario logistico autenticado.
   get logisticsDisplayName(): string {
     const session = this.authStore.getSession();
     if (!session) {
@@ -27,6 +29,7 @@ export class LogisticsLayoutComponent {
     return fullName.length > 0 ? fullName : session.email;
   }
 
+  // Navegacion interna de los modulos logisticos.
   goToDashboard(): void {
     this.router.navigate(['/logistics/dashboard']);
   }
