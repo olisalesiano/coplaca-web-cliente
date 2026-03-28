@@ -10,6 +10,7 @@ import { TopProductStatDTO } from '../../../../core/api.models';
   templateUrl: './admin-stats.component.html',
   styleUrls: ['./admin-stats.component.css'],
 })
+// Panel de metricas administrativas: top de productos y salud de base de datos.
 export class AdminStatsComponent implements OnInit {
   topProducts: TopProductStatDTO[] = [];
   loading = false;
@@ -20,11 +21,13 @@ export class AdminStatsComponent implements OnInit {
 
   constructor(private readonly apiService: ApiService) {}
 
+  // Al iniciar, carga estadisticas de negocio y estado tecnico del backend.
   ngOnInit(): void {
     this.loadStats();
     this.checkDatabaseHealth();
   }
 
+  // Obtiene ranking de productos vendidos del ultimo periodo.
   loadStats(): void {
     this.loading = true;
     this.error = '';
@@ -41,6 +44,7 @@ export class AdminStatsComponent implements OnInit {
     });
   }
 
+  // Consulta endpoint de salud para mostrar estado de base de datos.
   checkDatabaseHealth(): void {
     this.apiService.checkAdminHealth().subscribe({
       next: (response: Record<string, unknown>) => {
