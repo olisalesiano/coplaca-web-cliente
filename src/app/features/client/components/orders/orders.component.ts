@@ -13,6 +13,7 @@ import { OrderStore } from '../../../../core/order.store';
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css'],
 })
+// Historial de pedidos del cliente: merge remoto/local y detalle por pedido.
 export class OrdersComponent {
   pedidos: OrderDTO[] = [];
   pedidoSeleccionado: OrderDTO | null = null;
@@ -31,6 +32,7 @@ export class OrdersComponent {
     this.loadProductImages();
   }
 
+  // Precarga imagenes para enriquecer la vista de detalle de cada pedido.
   private loadProductImages(): void {
     this.apiService.getProducts().subscribe({
       next: (products) => {
@@ -46,6 +48,7 @@ export class OrdersComponent {
     });
   }
 
+  // Sincroniza pedidos remotos con respaldo local para escenarios offline.
   loadOrders(): void {
     this.loading = true;
     this.error = '';
