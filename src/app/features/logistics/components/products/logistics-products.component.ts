@@ -13,6 +13,7 @@ import { ProductCategoryDTO, ProductDTO, SeasonalOfferDTO } from '../../../../co
   templateUrl: './logistics-products.component.html',
   styleUrls: ['./logistics-products.component.css'],
 })
+// Gestion de catalogo para logistica: stock, precio, ofertas y alta de producto.
 export class LogisticsProductsComponent implements OnInit, OnDestroy {
   products: ProductDTO[] = [];
   categories: ProductCategoryDTO[] = [];
@@ -48,6 +49,7 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
 
   constructor(private readonly apiService: ApiService) {}
 
+  // Carga inicial y refresco periodico de productos/ofertas/categorias.
   ngOnInit(): void {
     this.loadProducts();
     this.autoRefreshHandle = setInterval(() => {
@@ -62,6 +64,7 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
     }
   }
 
+  // Sincroniza datos de productos y prepara estructuras de edicion por fila.
   loadProducts(silentRefresh = false): void {
     this.loading = !silentRefresh;
     this.error = '';
@@ -113,6 +116,7 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Crea un producto nuevo validando campos operativos minimos.
   createProduct(): void {
     if (this.creatingProduct || this.updatingStockProductId !== null || this.updatingPriceProductId !== null || this.updatingOfferProductId !== null) {
       this.warning = 'Hay una operacion en curso. Espera a que termine.';
