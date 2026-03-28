@@ -8,6 +8,7 @@ export type AppRole = 'customer' | 'admin' | 'logistics' | 'delivery' | 'guest';
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
+  // Persiste token y sesion completa devuelta por backend.
   setSession(session: LoginResponse): void {
     localStorage.setItem(TOKEN_KEY, session.token);
     localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -26,6 +27,7 @@ export class AuthStore {
     }
   }
 
+  // Scope estable de usuario para aislar datos entre cuentas (pedidos/carrito).
   getUserScope(): string {
     const session = this.getSession();
     if (!session) {
@@ -51,6 +53,7 @@ export class AuthStore {
     return this.getToken().length > 0;
   }
 
+  // Normaliza roles de backend (ROLE_ADMIN, ROLE_CUSTOMER...) al vocabulario de la app.
   getNormalizedRoles(): AppRole[] {
     const session = this.getSession();
     if (!session?.roles?.length) {
@@ -64,6 +67,7 @@ export class AuthStore {
     return normalized.length > 0 ? normalized : ['guest'];
   }
 
+  // Regla de prioridad para obtener el rol principal de navegacion.
   getPrimaryRole(): AppRole {
     const roles = this.getNormalizedRoles();
     if (roles.includes('admin')) {
@@ -87,6 +91,7 @@ export class AuthStore {
     return expectedRoles.some((expectedRole) => currentRoles.includes(expectedRole));
   }
 
+  // Devuelve la ruta por defecto segun rol principal.
   getDefaultRouteForCurrentRole(): string {
     const role = this.getPrimaryRole();
     switch (role) {
@@ -102,6 +107,7 @@ export class AuthStore {
     }
   }
 
+  // Parser flexible para soportar variaciones de nombres de rol del backend.
   private mapRole(role: string): AppRole | null {
     const normalized = role.toUpperCase();
 
@@ -121,6 +127,7 @@ export class AuthStore {
     return null;
   }
 
+  // Limpia toda la huella local de autenticacion.
   clear(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(SESSION_KEY);
