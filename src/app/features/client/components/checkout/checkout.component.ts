@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './checkout.component.html',
   styleUrls: ['./checkout.component.css'],
 })
+// Checkout simulado: resumen de compra, direccion, validacion de saldo y confirmacion.
 export class CheckoutComponent {
   orderItems = [
     { nombre: 'Plátano de Canarias', cantidad: 3, precio: '4,50€', peso: '2kg' },
@@ -48,6 +49,7 @@ export class CheckoutComponent {
            this.codigoPostal.trim() !== '';
   }
 
+  // Alterna modo edicion de direccion y persiste datos en sessionStorage.
   editarDireccion(): void {
     if (!this.editandoDireccion) {
       this.direccionTemp = this.direccion;
@@ -67,6 +69,7 @@ export class CheckoutComponent {
     }
   }
 
+  // Valida direccion/saldo y confirma el pedido localmente.
   confirmarPedido(): void {
     this.errorDireccion = !this.direccionCompleta;
     this.errorSaldo = !this.saldoSuficiente;
