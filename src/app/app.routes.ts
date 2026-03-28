@@ -18,12 +18,16 @@ import { LogisticsOrdersComponent } from './features/logistics/components/orders
 import { LogisticsProductsComponent } from './features/logistics/components/products/logistics-products.component';
 import { LogisticsProfileComponent } from './features/logistics/components/profile/logistics-profile.component';
 
+// Mapa global de rutas.
+// - Rutas publicas: login/register.
+// - Areas protegidas: client, admin, logistics.
+// - El control de acceso por rol se aplica desde AuthGuard con data.roles.
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
-  // CLIENTE
+  // Area CLIENTE (roles customer y delivery comparten este layout).
   {
     path: 'client',
     component: ClientLayoutComponent,
@@ -39,7 +43,7 @@ export const routes: Routes = [
     ],
   },
 
-  // ADMIN
+  // Area ADMIN.
   {
     path: 'admin',
     component: AdminLayoutComponent,
@@ -53,7 +57,7 @@ export const routes: Routes = [
     ],
   },
 
-  // LOGÍSTICA
+  // Area LOGISTICA.
   {
     path: 'logistics',
     component: LogisticsLayoutComponent,
@@ -68,6 +72,6 @@ export const routes: Routes = [
     ],
   },
 
-  // fallback
+  // Fallback para rutas no definidas.
   { path: '**', redirectTo: 'login' },
 ];
