@@ -10,10 +10,11 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './client-layout.component.html',
   styleUrls: ['./client-layout.component.css'],
 })
+// Layout del cliente final: barra principal y rutas del flujo de compra.
 export class ClientLayoutComponent {
   constructor(public router: Router) {}
 
-  // Navegación
+  // Navegacion principal del area cliente.
   goToOurProducts(): void {
     this.router.navigate(['/client/our-products']);
   }
