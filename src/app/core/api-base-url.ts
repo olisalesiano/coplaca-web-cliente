@@ -10,6 +10,10 @@ function sanitizeBaseUrl(url: string): string {
   return url.trim().replace(/\/+$/, '');
 }
 
+// Resuelve la URL base de la API con prioridad:
+// 1) variable runtime en window,
+// 2) override guardado en localStorage,
+// 3) valor de environment.
 export function resolveApiBaseUrl(): string {
   const runtimeUrl =
     window.__COPLACA_API_URL__ ??
