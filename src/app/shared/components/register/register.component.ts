@@ -16,6 +16,7 @@ import { AddressGeoService } from '../../../core/address-geo.service';
   styleUrls: ['./register.component.css'],
 })
 export class RegisterComponent {
+  // Modelo del formulario de registro y contexto de geolocalizacion.
   firstName = '';
   lastName = '';
   email = '';
@@ -50,6 +51,7 @@ export class RegisterComponent {
     private readonly addressGeoService: AddressGeoService,
   ) {}
 
+  // Handler con debounce para codigo postal; resuelve coordenadas y almacen cercano.
   onPostalCodeChange(value: string): void {
     this.postalCode = value;
 
@@ -73,6 +75,7 @@ export class RegisterComponent {
     }, 450);
   }
 
+  // Intenta resolver coordenadas por codigo postal y completar campos faltantes.
   private async resolveCoordinatesFromPostalCode(postalCode: string): Promise<void> {
     const resolved = await this.addressGeoService.geocodeFromPostalCode(postalCode);
 
@@ -81,7 +84,7 @@ export class RegisterComponent {
       return;
     }
 
-    // Fill empty fields with resolved postal-code context without overriding user input.
+    // Rellena solo campos vacios sin pisar datos escritos manualmente.
     if (!this.city.trim() && resolved.city.trim()) {
       this.city = resolved.city;
     }
@@ -108,6 +111,7 @@ export class RegisterComponent {
     this.isResolvingPostalCode = false;
   }
 
+  // Calcula el almacen mas cercano para las coordenadas actuales.
   private async updateNearestWarehouse(
     latitude: number,
     longitude: number,
@@ -123,6 +127,7 @@ export class RegisterComponent {
     this.nearestWarehouseDistanceKm = nearest.distanceKm;
   }
 
+  // Alterna visibilidad de contrasenas.
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
@@ -131,44 +136,46 @@ export class RegisterComponent {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
+  // Vuelve a la pantalla de login.
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
 
+  // Valida politica de contrasena y guarda incumplimientos para mostrar en UI.
   private validatePassword(): boolean {
     this.passwordErrors = [];
 
-    // Check if password is not empty
+    // Verifica contrasena requerida
     if (!this.password?.trim()) {
       this.passwordErrors.push('La contraseña es requerida');
     }
 
-    // Check if confirmation password is not empty
+    // Verifica confirmacion requerida
     if (!this.confirmPassword?.trim()) {
       this.passwordErrors.push('La confirmación de contraseña es requerida');
     }
 
-    // Check minimum length
+    // Longitud minima
     if (this.password && this.password.length < 8) {
       this.passwordErrors.push('La contraseña debe tener al menos 8 caracteres');
     }
 
-    // Check for at least one uppercase letter
+    // Requiere al menos una mayuscula
     if (this.password && !/[A-Z]/.test(this.password)) {
       this.passwordErrors.push('La contraseña debe contener al menos una mayúscula');
     }
 
-    // Check for at least one lowercase letter
+    // Requiere al menos una minuscula
     if (this.password && !/[a-z]/.test(this.password)) {
       this.passwordErrors.push('La contraseña debe contener al menos una minúscula');
     }
 
-    // Check for at least one number
+    // Requiere al menos un numero
     if (this.password && !/\d/.test(this.password)) {
       this.passwordErrors.push('La contraseña debe contener al menos un número');
     }
 
-    // Check if passwords match
+    // Verifica coincidencia entre contrasena y confirmacion
     if (this.password && this.confirmPassword && this.password !== this.confirmPassword) {
       this.passwordErrors.push('Las contraseñas no coinciden');
     }
@@ -176,8 +183,9 @@ export class RegisterComponent {
     return this.passwordErrors.length === 0;
   }
 
+  // Valida formulario antes de abrir modal de confirmacion.
   openConfirmationModal(): void {
-    // First validate password
+    // Primero valida politica de contrasena
     if (!this.validatePassword()) {
       return;
     }
@@ -200,10 +208,11 @@ export class RegisterComponent {
       return;
     }
 
-    // Show confirmation modal
+    // Si todo esta correcto, abre modal
     this.showConfirmationModal = true;
   }
 
+  // Control de cierre del modal.
   closeConfirmationModal(): void {
     this.showConfirmationModal = false;
     this.passwordErrors = [];
@@ -213,6 +222,7 @@ export class RegisterComponent {
     this.register();
   }
 
+  // Flujo completo de alta: validar, geolocalizar, registrar y persistir sesion.
   async register(): Promise<void> {
     this.error = '';
     const required = [
@@ -290,6 +300,7 @@ export class RegisterComponent {
       });
   }
 
+  // Convierte errores tecnicos en mensajes legibles para el registro.
   private extractErrorMessage(error: unknown, fallback: string): string {
     if (!(error instanceof HttpErrorResponse)) {
       return fallback;
@@ -305,6 +316,7 @@ export class RegisterComponent {
       : fallback;
   }
 
+  // Extrae texto de error desde payloads heterogeneos del backend.
   private extractBackendMessage(payload: { message?: string; error?: string } | string | null): string | null {
     if (typeof payload === 'string') {
       const text = payload.trim();
