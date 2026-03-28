@@ -15,6 +15,7 @@ import { AuthStore } from '../../../core/auth.store';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
+  // Modelo del formulario y estado de UI.
   email = '';
   password = '';
   loading = false;
@@ -28,10 +29,12 @@ export class LoginComponent {
 
   showPassword = false;
 
+  // Alterna visibilidad de la contrasena en el input.
   togglePassword(): void {
     this.showPassword = !this.showPassword;
   }
 
+  // Ejecuta flujo de login: valida, llama API, guarda sesion y redirige por rol.
   login(): void {
     this.error = '';
     if (!this.email || !this.password) {
@@ -53,10 +56,12 @@ export class LoginComponent {
     });
   }
 
+  // Navega a la pantalla de registro.
   goToRegister(): void {
     this.router.navigate(['/register']);
   }
 
+  // Convierte errores tecnicos en mensajes de autenticacion legibles.
   private extractLoginErrorMessage(error: unknown): string {
     if (!(error instanceof HttpErrorResponse)) {
       return 'No se pudo iniciar sesion. Revisa tus credenciales.';
@@ -74,6 +79,7 @@ export class LoginComponent {
     return 'No se pudo iniciar sesion. Revisa tus credenciales.';
   }
 
+  // Extrae texto de error desde payloads heterogeneos del backend.
   private extractBackendMessage(payload: { message?: string; error?: string } | string | null): string | null {
     if (typeof payload === 'string') {
       const text = payload.trim();
