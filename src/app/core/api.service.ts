@@ -58,6 +58,7 @@ interface SignUpPayload {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
+  // Resuelve URL base de API con soporte para override runtime y fallback de entorno.
   private readonly baseUrl = resolveApiBaseUrl();
 
   constructor(
@@ -65,6 +66,9 @@ export class ApiService {
     private readonly authStore: AuthStore,
   ) {}
 
+  // -----------------------
+  // Autenticacion
+  // -----------------------
   login(email: string, password: string): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.baseUrl}/auth/login`, { email, password });
   }
@@ -73,6 +77,9 @@ export class ApiService {
     return this.http.post<LoginResponse>(`${this.baseUrl}/auth/signup`, payload);
   }
 
+  // -----------------------
+  // Catalogo y perfil del cliente
+  // -----------------------
   getProducts(query?: string): Observable<ProductDTO[]> {
     if (query && query.trim().length > 0) {
       return this.http
@@ -170,6 +177,9 @@ export class ApiService {
       .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
+  // -----------------------
+  // Endpoints de administracion
+  // -----------------------
   getAdminUsers(): Observable<AdminUserDTO[]> {
     return this.http
       .get<AdminUserDTO[] | ApiSuccessResponse<AdminUserDTO[]>>(
@@ -293,6 +303,9 @@ export class ApiService {
       );
   }
 
+  // -----------------------
+  // Endpoints de logistica
+  // -----------------------
   getLogisticsOrders(warehouseId: number): Observable<LogisticsOrderDTO[]> {
     return this.http
       .get<LogisticsOrderDTO[] | ApiSuccessResponse<LogisticsOrderDTO[]>>(
@@ -426,6 +439,7 @@ export class ApiService {
     );
   }
 
+  // Construye cabeceras con bearer token para endpoints protegidos.
   private authHeaders(): HttpHeaders {
     const token = this.authStore.getToken();
     return new HttpHeaders({
@@ -433,6 +447,7 @@ export class ApiService {
     });
   }
 
+  // Soporta respuestas tipo arreglo directo o envoltorio { success, data }.
   private unwrapListResponse<T>(response: T[] | ApiSuccessResponse<T[]>): T[] {
     if (Array.isArray(response)) {
       return response;
@@ -445,6 +460,7 @@ export class ApiService {
     return [];
   }
 
+  // Soporta respuestas tipo objeto directo o envoltorio { success, data }.
   private unwrapSingleResponse<T>(response: T | ApiSuccessResponse<T>): T {
     if (response && typeof response === 'object' && 'data' in response) {
       if (response.data !== undefined) {
