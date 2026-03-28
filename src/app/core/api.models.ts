@@ -1,3 +1,4 @@
+// Estructura de direccion usada en registro y perfil de usuario.
 export interface AddressDTO {
   id?: number;
   street: string;
@@ -12,6 +13,7 @@ export interface AddressDTO {
   isDefault?: boolean;
 }
 
+// Perfil de usuario autenticado devuelto por backend.
 export interface UserDTO {
   id: number;
   email: string;
@@ -25,6 +27,7 @@ export interface UserDTO {
   enabled: boolean;
 }
 
+// Datos de sesion devueltos en login/signup.
 export interface LoginResponse {
   token: string;
   type: string;
@@ -35,6 +38,7 @@ export interface LoginResponse {
   roles: string[];
 }
 
+// Contrato de producto consumido por catalogo/carrito/logistica.
 export interface ProductDTO {
   id: number;
   name: string;
@@ -52,6 +56,7 @@ export interface ProductDTO {
   discountPercentage?: number;
 }
 
+// Metadatos de categoria para filtros y formularios administrativos.
 export interface ProductCategoryDTO {
   id: number;
   name: string;
@@ -60,6 +65,7 @@ export interface ProductCategoryDTO {
   productCount?: number;
 }
 
+// Linea de detalle dentro de un pedido.
 export interface OrderItemDTO {
   id: number;
   productId: number;
@@ -69,6 +75,7 @@ export interface OrderItemDTO {
   subtotal: number;
 }
 
+// Agregado de pedido mostrado en cliente y logistica.
 export interface OrderDTO {
   id: number;
   orderNumber: string;
@@ -82,6 +89,7 @@ export interface OrderDTO {
   items: OrderItemDTO[];
 }
 
+// Datos de almacen: ubicacion y estado operativo.
 export interface WarehouseDTO {
   id: number;
   name: string;
@@ -91,6 +99,7 @@ export interface WarehouseDTO {
   isActive?: boolean;
 }
 
+// Proyeccion simplificada de usuario para tablas administrativas.
 export interface AdminUserDTO {
   id: number;
   email: string;
@@ -101,6 +110,7 @@ export interface AdminUserDTO {
   warehouseName?: string;
 }
 
+// DTO de analitica para ranking de productos vendidos.
 export interface TopProductStatDTO {
   productId: number;
   productName: string;
@@ -108,6 +118,7 @@ export interface TopProductStatDTO {
   totalRevenue?: number;
 }
 
+// Proyeccion de pedido orientada al flujo logistico.
 export interface LogisticsOrderDTO {
   id: number;
   orderNumber: string;
@@ -119,6 +130,7 @@ export interface LogisticsOrderDTO {
   warehouseName?: string;
 }
 
+// DTO de repartidor usado en asignaciones de pedidos.
 export interface DeliveryWorkerDTO {
   id: number;
   email?: string;
@@ -129,6 +141,7 @@ export interface DeliveryWorkerDTO {
   enabled?: boolean;
 }
 
+// Contrato de ofertas/promociones gestionadas por logistica.
 export interface SeasonalOfferDTO {
   id: number;
   productId: number;
@@ -139,6 +152,7 @@ export interface SeasonalOfferDTO {
   active?: boolean;
 }
 
+// Item de carrito persistido en almacenamiento local.
 export interface CartItem {
   productId: number;
   name: string;
