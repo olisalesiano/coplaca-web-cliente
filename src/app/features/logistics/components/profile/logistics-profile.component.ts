@@ -11,6 +11,7 @@ import { LogisticsOrderDTO, UserDTO } from '../../../../core/api.models';
   templateUrl: './logistics-profile.component.html',
   styleUrls: ['./logistics-profile.component.css'],
 })
+// Perfil logistico con indicadores del almacen asignado y estado de repartidores.
 export class LogisticsProfileComponent implements OnInit {
   loading = false;
   error = '';
@@ -27,6 +28,7 @@ export class LogisticsProfileComponent implements OnInit {
 
   constructor(private readonly apiService: ApiService) {}
 
+  // Carga perfil y metricas operativas del almacen.
   ngOnInit(): void {
     this.loadProfile();
   }
