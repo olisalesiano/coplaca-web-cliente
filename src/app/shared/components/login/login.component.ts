@@ -68,7 +68,7 @@ export class LoginComponent {
     }
 
     if (error.status === 401 || error.status === 400) {
-      return 'Contrasena incorrecta o email no registrado.';
+      return 'Error: correo o contraseña incorrectos.';
     }
 
     const backendMessage = this.extractBackendMessage(error.error as { message?: string; error?: string } | string | null);

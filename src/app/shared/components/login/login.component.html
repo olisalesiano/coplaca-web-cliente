@@ -38,7 +38,7 @@
       {{ loading ? 'Entrando...' : 'Iniciar sesión' }}
     </button>
 
-    <p class="register-link" *ngIf="error">{{ error }}</p>
+    <p class="login-error" *ngIf="error" role="alert" aria-live="assertive">{{ error }}</p>
 
     <p class="register-link">
       ¿No tiene una cuenta? <a (click)="goToRegister()">Registrate...</a>
