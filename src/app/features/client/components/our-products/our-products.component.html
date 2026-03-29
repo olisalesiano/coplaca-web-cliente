@@ -24,11 +24,6 @@
         </button>
       </div>
 
-      <button type="button" class="search-btn" (click)="loadProducts()">
-        <mat-icon>bolt</mat-icon>
-        Buscar ahora
-      </button>
-
       <button type="button" class="filter-btn" (click)="toggleFilters()" [attr.aria-expanded]="showFilters">
         <mat-icon>tune</mat-icon>
         Filtrar
@@ -63,7 +58,7 @@
         </label>
       </div>
     </div>
-    <p class="section-sub" *ngIf="message">{{ message }}</p>
+    <p class="section-sub status-msg" *ngIf="message" [ngClass]="'status-' + messageType">{{ message }}</p>
   </section>
 
   <!-- DIÁLOGO GLOBAL - Disponible para todas las secciones -->

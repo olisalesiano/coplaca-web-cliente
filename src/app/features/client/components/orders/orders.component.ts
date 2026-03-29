@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatIcon } from '@angular/material/icon';
 import { ApiService } from '../../../../core/api.service';
 import { OrderDTO } from '../../../../core/api.models';
 import { OrderStore } from '../../../../core/order.store';
@@ -9,7 +8,7 @@ import { OrderStore } from '../../../../core/order.store';
 @Component({
   selector: 'app-orders',
   standalone: true,
-  imports: [CommonModule, MatIcon],
+  imports: [CommonModule],
   templateUrl: './orders.component.html',
   styleUrls: ['./orders.component.css'],
 })

@@ -65,6 +65,7 @@ export class OurProductsComponent implements OnInit {
   products: ProductDTO[] = [];
   loading = false;
   message = '';
+  messageType: 'info' | 'warning' | 'error' | 'success' = 'info';
   searchQuery = '';
   showFilters = false;
   selectedCategory = 'Todas';
@@ -102,14 +103,14 @@ export class OurProductsComponent implements OnInit {
         }
 
         if (products.length === 0) {
-          this.message = 'No hay productos disponibles en este momento.';
+          this.setMessage('warning', 'No hay productos disponibles en este momento.');
         }
 
         this.loading = false;
       },
       error: () => {
         this.loading = false;
-        this.message = 'No se pudieron cargar los productos desde la API Coplaca.';
+        this.setMessage('error', 'No se pudieron cargar los productos desde la API Coplaca.');
       },
     });
   }
@@ -243,7 +244,17 @@ export class OurProductsComponent implements OnInit {
   addToCart(product: ProductDTO): void {
     const quantityKg = this.quantityByProduct[product.id] ?? 1;
     if (quantityKg <= 0) {
-      this.message = 'La cantidad por kilo debe ser mayor que 0.';
+      this.setMessage('error', 'La cantidad por kilo debe ser mayor que 0.');
+      return;
+    }
+
+    if (Number(product.stockQuantity) <= 0) {
+      this.setMessage('warning', `${product.name} no tiene stock disponible ahora mismo.`);
+      return;
+    }
+
+    if (quantityKg > Number(product.stockQuantity)) {
+      this.setMessage('warning', `Solo hay ${product.stockQuantity} kg de ${product.name} disponibles.`);
       return;
     }
 
@@ -256,7 +267,7 @@ export class OurProductsComponent implements OnInit {
       quantityKg,
       offerReason: product.offerReason,
     });
-    this.message = `${product.name} anadido al carrito (${quantityKg} kg).`;
+    this.setMessage('success', `${product.name} anadido al carrito (${quantityKg} kg).`);
   }
 
   openProductDialog(product: ProductDTO): void {
@@ -364,6 +375,11 @@ export class OurProductsComponent implements OnInit {
       normalizedCategory.includes('ortaliza');
 
     return isFreshCategory && Number(product.stockQuantity) >= 120;
+  }
+
+  private setMessage(type: 'info' | 'warning' | 'error' | 'success', text: string): void {
+    this.messageType = type;
+    this.message = text;
   }
 
   scrollOffersLeft(): void {
