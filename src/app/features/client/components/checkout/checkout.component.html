@@ -3,6 +3,11 @@
 <!-- MAIN -->
 <main class="main-content">
 
+  <p class="status-msg" *ngIf="statusMessage" [ngClass]="'status-' + statusTone">
+    <mat-icon>{{ statusTone === 'success' ? 'check_circle' : statusTone === 'error' ? 'error' : 'warning' }}</mat-icon>
+    {{ statusMessage }}
+  </p>
+
   <!-- PANTALLA DE ÉXITO -->
   <div class="success-overlay" *ngIf="orderSuccess">
     <div class="success-card">

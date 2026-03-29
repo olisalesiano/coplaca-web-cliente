@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatIconModule, MatIcon } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/api.service';
 import { CartStore } from '../../../../core/cart.store';
@@ -9,11 +9,12 @@ import { CartItem, OrderDTO } from '../../../../core/api.models';
 import { OrderStore } from '../../../../core/order.store';
 
 type PaymentMethod = 'fisico' | 'paypal' | 'tarjeta';
+type FeedbackTone = 'success' | 'warning' | 'error' | 'info';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, MatIcon, MatIconModule, FormsModule],
+  imports: [CommonModule, MatIconModule, FormsModule],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.css'],
 })
@@ -22,8 +23,9 @@ export class CartComponent {
   readonly metodosPago = ['fisico', 'paypal', 'tarjeta'] as const;
   cartItems: CartItem[] = [];
   totalPedido = 0;
-  message = '';
+  feedback: { tone: FeedbackTone; text: string } | null = null;
   paymentDialogOpen = false;
+  paymentError = '';
   selectedPaymentMethod: PaymentMethod = 'fisico';
   paypalEmail = '';
   cardNumber = '';
@@ -48,13 +50,25 @@ export class CartComponent {
   }
 
   increment(item: CartItem): void {
-    item.quantityKg = Number(Math.min(item.stockQuantity, item.quantityKg + 0.5).toFixed(2));
+    const nextQuantity = Number(Math.min(item.stockQuantity, item.quantityKg + 0.5).toFixed(2));
+    if (nextQuantity === item.quantityKg) {
+      this.setFeedback('warning', `Ya alcanzaste el stock maximo disponible para ${item.name}.`);
+      return;
+    }
+
+    item.quantityKg = nextQuantity;
     this.cartStore.saveItems(this.cartItems);
     this.refreshCart();
   }
 
   decrement(item: CartItem): void {
-    item.quantityKg = Number(Math.max(0.5, item.quantityKg - 0.5).toFixed(2));
+    const nextQuantity = Number(Math.max(0.5, item.quantityKg - 0.5).toFixed(2));
+    if (nextQuantity === item.quantityKg) {
+      this.setFeedback('warning', `La cantidad minima para ${item.name} es 0.5 kg.`);
+      return;
+    }
+
+    item.quantityKg = nextQuantity;
     this.cartStore.saveItems(this.cartItems);
     this.refreshCart();
   }
@@ -63,13 +77,18 @@ export class CartComponent {
     this.cartItems = this.cartItems.filter((value) => value.productId !== item.productId);
     this.cartStore.saveItems(this.cartItems);
     this.refreshCart();
-    this.message = 'Producto eliminado del carrito.';
+    this.setFeedback('info', 'Producto eliminado del carrito.');
   }
 
   clearCart(): void {
+    if (this.cartItems.length === 0) {
+      this.setFeedback('warning', 'Tu carrito ya esta vacio.');
+      return;
+    }
+
     this.cartStore.clear();
     this.refreshCart();
-    this.message = 'Carrito vaciado correctamente.';
+    this.setFeedback('success', 'Carrito vaciado correctamente.');
   }
 
   goToOurProducts(): void {
@@ -86,7 +105,7 @@ export class CartComponent {
   }
   pagar(): void {
     if (this.cartItems.length === 0) {
-      this.message = 'Tu carrito esta vacio.';
+      this.setFeedback('warning', 'Tu carrito esta vacio. Agrega productos para continuar.');
       return;
     }
 
@@ -95,6 +114,7 @@ export class CartComponent {
 
   openPaymentDialog(): void {
     this.paymentDialogOpen = true;
+    this.paymentError = '';
     this.selectedPaymentMethod = 'fisico';
     this.paypalEmail = '';
     this.cardNumber = '';
@@ -105,6 +125,7 @@ export class CartComponent {
 
   closePaymentDialog(): void {
     this.paymentDialogOpen = false;
+    this.paymentError = '';
   }
 
   selectPaymentMethod(method: PaymentMethod): void {
@@ -114,33 +135,34 @@ export class CartComponent {
   // Valida datos de pago segun metodo elegido y lanza la creacion de pedido.
   confirmarPago(): void {
     if (this.selectedPaymentMethod === 'paypal' && !this.isValidEmail(this.paypalEmail)) {
-      this.message = 'Introduce un email valido para pagar con PayPal.';
+      this.paymentError = 'Introduce un email valido para pagar con PayPal.';
       return;
     }
 
     if (this.selectedPaymentMethod === 'tarjeta') {
       const cardNumberDigits = this.cardNumber.split(' ').join('');
       if (!/^\d{16}$/.test(cardNumberDigits)) {
-        this.message = 'El numero de tarjeta debe tener 16 digitos.';
+        this.paymentError = 'El numero de tarjeta debe tener 16 digitos.';
         return;
       }
 
       if (this.cardName.trim().length < 3) {
-        this.message = 'Introduce el nombre del titular de la tarjeta.';
+        this.paymentError = 'Introduce el nombre del titular de la tarjeta.';
         return;
       }
 
       if (!this.isValidExpiry(this.cardExpiry)) {
-        this.message = 'La fecha de caducidad de la tarjeta no es valida.';
+        this.paymentError = 'La fecha de caducidad de la tarjeta no es valida.';
         return;
       }
 
       if (!/^\d{3,4}$/.test(this.cardCvv)) {
-        this.message = 'El CVV debe tener 3 o 4 digitos.';
+        this.paymentError = 'El CVV debe tener 3 o 4 digitos.';
         return;
       }
     }
 
+    this.paymentError = '';
     this.createOrder();
   }
 
@@ -157,21 +179,23 @@ export class CartComponent {
         this.orderStore.prependOrder(createdOrder);
         this.cartStore.clear();
         this.refreshCart();
-        this.message =
+        this.setFeedback(
+          'success',
           this.selectedPaymentMethod === 'fisico'
             ? 'Pedido creado. Pagaras en fisico al recibirlo.'
-            : 'Pedido creado y pago confirmado.';
+            : 'Pedido creado y pago confirmado.',
+        );
         this.closePaymentDialog();
-        void this.router.navigate(['/orders']);
+        void this.router.navigate(['/client/orders']);
       },
       error: () => {
         const localOrder = this.buildLocalOrderFromCart();
         this.orderStore.prependOrder(localOrder);
         this.cartStore.clear();
         this.refreshCart();
-        this.message = 'Pedido guardado localmente. Se sincronizara cuando haya conexion.';
+        this.setFeedback('warning', 'Pedido guardado localmente. Se sincronizara cuando haya conexion.');
         this.closePaymentDialog();
-        void this.router.navigate(['/orders']);
+        void this.router.navigate(['/client/orders']);
       },
     });
   }
@@ -231,5 +255,9 @@ export class CartComponent {
     const now = new Date();
     const expiry = new Date(year, month);
     return expiry > new Date(now.getFullYear(), now.getMonth());
+  }
+
+  private setFeedback(tone: FeedbackTone, text: string): void {
+    this.feedback = { tone, text };
   }
 }

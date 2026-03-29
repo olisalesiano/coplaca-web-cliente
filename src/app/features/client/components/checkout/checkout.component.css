@@ -22,6 +22,47 @@
   position: relative;
 }
 
+.status-msg {
+  position: absolute;
+  top: 0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 150;
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.status-info {
+  background: #e8f4ff;
+  border-color: #9cc7ee;
+  color: #194b76;
+}
+
+.status-warning {
+  background: #fff8e0;
+  border-color: #f0d37f;
+  color: #7b5100;
+}
+
+.status-error {
+  background: #ffe9e9;
+  border-color: #efb1b1;
+  color: #8e2020;
+}
+
+.status-success {
+  background: #e8f7ea;
+  border-color: #98d9a1;
+  color: #155427;
+}
+
 /* ===== COLUMNAS ===== */
 .left-col {
   flex: 1;
@@ -101,7 +142,7 @@
 }
 
 .order-item {
-  background-color: #2a9d3f;
+  background-color: #1b6e2f;
   border-radius: 10px;
   padding: 0.5rem 0.9rem;
   display: flex;
@@ -179,7 +220,7 @@
   display: flex;
   align-items: flex-start;
   gap: 0.6rem;
-  background: #2a9d3f;
+  background: #1b6e2f;
   border-radius: 10px;
   padding: 0.8rem 1rem;
   color: white;
@@ -215,7 +256,7 @@
 }
 
 .btn-change:hover {
-  background: #2a9d3f;
+  background: #1b6e2f;
   color: white;
 }
 
@@ -231,8 +272,8 @@
 }
 
 .payment-tab.active {
-  background: #2a9d3f;
-  border-color: #2a9d3f;
+  background: #1b6e2f;
+  border-color: #1b6e2f;
   color: white;
 }
 
@@ -250,7 +291,7 @@
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: white;
+  color: #1f1f1f;
   cursor: pointer;
   transition: background 0.2s;
   display: flex;
@@ -321,7 +362,7 @@
 }
 
 .balance-block {
-  background: #2a9d3f;
+  background: #1b6e2f;
   border-radius: 12px;
   padding: 1rem 1.2rem;
   display: flex;
@@ -364,19 +405,19 @@
   background: transparent;
   font-family: 'Poppins', sans-serif;
   font-size: 0.88rem;
-  color: white;
+  color: #1c4c27;
   outline: none;
   padding: 0.2rem 0.3rem;
 }
 
 .address-input::placeholder {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(28, 76, 39, 0.7);
 }
 
 .btn-guardar-dir {
-  background: #2a9d3f !important;
+  background: #1b6e2f !important;
   color: white !important;
-  border-color: #2a9d3f !important;
+  border-color: #1b6e2f !important;
 }
 
 .success-sub {
@@ -400,9 +441,10 @@
   gap: 0.3rem;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #e05c5c;
+  color: #8a1c1c;
   margin: 0;
-  background: rgba(224, 92, 92, 0.12);
+  background: #ffdede;
+  border: 1px solid #efb0b0;
   border-radius: 8px;
   padding: 0.4rem 0.7rem;
 }
@@ -464,6 +506,13 @@
   .main-content {
     gap: 0.9rem;
     padding: 0.9rem 0.65rem;
+  }
+
+  .status-msg {
+    position: static;
+    transform: none;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .section-card {

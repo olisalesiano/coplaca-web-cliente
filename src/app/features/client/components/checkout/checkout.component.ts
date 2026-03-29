@@ -22,7 +22,7 @@ export class CheckoutComponent {
   subtotal = '10,50€';
   envio = '2,50€';
   totalPedido = '13,00€';
-  totalNumerico = 13.00;
+  totalNumerico = 13;
 
   saldoCuenta: number = Number(sessionStorage.getItem('saldo') ?? '0');
 
@@ -36,6 +36,8 @@ export class CheckoutComponent {
 
   errorDireccion = false;
   errorSaldo = false;
+  statusMessage = '';
+  statusTone: 'info' | 'warning' | 'error' | 'success' = 'info';
 
   orderSuccess = false;
 
@@ -51,13 +53,7 @@ export class CheckoutComponent {
 
   // Alterna modo edicion de direccion y persiste datos en sessionStorage.
   editarDireccion(): void {
-    if (!this.editandoDireccion) {
-      this.direccionTemp = this.direccion;
-      this.ciudadTemp = this.ciudad;
-      this.codigoPostalTemp = this.codigoPostal;
-      this.editandoDireccion = true;
-      this.errorDireccion = false;
-    } else {
+    if (this.editandoDireccion) {
       this.direccion = this.direccionTemp;
       this.ciudad = this.ciudadTemp;
       this.codigoPostal = this.codigoPostalTemp;
@@ -66,7 +62,20 @@ export class CheckoutComponent {
       sessionStorage.setItem('codigoPostal', this.codigoPostal);
       this.editandoDireccion = false;
       this.errorDireccion = !this.direccionCompleta;
+      if (this.errorDireccion) {
+        this.setStatus('warning', 'Completa direccion, ciudad y codigo postal para enviar el pedido.');
+      } else {
+        this.setStatus('success', 'Direccion guardada correctamente.');
+      }
+      return;
     }
+
+    this.direccionTemp = this.direccion;
+    this.ciudadTemp = this.ciudad;
+    this.codigoPostalTemp = this.codigoPostal;
+    this.editandoDireccion = true;
+    this.errorDireccion = false;
+    this.setStatus('info', 'Edita los datos y pulsa en "Guardar direccion" para confirmar los cambios.');
   }
 
   // Valida direccion/saldo y confirma el pedido localmente.
@@ -74,18 +83,33 @@ export class CheckoutComponent {
     this.errorDireccion = !this.direccionCompleta;
     this.errorSaldo = !this.saldoSuficiente;
 
-    if (this.errorDireccion || this.errorSaldo) return;
+    if (this.errorDireccion || this.errorSaldo) {
+      if (this.errorDireccion && this.errorSaldo) {
+        this.setStatus('error', 'Completa la direccion y revisa tu saldo antes de confirmar el pedido.');
+      } else if (this.errorDireccion) {
+        this.setStatus('warning', 'Completa la direccion de envio para continuar.');
+      } else {
+        this.setStatus('warning', 'Saldo insuficiente. Puedes anadir saldo desde tu perfil.');
+      }
+      return;
+    }
 
     this.saldoCuenta -= this.totalNumerico;
     sessionStorage.setItem('saldo', this.saldoCuenta.toString());
+    this.setStatus('success', 'Pago confirmado. Tu pedido ha sido procesado correctamente.');
     this.orderSuccess = true;
   }
 
-  constructor(private router: Router) {}
+  constructor(private readonly router: Router) {}
 
   goToOurProducts(): void { this.router.navigate(['/client/our-products']); }
   goToOrders(): void { this.router.navigate(['/client/orders']); }
   goToCart(): void { this.router.navigate(['/client/cart']); }
   goToProfile(): void { this.router.navigate(['/client/profile']); }
   goToHome(): void { this.router.navigate(['/client/our-products']); }
+
+  private setStatus(tone: 'info' | 'warning' | 'error' | 'success', message: string): void {
+    this.statusTone = tone;
+    this.statusMessage = message;
+  }
 }

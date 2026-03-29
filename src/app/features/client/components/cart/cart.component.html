@@ -15,7 +15,7 @@
 
       <div class="cart-summary" *ngIf="cartItems.length > 0">
         <span class="cart-count">{{ cartItems.length }} producto{{ cartItems.length === 1 ? '' : 's' }}</span>
-        <span class="cart-help">Pasa el mouse sobre un producto para ver acciones rapidas.</span>
+        <span class="cart-help">Toca o pasa sobre un producto para ver acciones rapidas.</span>
       </div>
 
       <div class="cart-empty" *ngIf="cartItems.length === 0">
@@ -51,8 +51,8 @@
     </div>
   </div>
 
-  <div class="sugerencias-section" *ngIf="message">
-    <p class="sugerencias-label">{{ message }}</p>
+  <div class="sugerencias-section" *ngIf="feedback">
+    <p class="sugerencias-label" [ngClass]="'feedback-' + feedback.tone">{{ feedback.text }}</p>
   </div>
 
   <!-- FOOTER: total + pagar -->
@@ -143,6 +143,8 @@
           />
         </div>
       </div>
+
+      <p class="payment-error" *ngIf="paymentError">{{ paymentError }}</p>
 
       <div class="payment-dialog-footer">
         <button class="btn-cancel-payment" type="button" (click)="closePaymentDialog()">Cancelar</button>
