@@ -15,7 +15,7 @@
 
       <div class="cart-summary" *ngIf="cartItems.length > 0">
         <span class="cart-count">{{ cartItems.length }} producto{{ cartItems.length === 1 ? '' : 's' }}</span>
-        <span class="cart-help">Toca o pasa sobre un producto para ver acciones rapidas.</span>
+        <span class="cart-help">Ajusta cantidades y revisa subtotales antes de pagar.</span>
       </div>
 
       <div class="cart-empty" *ngIf="cartItems.length === 0">
@@ -29,22 +29,27 @@
           <img [src]="item.imageUrl || '/assets/test/Banana.png'" alt="producto" class="cart-item-img" />
           <div class="cart-item-main">
             <span class="cart-item-name">{{ item.name }}</span>
-            <span class="cart-item-stock">{{ item.quantityKg }} kg en tu carrito</span>
+            <span class="cart-item-stock">Stock disponible: {{ item.stockQuantity }} kg</span>
           </div>
 
-          <div class="cart-hover-panel">
-            <div class="cart-item-details">
-              <span>Stock disponible: {{ item.stockQuantity }} kg</span>
-              <span>Precio: {{ item.unitPrice }} €/kg</span>
-              <span>Subtotal: {{ getItemSubtotal(item) | number:'1.2-2' }} €</span>
+          <div class="cart-item-pricing">
+            <div class="price-chip">
+              <span class="price-chip-label">Precio/kg</span>
+              <strong>{{ item.unitPrice | number:'1.2-2' }} €</strong>
             </div>
+            <div class="price-chip subtotal-chip">
+              <span class="price-chip-label">Subtotal</span>
+              <strong>{{ getItemSubtotal(item) | number:'1.2-2' }} €</strong>
+            </div>
+          </div>
 
-            <div class="cart-item-actions">
+          <div class="cart-item-actions">
+            <div class="qty-controls">
               <button class="btn-qty" type="button" (click)="decrement(item)">-</button>
               <span class="qty-value">{{ item.quantityKg }} kg</span>
               <button class="btn-qty" type="button" (click)="increment(item)">+</button>
-              <button class="btn-remove" type="button" (click)="removeItem(item)">Eliminar</button>
             </div>
+            <button class="btn-remove" type="button" (click)="removeItem(item)">Eliminar</button>
           </div>
         </div>
       </div>
