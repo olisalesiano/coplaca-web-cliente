@@ -1,27 +1,104 @@
 <section class="stats">
   <header>
-    <h1>Productos mas vendidos del ultimo mes</h1>
-    <p>Seguimiento de ventas para tomar decisiones de abastecimiento y ofertas.</p>
+    <h1>Estadisticas administrativas</h1>
+    <p>Panel consolidado de operacion, actividad comercial y salud del sistema.</p>
   </header>
-
-  <div class="health-check" [class.connected]="databaseStatus === 'CONNECTED'" [class.error]="databaseStatus === 'ERROR'">
-    <strong>Base de datos:</strong>
-    <span class="status-badge" [class.success]="databaseStatus === 'CONNECTED'" [class.error]="databaseStatus === 'ERROR'">
-      {{ databaseStatus }}
-    </span>
-    <span class="message">{{ databaseMessage }}</span>
-    <span class="count" *ngIf="databaseStatus === 'CONNECTED'">{{ usersInDatabase }} usuarios registrados</span>
-  </div>
 
   <p *ngIf="loading">Cargando estadisticas...</p>
   <p class="error" *ngIf="error">{{ error }}</p>
 
-  <div class="cards" *ngIf="!loading && !error">
-    <article class="card" *ngFor="let item of topProducts; let i = index">
-      <span class="rank">#{{ i + 1 }}</span>
-      <h2>{{ item.productName }}</h2>
-      <p><strong>Unidades vendidas:</strong> {{ item.unitsSold }}</p>
-      <p *ngIf="item.totalRevenue !== undefined"><strong>Facturacion:</strong> {{ item.totalRevenue | currency : 'EUR' }}</p>
+  <div class="kpi-grid" *ngIf="!loading && !error">
+    <article class="kpi-card highlight">
+      <span>Ventas del mes</span>
+      <strong>{{ revenueMonth | number:'1.2-2' }} EUR</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Ticket medio (mes)</span>
+      <strong>{{ averageOrderValueMonth | number:'1.2-2' }} EUR</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Pedidos del mes</span>
+      <strong>{{ totalOrdersMonth }}</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Tasa de completados</span>
+      <strong>{{ completionRate | number:'1.0-2' }}%</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Pedidos esta semana</span>
+      <strong>{{ totalOrdersWeek }}</strong>
+    </article>
+    <article class="kpi-card">
+      <span>Pedidos hoy</span>
+      <strong>{{ totalOrdersDay }}</strong>
     </article>
   </div>
+
+  <div class="sections" *ngIf="!loading && !error">
+    <article class="section-card">
+      <h2>Cuentas internas</h2>
+      <div class="mini-grid">
+        <div>
+          <span>Activas</span>
+          <strong>{{ activeUsers }}</strong>
+        </div>
+        <div>
+          <span>Desactivadas</span>
+          <strong>{{ disabledUsers }}</strong>
+        </div>
+        <div>
+          <span>Logistica</span>
+          <strong>{{ logisticsUsers }}</strong>
+        </div>
+        <div>
+          <span>Reparto</span>
+          <strong>{{ deliveryUsers }}</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="section-card">
+      <h2>Catalogo y red</h2>
+      <div class="mini-grid">
+        <div>
+          <span>Productos activos</span>
+          <strong>{{ totalProducts }}</strong>
+        </div>
+        <div>
+          <span>Ofertas activas</span>
+          <strong>{{ activeOffers }}</strong>
+        </div>
+        <div>
+          <span>Almacenes activos</span>
+          <strong>{{ activeWarehouses }}</strong>
+        </div>
+        <div>
+          <span>Usuarios en DB</span>
+          <strong>{{ usersInDatabase }}</strong>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <section class="top-products" *ngIf="!loading && !error">
+    <h2>Top productos del ultimo mes</h2>
+    <div class="cards">
+      <article class="card" *ngFor="let item of topProducts; let i = index">
+        <span class="rank">#{{ i + 1 }}</span>
+        <h3>{{ item.productName }}</h3>
+        <p><strong>Unidades vendidas:</strong> {{ item.unitsSold }}</p>
+        <p *ngIf="item.totalRevenue !== undefined"><strong>Facturacion:</strong> {{ item.totalRevenue | currency : 'EUR' }}</p>
+      </article>
+    </div>
+    <p class="hint" *ngIf="topProducts.length === 0">No hay datos de productos para este periodo.</p>
+  </section>
+
+  <section class="insights" *ngIf="!loading && !error">
+    <h2>Lectura rapida</h2>
+    <ul>
+      <li>Pedidos completados en el mes: {{ completedOrdersMonth }} de {{ totalOrdersMonth }}.</li>
+      <li>Ritmo actual: {{ totalOrdersDay }} pedidos hoy y {{ totalOrdersWeek }} durante la semana.</li>
+      <li>Cobertura operativa: {{ logisticsUsers }} en logistica y {{ deliveryUsers }} en reparto.</li>
+    </ul>
+  </section>
 </section>
