@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatIconModule } from '@angular/material/icon';
+// import { MatIconModule, MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/api.service';
 import { CartStore } from '../../../../core/cart.store';
@@ -14,7 +14,7 @@ type FeedbackTone = 'success' | 'warning' | 'error' | 'info';
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, MatIconModule, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.css'],
 })
@@ -223,7 +223,10 @@ export class CartComponent {
           },
           error: () => {
             this.creatingOrder = false;
-            this.setFeedback('error', 'No se pudo crear el pedido en servidor. No se desconto stock ni se confirmo la compra.');
+            this.setFeedback(
+              'error',
+              'No se pudo crear el pedido en servidor. No se desconto stock ni se confirmo la compra.',
+            );
           },
         });
       },

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -26,7 +26,10 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
   warning = '';
   message = '';
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   // Inicializa almacen y activa refresco periodico.
   ngOnInit(): void {
@@ -55,17 +58,40 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
           this.error = 'No tienes almacen asignado para operar en logistica.';
           return;
         }
-        this.warehouseId = user.warehouseId;
-        this.loadData();
-        if (!this.autoRefreshHandle) {
-          this.autoRefreshHandle = setInterval(() => {
-            this.loadData(true);
-          }, 15000);
-        }
+
+        forkJoin({
+          orders: this.apiService.getLogisticsOrders(user.warehouseId),
+          workers: this.apiService.getAvailableDeliveryWorkers(user.warehouseId),
+        }).subscribe({
+          next: ({ orders, workers }) => {
+            this.orders = orders;
+            this.workers = workers;
+
+            if (orders.length === 0) {
+              this.warning = 'No hay pedidos pendientes en tu almacen.';
+            } else if (workers.length === 0) {
+              this.warning =
+                'No hay repartidores disponibles. No podras asignar pedidos hasta que haya personal activo.';
+            }
+
+            this.loading = false;
+            this.cdr.detectChanges();
+          },
+          error: (httpError: unknown) => {
+            this.loading = false;
+            this.error = this.extractErrorMessage(
+              httpError,
+              'No se pudo cargar la operativa de pedidos.',
+            );
+          },
+        });
       },
       error: (httpError: unknown) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo resolver el almacen asociado al usuario.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo resolver el almacen asociado al usuario.',
+        );
       },
     });
   }
@@ -94,14 +120,18 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
         if (orders.length === 0) {
           this.warning = 'No hay pedidos registrados en tu almacen.';
         } else if (this.assignableOrders.length > 0 && workers.length === 0) {
-          this.warning = 'No hay repartidores disponibles. No podras asignar pedidos confirmados hasta que haya personal activo.';
+          this.warning =
+            'No hay repartidores disponibles. No podras asignar pedidos confirmados hasta que haya personal activo.';
         }
 
         this.loading = false;
       },
       error: (httpError: unknown) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo cargar la operativa de pedidos.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo cargar la operativa de pedidos.',
+        );
       },
     });
   }
@@ -120,8 +150,12 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     }
 
     const worker = this.workers.find((item) => item.id === deliveryUserId);
-    const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'el repartidor seleccionado';
-    const confirmed = confirm(`Vas a asignar el pedido ${orderId} a ${workerName}. ¿Confirmas la operacion?`);
+    const workerName = worker
+      ? `${worker.firstName} ${worker.lastName}`
+      : 'el repartidor seleccionado';
+    const confirmed = confirm(
+      `Vas a asignar el pedido ${orderId} a ${workerName}. ¿Confirmas la operacion?`,
+    );
     if (!confirmed) {
       this.warning = 'Asignacion cancelada por seguridad.';
       return;
