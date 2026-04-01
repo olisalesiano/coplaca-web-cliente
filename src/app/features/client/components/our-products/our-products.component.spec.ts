@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
-import { ApiService } from '../../core/api.service';
-import { CartStore } from '../../core/cart.store';
+import { ApiService } from '../../../../core/api.service';
+import { CartStore } from '../../../../core/cart.store';
 
 import { OurProductsComponent } from './our-products.component';
 
