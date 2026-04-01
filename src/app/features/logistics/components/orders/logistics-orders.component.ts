@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -58,17 +58,40 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
           this.error = 'No tienes almacen asignado para operar en logistica.';
           return;
         }
-        this.warehouseId = user.warehouseId;
-        this.loadData();
-        if (!this.autoRefreshHandle) {
-          this.autoRefreshHandle = setInterval(() => {
-            this.loadData(true);
-          }, 15000);
-        }
+
+        forkJoin({
+          orders: this.apiService.getLogisticsOrders(user.warehouseId),
+          workers: this.apiService.getAvailableDeliveryWorkers(user.warehouseId),
+        }).subscribe({
+          next: ({ orders, workers }) => {
+            this.orders = orders;
+            this.workers = workers;
+
+            if (orders.length === 0) {
+              this.warning = 'No hay pedidos pendientes en tu almacen.';
+            } else if (workers.length === 0) {
+              this.warning =
+                'No hay repartidores disponibles. No podras asignar pedidos hasta que haya personal activo.';
+            }
+
+            this.loading = false;
+            this.cdr.detectChanges();
+          },
+          error: (httpError: unknown) => {
+            this.loading = false;
+            this.error = this.extractErrorMessage(
+              httpError,
+              'No se pudo cargar la operativa de pedidos.',
+            );
+          },
+        });
       },
       error: (httpError: unknown) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo resolver el almacen asociado al usuario.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo resolver el almacen asociado al usuario.',
+        );
       },
     });
   }
@@ -94,23 +117,21 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
         this.orders = orders;
         this.workers = workers;
 
-            if (orders.length === 0) {
-              this.warning = 'No hay pedidos pendientes en tu almacen.';
-            } else if (workers.length === 0) {
-              this.warning = 'No hay repartidores disponibles. No podras asignar pedidos hasta que haya personal activo.';
-            }
+        if (orders.length === 0) {
+          this.warning = 'No hay pedidos registrados en tu almacen.';
+        } else if (this.assignableOrders.length > 0 && workers.length === 0) {
+          this.warning =
+            'No hay repartidores disponibles. No podras asignar pedidos confirmados hasta que haya personal activo.';
+        }
 
-            this.loading = false;
-          },
-          error: (httpError: unknown) => {
-            this.loading = false;
-            this.error = this.extractErrorMessage(httpError, 'No se pudo cargar la operativa de pedidos.');
-          },
-        });
+        this.loading = false;
       },
       error: (httpError: unknown) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo resolver el almacen asociado al usuario.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo cargar la operativa de pedidos.',
+        );
       },
     });
   }
