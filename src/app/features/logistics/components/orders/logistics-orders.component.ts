@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -23,7 +23,10 @@ export class LogisticsOrdersComponent implements OnInit {
   warning = '';
   message = '';
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -54,20 +57,28 @@ export class LogisticsOrdersComponent implements OnInit {
             if (orders.length === 0) {
               this.warning = 'No hay pedidos pendientes en tu almacen.';
             } else if (workers.length === 0) {
-              this.warning = 'No hay repartidores disponibles. No podras asignar pedidos hasta que haya personal activo.';
+              this.warning =
+                'No hay repartidores disponibles. No podras asignar pedidos hasta que haya personal activo.';
             }
 
             this.loading = false;
+            this.cdr.detectChanges();
           },
           error: (httpError: unknown) => {
             this.loading = false;
-            this.error = this.extractErrorMessage(httpError, 'No se pudo cargar la operativa de pedidos.');
+            this.error = this.extractErrorMessage(
+              httpError,
+              'No se pudo cargar la operativa de pedidos.',
+            );
           },
         });
       },
       error: (httpError: unknown) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo resolver el almacen asociado al usuario.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo resolver el almacen asociado al usuario.',
+        );
       },
     });
   }
@@ -85,8 +96,12 @@ export class LogisticsOrdersComponent implements OnInit {
     }
 
     const worker = this.workers.find((item) => item.id === deliveryUserId);
-    const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'el repartidor seleccionado';
-    const confirmed = confirm(`Vas a asignar el pedido ${orderId} a ${workerName}. ¿Confirmas la operacion?`);
+    const workerName = worker
+      ? `${worker.firstName} ${worker.lastName}`
+      : 'el repartidor seleccionado';
+    const confirmed = confirm(
+      `Vas a asignar el pedido ${orderId} a ${workerName}. ¿Confirmas la operacion?`,
+    );
     if (!confirmed) {
       this.warning = 'Asignacion cancelada por seguridad.';
       return;

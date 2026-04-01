@@ -44,7 +44,9 @@ export class LoginComponent {
       next: (session) => {
         this.authStore.setSession(session);
         this.loading = false;
-        void this.router.navigate([this.authStore.getDefaultRouteForCurrentRole()]);
+        setTimeout(() => {
+          void this.router.navigate([this.authStore.getDefaultRouteForCurrentRole()]);
+        }, 0);
       },
       error: (httpError: unknown) => {
         this.loading = false;
@@ -66,7 +68,9 @@ export class LoginComponent {
       return 'Contrasena incorrecta o email no registrado.';
     }
 
-    const backendMessage = this.extractBackendMessage(error.error as { message?: string; error?: string } | string | null);
+    const backendMessage = this.extractBackendMessage(
+      error.error as { message?: string; error?: string } | string | null,
+    );
     if (backendMessage) {
       return backendMessage;
     }
@@ -74,7 +78,9 @@ export class LoginComponent {
     return 'No se pudo iniciar sesion. Revisa tus credenciales.';
   }
 
-  private extractBackendMessage(payload: { message?: string; error?: string } | string | null): string | null {
+  private extractBackendMessage(
+    payload: { message?: string; error?: string } | string | null,
+  ): string | null {
     if (typeof payload === 'string') {
       const text = payload.trim();
       return text.length > 0 ? text : null;

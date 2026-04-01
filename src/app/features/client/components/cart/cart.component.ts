@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MatIconModule, MatIcon } from '@angular/material/icon';
+// import { MatIconModule, MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/api.service';
 import { CartStore } from '../../../../core/cart.store';
@@ -13,7 +13,7 @@ type PaymentMethod = 'fisico' | 'paypal' | 'tarjeta';
 @Component({
   selector: 'app-cart',
   standalone: true,
-  imports: [CommonModule, MatIcon, MatIconModule, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './cart.component.html',
   styleUrls: ['./cart.component.css'],
 })
@@ -142,7 +142,6 @@ export class CartComponent {
   }
 
   private createOrder(): void {
-
     const items = this.cartItems.map((item) => ({
       productId: item.productId,
       quantity: item.quantityKg,

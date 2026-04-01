@@ -5,16 +5,22 @@
 }
 
 .logistics-navbar {
+  z-index: 100;
+  padding: 0 2rem;
+  height: 72px;
+  flex-shrink: 0;
+  background-color: #2a9d3f;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
-  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 1.2rem;
-  background: #2b5f3e;
-  color: #fff;
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
 }
 
 .brand {
@@ -22,37 +28,52 @@
   background: transparent;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
   cursor: pointer;
-  color: inherit;
+  border-radius: 10px;
+  border: 4px solid #e0a800;
 }
 
 .brand img {
-  height: 34px;
-  width: auto;
-  filter: brightness(0) invert(1);
+  background-color: white;
+  width: 150px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 5px;
 }
 
-.brand span {
+.user-status {
+  color: white;
+  margin-left: 8px;
   font-weight: 600;
 }
 
 .links {
   display: flex;
-  gap: 1rem;
+  gap: 3rem;
+  margin-right: 75px;
 }
 
 .links a {
-  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  color: #f5c518;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.2s;
   text-decoration: none;
   cursor: pointer;
   font-weight: 500;
 }
 
+.links a:hover {
+  color: white;
+}
+
 .logout-btn {
   border: none;
   background: #f0c019;
-  color: #1a1a1a;
+  color: #2a9d3f;
   border-radius: 8px;
   display: flex;
   align-items: center;
