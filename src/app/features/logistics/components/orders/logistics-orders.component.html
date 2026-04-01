@@ -17,6 +17,14 @@
       <span>Repartidores disponibles</span>
       <strong>{{ availableWorkersCount }}</strong>
     </article>
+    <article class="summary-card info">
+      <span>Con repartidor asignado</span>
+      <strong>{{ assignedOrdersCount }}</strong>
+    </article>
+    <article class="summary-card delivered">
+      <span>Pedidos entregados</span>
+      <strong>{{ deliveredOrdersCount }}</strong>
+    </article>
     <article class="summary-card sales">
       <span>Importe por asignar</span>
       <strong>{{ pendingOrdersAmount | number : '1.2-2' }} EUR</strong>
@@ -35,7 +43,9 @@
     </p>
   </section>
 
-  <div class="table-wrap" *ngIf="!loading && orders.length > 0">
+  <section class="orders-section" *ngIf="!loading && assignableOrders.length > 0">
+    <h2>Pedidos por asignar</h2>
+    <div class="table-wrap">
     <table>
       <thead>
         <tr>
@@ -50,7 +60,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let order of orders; trackBy: trackByOrderId">
+        <tr *ngFor="let order of assignableOrders; trackBy: trackByOrderId">
           <td>
             <strong>{{ order.orderNumber || order.id }}</strong>
           </td>
@@ -60,7 +70,7 @@
           <td>{{ order.customerName || 'Cliente Coplaca' }}</td>
           <td>{{ order.deliveryAgentName || 'Sin asignar' }}</td>
           <td>{{ order.totalPrice | number : '1.2-2' }} EUR</td>
-          <td>{{ order.warehouseName || 'No disponible' }}</td>
+          <td>{{ order.warehouseName || '-' }}</td>
           <td>
             <select [disabled]="isAssigning(order.id) || !canAssign(order)" [(ngModel)]="selectedDeliveryByOrder[order.id]">
               <option [ngValue]="undefined">Seleccionar repartidor</option>
@@ -77,5 +87,75 @@
         </tr>
       </tbody>
     </table>
-  </div>
+    </div>
+  </section>
+
+  <section class="orders-section" *ngIf="!loading && assignedOrders.length > 0">
+    <h2>Pedidos con repartidor asignado</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Estado</th>
+            <th>Cliente</th>
+            <th>Repartidor</th>
+            <th>Total</th>
+            <th>Almacen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of assignedOrders; trackBy: trackByOrderId">
+            <td>
+              <strong>{{ order.orderNumber || order.id }}</strong>
+            </td>
+            <td>
+              <span [class]="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
+            </td>
+            <td>{{ order.customerName || 'Cliente Coplaca' }}</td>
+            <td>{{ order.deliveryAgentName || 'Sin asignar' }}</td>
+            <td>{{ order.totalPrice | number : '1.2-2' }} EUR</td>
+            <td>{{ order.warehouseName || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="orders-section" *ngIf="!loading && deliveredOrders.length > 0">
+    <h2>Pedidos entregados</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Estado</th>
+            <th>Cliente</th>
+            <th>Repartidor</th>
+            <th>Total</th>
+            <th>Almacen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of deliveredOrders; trackBy: trackByOrderId">
+            <td>
+              <strong>{{ order.orderNumber || order.id }}</strong>
+            </td>
+            <td>
+              <span [class]="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
+            </td>
+            <td>{{ order.customerName || 'Cliente Coplaca' }}</td>
+            <td>{{ order.deliveryAgentName || 'Sin asignar' }}</td>
+            <td>{{ order.totalPrice | number : '1.2-2' }} EUR</td>
+            <td>{{ order.warehouseName || '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="orders-section" *ngIf="!loading && orders.length > 0 && assignableOrders.length === 0 && assignedOrders.length === 0 && deliveredOrders.length === 0">
+    <h2>Pedidos sin seccion operativa</h2>
+    <p class="warning">Hay pedidos en otros estados (pendiente o cancelado) que no requieren asignacion en este panel.</p>
+  </section>
 </section>

@@ -152,6 +152,15 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     return this.normalizeStatus(order.status) === 'CONFIRMED';
   }
 
+  hasDeliveryAssigned(order: LogisticsOrderDTO): boolean {
+    const status = this.normalizeStatus(order.status);
+    return ['ASSIGNED', 'ACCEPTED', 'IN_TRANSIT'].includes(status);
+  }
+
+  isDelivered(order: LogisticsOrderDTO): boolean {
+    return this.normalizeStatus(order.status) === 'DELIVERED';
+  }
+
   statusLabel(status: string | undefined): string {
     const normalized = this.normalizeStatus(status);
     const labels: Record<string, string> = {
@@ -167,12 +176,20 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
   }
 
   statusClass(status: string | undefined): string {
-    const normalized = this.normalizeStatus(status).toLowerCase().replace(/_/g, '-');
+    const normalized = this.normalizeStatus(status).toLowerCase().replaceAll('_', '-');
     return `status-badge ${normalized}`;
   }
 
   get pendingOrdersCount(): number {
     return this.assignableOrders.length;
+  }
+
+  get assignedOrdersCount(): number {
+    return this.assignedOrders.length;
+  }
+
+  get deliveredOrdersCount(): number {
+    return this.deliveredOrders.length;
   }
 
   get totalOrdersCount(): number {
@@ -189,6 +206,14 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
 
   get assignableOrders(): LogisticsOrderDTO[] {
     return this.orders.filter((order) => this.canAssign(order));
+  }
+
+  get assignedOrders(): LogisticsOrderDTO[] {
+    return this.orders.filter((order) => this.hasDeliveryAssigned(order));
+  }
+
+  get deliveredOrders(): LogisticsOrderDTO[] {
+    return this.orders.filter((order) => this.isDelivered(order));
   }
 
   trackByOrderId(_: number, order: LogisticsOrderDTO): number {
