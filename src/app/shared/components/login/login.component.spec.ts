@@ -6,10 +6,12 @@ import { AuthStore } from '../../../core/auth.store';
 
 import { LoginComponent } from './login.component';
 
+// Prueba de inicializacion de la pantalla de login.
 describe('LoginComponent', () => {
   let component: LoginComponent;
   let fixture: ComponentFixture<LoginComponent>;
 
+  // Inyecta mocks de login y almacenamiento de sesion.
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
@@ -36,6 +38,7 @@ describe('LoginComponent', () => {
     await fixture.whenStable();
   });
 
+  // Verifica creacion del componente.
   it('should create', () => {
     expect(component).toBeTruthy();
   });

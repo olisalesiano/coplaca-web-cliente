@@ -6,11 +6,13 @@ import { resolveApiBaseUrl } from '../core/api-base-url';
 @Injectable({
   providedIn: 'root'
 })
+// Servicio HTTP de autenticacion para login/registro y token local.
 export class AuthService {
   private readonly apiUrl = `${resolveApiBaseUrl()}/auth`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
+  // Registra usuario cliente y fuerza rol CUSTOMER en payload.
   register(data: {
     email: string;
     password: string;
@@ -25,22 +27,27 @@ export class AuthService {
     });
   }
 
+  // Ejecuta login contra backend y devuelve respuesta raw.
   login(email: string, password: string): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, { email, password });
   }
 
+  // Elimina token de autenticacion local.
   logout(): void {
     localStorage.removeItem('authToken');
   }
 
+  // Recupera token persistido en navegador.
   getToken(): string | null {
     return localStorage.getItem('authToken');
   }
 
+  // Persiste token en navegador.
   setToken(token: string): void {
     localStorage.setItem('authToken', token);
   }
 
+  // Indica si hay token disponible para sesion activa.
   isAuthenticated(): boolean {
     return !!this.getToken();
   }

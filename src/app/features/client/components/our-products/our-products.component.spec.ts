@@ -6,10 +6,12 @@ import { CartStore } from '../../../../core/cart.store';
 
 import { OurProductsComponent } from './our-products.component';
 
+// Prueba de creacion del catalogo de productos del cliente.
 describe('OurProducts', () => {
   let component: OurProductsComponent;
   let fixture: ComponentFixture<OurProductsComponent>;
 
+  // Configura dependencias minimas requeridas para renderizar el componente.
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [OurProductsComponent],
@@ -35,6 +37,7 @@ describe('OurProducts', () => {
     await fixture.whenStable();
   });
 
+  // Valida que el componente se cree sin errores.
   it('should create', () => {
     expect(component).toBeTruthy();
   });

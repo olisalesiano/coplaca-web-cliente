@@ -7,10 +7,12 @@ import { OrderStore } from '../../../../core/order.store';
 
 import { CartComponent } from './cart.component';
 
+// Pruebas minimas de creacion del componente carrito.
 describe('CartComponent', () => {
   let component: CartComponent;
   let fixture: ComponentFixture<CartComponent>;
 
+  // Registra mocks de servicios usados en inicializacion del carrito.
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [CartComponent],
@@ -44,6 +46,7 @@ describe('CartComponent', () => {
     await fixture.whenStable();
   });
 
+  // Verifica que el componente se instancie sin errores.
   it('should create', () => {
     expect(component).toBeTruthy();
   });

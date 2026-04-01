@@ -6,10 +6,12 @@ import { AuthStore } from '../../../core/auth.store';
 
 import { ProfileComponent } from './profile.component';
 
+// Prueba basica del componente de perfil cliente.
 describe('ProfileComponent', () => {
   let component: ProfileComponent;
   let fixture: ComponentFixture<ProfileComponent>;
 
+  // Simula API y store de autenticacion para levantar el perfil.
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ProfileComponent],
@@ -44,6 +46,7 @@ describe('ProfileComponent', () => {
     await fixture.whenStable();
   });
 
+  // Asegura que la vista se instancie correctamente.
   it('should create', () => {
     expect(component).toBeTruthy();
   });
