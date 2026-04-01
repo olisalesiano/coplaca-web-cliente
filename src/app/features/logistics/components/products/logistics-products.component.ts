@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -47,7 +47,10 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
   creatingProduct = false;
   showCreateForm = false;
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   // Carga inicial y refresco periodico de productos/ofertas/categorias.
   ngOnInit(): void {
@@ -108,17 +111,26 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
         }
 
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (httpError: unknown) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo cargar el catalogo de productos.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo cargar el catalogo de productos.',
+        );
       },
     });
   }
 
   // Crea un producto nuevo validando campos operativos minimos.
   createProduct(): void {
-    if (this.creatingProduct || this.updatingStockProductId !== null || this.updatingPriceProductId !== null || this.updatingOfferProductId !== null) {
+    if (
+      this.creatingProduct ||
+      this.updatingStockProductId !== null ||
+      this.updatingPriceProductId !== null ||
+      this.updatingOfferProductId !== null
+    ) {
       this.warning = 'Hay una operacion en curso. Espera a que termine.';
       return;
     }
@@ -207,7 +219,11 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
   }
 
   updateStock(product: ProductDTO): void {
-    if (this.updatingStockProductId !== null || this.updatingPriceProductId !== null || this.updatingOfferProductId !== null) {
+    if (
+      this.updatingStockProductId !== null ||
+      this.updatingPriceProductId !== null ||
+      this.updatingOfferProductId !== null
+    ) {
       this.warning = 'Hay una operacion en curso. Espera a que termine.';
       return;
     }
@@ -226,7 +242,9 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
     }
 
     const actionText = delta > 0 ? 'incrementar' : 'reducir';
-    const confirmed = confirm(`Vas a ${actionText} el stock de ${product.name} en ${Math.abs(delta)} unidades. ¿Deseas continuar?`);
+    const confirmed = confirm(
+      `Vas a ${actionText} el stock de ${product.name} en ${Math.abs(delta)} unidades. ¿Deseas continuar?`,
+    );
     if (!confirmed) {
       this.warning = 'Actualizacion de stock cancelada por seguridad.';
       return;
@@ -244,13 +262,20 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
       },
       error: (httpError: unknown) => {
         this.updatingStockProductId = null;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo actualizar el stock del producto.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo actualizar el stock del producto.',
+        );
       },
     });
   }
 
   updatePrice(product: ProductDTO): void {
-    if (this.updatingStockProductId !== null || this.updatingPriceProductId !== null || this.updatingOfferProductId !== null) {
+    if (
+      this.updatingStockProductId !== null ||
+      this.updatingPriceProductId !== null ||
+      this.updatingOfferProductId !== null
+    ) {
       this.warning = 'Hay una operacion en curso. Espera a que termine.';
       return;
     }
@@ -287,13 +312,20 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
       },
       error: (httpError: unknown) => {
         this.updatingPriceProductId = null;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo actualizar el precio del producto.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo actualizar el precio del producto.',
+        );
       },
     });
   }
 
   updateOffer(product: ProductDTO): void {
-    if (this.updatingStockProductId !== null || this.updatingPriceProductId !== null || this.updatingOfferProductId !== null) {
+    if (
+      this.updatingStockProductId !== null ||
+      this.updatingPriceProductId !== null ||
+      this.updatingOfferProductId !== null
+    ) {
       this.warning = 'Hay una operacion en curso. Espera a que termine.';
       return;
     }
@@ -306,13 +338,19 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!Number.isFinite(discountPercentage) || discountPercentage <= 0 || discountPercentage > 90) {
+    if (
+      !Number.isFinite(discountPercentage) ||
+      discountPercentage <= 0 ||
+      discountPercentage > 90
+    ) {
       this.error = 'El descuento debe estar entre 1 y 90.';
       return;
     }
 
     if (discountPercentage > 60) {
-      const approved = confirm('El descuento supera el 60%. Esta accion puede afectar margenes. ¿Deseas continuar?');
+      const approved = confirm(
+        'El descuento supera el 60%. Esta accion puede afectar margenes. ¿Deseas continuar?',
+      );
       if (!approved) {
         this.warning = 'Guardado de oferta cancelado por seguridad.';
         return;
@@ -336,7 +374,10 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
       },
       error: (httpError: unknown) => {
         this.updatingOfferProductId = null;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo guardar la oferta del producto.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo guardar la oferta del producto.',
+        );
       },
     });
   }
@@ -395,7 +436,10 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
         }
       }
 
-      if (this.selectedCategoryFilter !== 'Todas' && productCategory !== this.selectedCategoryFilter) {
+      if (
+        this.selectedCategoryFilter !== 'Todas' &&
+        productCategory !== this.selectedCategoryFilter
+      ) {
         return false;
       }
 

@@ -47,7 +47,9 @@ export class LoginComponent {
       next: (session) => {
         this.authStore.setSession(session);
         this.loading = false;
-        void this.router.navigate([this.authStore.getDefaultRouteForCurrentRole()]);
+        setTimeout(() => {
+          void this.router.navigate([this.authStore.getDefaultRouteForCurrentRole()]);
+        }, 0);
       },
       error: (httpError: unknown) => {
         this.loading = false;
@@ -71,7 +73,9 @@ export class LoginComponent {
       return 'Error: correo o contraseña incorrectos.';
     }
 
-    const backendMessage = this.extractBackendMessage(error.error as { message?: string; error?: string } | string | null);
+    const backendMessage = this.extractBackendMessage(
+      error.error as { message?: string; error?: string } | string | null,
+    );
     if (backendMessage) {
       return backendMessage;
     }
@@ -80,7 +84,9 @@ export class LoginComponent {
   }
 
   // Extrae texto de error desde payloads heterogeneos del backend.
-  private extractBackendMessage(payload: { message?: string; error?: string } | string | null): string | null {
+  private extractBackendMessage(
+    payload: { message?: string; error?: string } | string | null,
+  ): string | null {
     if (typeof payload === 'string') {
       const text = payload.trim();
       return text.length > 0 ? text : null;

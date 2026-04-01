@@ -15,6 +15,12 @@
 }
 
 .logistics-navbar {
+  z-index: 100;
+  padding: 0 2rem;
+  height: 72px;
+  flex-shrink: 0;
+  background-color: #2a9d3f;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
   z-index: 15;
@@ -26,6 +32,14 @@
   background: linear-gradient(100deg, var(--coplaca-green-900), var(--coplaca-green-700));
   color: #fff;
   box-shadow: 0 12px 32px rgba(9, 43, 23, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
 }
 
 .brand {
@@ -59,6 +73,23 @@
 .brand-copy span {
   font-size: 0.76rem;
   color: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+  border-radius: 10px;
+  border: 4px solid #e0a800;
+}
+
+.brand img {
+  background-color: white;
+  width: 150px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
+.user-status {
+  color: white;
+  margin-left: 8px;
+  font-weight: 600;
 }
 
 .links {
@@ -74,6 +105,19 @@
   border-radius: 999px;
   padding: 0.42rem 0.8rem;
   font-weight: 600;
+  gap: 3rem;
+  margin-right: 75px;
+}
+
+.links a {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  color: #f5c518;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: color 0.2s;
+  text-decoration: none;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -90,72 +134,82 @@
 }
 
 .logistics-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-}
-
-.profile-chip {
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: rgba(10, 49, 27, 0.44);
-  color: #fff;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.75rem;
-  max-width: 230px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.profile-chip span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.logout-btn {
-  border: none;
-  background: var(--coplaca-yellow-500);
-  color: #1f220f;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.logistics-main {
-  padding: 1.1rem;
-}
-
-@media (max-width: 980px) {
-  .logistics-navbar {
-    flex-wrap: wrap;
+  .links a:hover {
+    color: white;
   }
 
-  .links {
-    width: 100%;
-    order: 3;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 0.2rem;
-  }
-
-  .logistics-actions {
-    margin-left: auto;
-  }
-}
-
-@media (max-width: 640px) {
-  .logistics-main {
-    padding: 0.8rem;
+  .logout-btn {
+    border: none;
+    background: #f0c019;
+    color: #2a9d3f;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
   }
 
   .profile-chip {
-    max-width: 170px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(10, 49, 27, 0.44);
+    color: #fff;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    max-width: 230px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .profile-chip span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .logout-btn {
+    border: none;
+    background: var(--coplaca-yellow-500);
+    color: #1f220f;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.45rem 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .logistics-main {
+    padding: 1.1rem;
+  }
+
+  @media (max-width: 980px) {
+    .logistics-navbar {
+      flex-wrap: wrap;
+    }
+
+    .links {
+      width: 100%;
+      order: 3;
+      justify-content: flex-start;
+      overflow-x: auto;
+      padding-bottom: 0.2rem;
+    }
+
+    .logistics-actions {
+      margin-left: auto;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .logistics-main {
+      padding: 0.8rem;
+    }
+
+    .profile-chip {
+      max-width: 170px;
+    }
   }
 }

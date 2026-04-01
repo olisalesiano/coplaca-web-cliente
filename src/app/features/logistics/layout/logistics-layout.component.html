@@ -1,34 +1,39 @@
-<div class="logistics-shell">
-  <header class="logistics-navbar">
-    <button class="brand" type="button" (click)="goToDashboard()">
+<nav class="logistics-navbar">
+  <div class="brand-container">
+    <button class="brand" type="button" (click)="goToOrders()">
       <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
-      <div class="brand-copy">
-        <strong>Panel COPLACA</strong>
-        <span>Operacion de logistica</span>
-      </div>
+    </button>
+    <span class="user-status">Logistica</span>
+  </div>
+
+  <div class="links">
+    <button type="button" routerLink="/logistics/dashboard" routerLinkActive="active-link">
+      Panel
+    </button>
+    <button type="button" routerLink="/logistics/orders" routerLinkActive="active-link">
+      Pedidos
+    </button>
+    <button type="button" routerLink="/logistics/products" routerLinkActive="active-link">
+      Productos
+    </button>
+    <button type="button" routerLink="/logistics/profile" routerLinkActive="active-link">
+      Perfil
+    </button>
+  </div>
+
+  <div class="logistics-actions">
+    <button class="profile-chip" type="button" (click)="goToProfile()">
+      <mat-icon>person</mat-icon>
+      <span>{{ logisticsDisplayName }}</span>
     </button>
 
-    <nav class="links">
-      <button type="button" routerLink="/logistics/dashboard" routerLinkActive="active-link">Panel</button>
-      <button type="button" routerLink="/logistics/orders" routerLinkActive="active-link">Pedidos</button>
-      <button type="button" routerLink="/logistics/products" routerLinkActive="active-link">Productos</button>
-      <button type="button" routerLink="/logistics/profile" routerLinkActive="active-link">Perfil</button>
-    </nav>
+    <button class="logout-btn" type="button" (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      Salir
+    </button>
+  </div>
+</nav>
 
-    <div class="logistics-actions">
-      <button class="profile-chip" type="button" (click)="goToProfile()">
-        <mat-icon>person</mat-icon>
-        <span>{{ logisticsDisplayName }}</span>
-      </button>
-
-      <button class="logout-btn" type="button" (click)="logout()">
-        <mat-icon>logout</mat-icon>
-        Salir
-      </button>
-    </div>
-  </header>
-
-  <main class="logistics-main">
-    <router-outlet></router-outlet>
-  </main>
-</div>
+<main class="logistics-main">
+  <router-outlet></router-outlet>
+</main>

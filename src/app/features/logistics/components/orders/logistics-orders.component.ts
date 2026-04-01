@@ -26,7 +26,10 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
   warning = '';
   message = '';
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   // Inicializa almacen y activa refresco periodico.
   ngOnInit(): void {
@@ -91,17 +94,23 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
         this.orders = orders;
         this.workers = workers;
 
-        if (orders.length === 0) {
-          this.warning = 'No hay pedidos registrados en tu almacen.';
-        } else if (this.assignableOrders.length > 0 && workers.length === 0) {
-          this.warning = 'No hay repartidores disponibles. No podras asignar pedidos confirmados hasta que haya personal activo.';
-        }
+            if (orders.length === 0) {
+              this.warning = 'No hay pedidos pendientes en tu almacen.';
+            } else if (workers.length === 0) {
+              this.warning = 'No hay repartidores disponibles. No podras asignar pedidos hasta que haya personal activo.';
+            }
 
-        this.loading = false;
+            this.loading = false;
+          },
+          error: (httpError: unknown) => {
+            this.loading = false;
+            this.error = this.extractErrorMessage(httpError, 'No se pudo cargar la operativa de pedidos.');
+          },
+        });
       },
       error: (httpError: unknown) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo cargar la operativa de pedidos.');
+        this.error = this.extractErrorMessage(httpError, 'No se pudo resolver el almacen asociado al usuario.');
       },
     });
   }
@@ -120,8 +129,12 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     }
 
     const worker = this.workers.find((item) => item.id === deliveryUserId);
-    const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'el repartidor seleccionado';
-    const confirmed = confirm(`Vas a asignar el pedido ${orderId} a ${workerName}. ¿Confirmas la operacion?`);
+    const workerName = worker
+      ? `${worker.firstName} ${worker.lastName}`
+      : 'el repartidor seleccionado';
+    const confirmed = confirm(
+      `Vas a asignar el pedido ${orderId} a ${workerName}. ¿Confirmas la operacion?`,
+    );
     if (!confirmed) {
       this.warning = 'Asignacion cancelada por seguridad.';
       return;
