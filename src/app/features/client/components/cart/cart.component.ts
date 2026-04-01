@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/api.service';
 import { CartStore } from '../../../../core/cart.store';
-import { CartItem, OrderDTO } from '../../../../core/api.models';
+import { CartItem } from '../../../../core/api.models';
 import { OrderStore } from '../../../../core/order.store';
 
 type PaymentMethod = 'fisico' | 'paypal' | 'tarjeta';
@@ -32,6 +32,7 @@ export class CartComponent {
   cardName = '';
   cardExpiry = '';
   cardCvv = '';
+  creatingOrder = false;
 
   constructor(
     private readonly router: Router,
@@ -45,8 +46,25 @@ export class CartComponent {
   // Recalcula lineas y total del carrito desde almacenamiento local.
   refreshCart(): void {
     this.cartItems = this.cartStore.getItems();
-    this.totalPedido = this.cartItems.reduce((acc, item) => acc + this.getItemSubtotal(item), 0);
-    this.totalPedido = this.roundMoney(this.totalPedido);
+    // Fuerza normalización de cada item siendo explícito sobre los types
+    this.cartItems = this.cartItems.map((item) => {
+      const unitPrice = Number(item.unitPrice || 0);
+      const quantityKg = Number(item.quantityKg || 0);
+      const stockQuantity = Number(item.stockQuantity || 0);
+      return {
+        ...item,
+        unitPrice: Math.max(0, unitPrice),
+        quantityKg: Math.max(0, quantityKg),
+        stockQuantity: Math.max(0, stockQuantity),
+      };
+    });
+    this.cartStore.saveItems(this.cartItems);
+    // Calcula suma sin redondear intermedios
+    const totalSinRedondeo = this.cartItems.reduce((acc, item) => {
+      const subtotal = Number((item.unitPrice * item.quantityKg).toFixed(2));
+      return Number((acc + subtotal).toFixed(2));
+    }, 0);
+    this.totalPedido = this.roundMoney(totalSinRedondeo);
   }
 
   increment(item: CartItem): void {
@@ -134,6 +152,10 @@ export class CartComponent {
 
   // Valida datos de pago segun metodo elegido y lanza la creacion de pedido.
   confirmarPago(): void {
+    if (this.creatingOrder) {
+      return;
+    }
+
     if (this.selectedPaymentMethod === 'paypal' && !this.isValidEmail(this.paypalEmail)) {
       this.paymentError = 'Introduce un email valido para pagar con PayPal.';
       return;
@@ -168,64 +190,48 @@ export class CartComponent {
 
   // Intenta crear pedido en API; si falla, registra pedido local de respaldo.
   private createOrder(): void {
+    if (this.cartItems.length === 0) {
+      this.setFeedback('warning', 'Tu carrito esta vacio.');
+      return;
+    }
 
     const items = this.cartItems.map((item) => ({
       productId: item.productId,
       quantity: item.quantityKg,
+      unitPrice: item.unitPrice,
+      subtotal: this.getItemSubtotal(item),
     }));
 
-    this.apiService.createOrder(items).subscribe({
-      next: (createdOrder) => {
-        this.orderStore.prependOrder(createdOrder);
-        this.cartStore.clear();
-        this.refreshCart();
-        this.setFeedback(
-          'success',
-          this.selectedPaymentMethod === 'fisico'
-            ? 'Pedido creado. Pagaras en fisico al recibirlo.'
-            : 'Pedido creado y pago confirmado.',
-        );
-        this.closePaymentDialog();
-        void this.router.navigate(['/client/orders']);
+    this.creatingOrder = true;
+    this.apiService.getCurrentUser().subscribe({
+      next: (user) => {
+        const shippingAddressId = user.address?.id;
+        this.apiService.createOrder(items, shippingAddressId, this.totalPedido).subscribe({
+          next: (createdOrder) => {
+            this.creatingOrder = false;
+            this.orderStore.prependOrder(createdOrder);
+            this.cartStore.clear();
+            this.refreshCart();
+            this.setFeedback(
+              'success',
+              this.selectedPaymentMethod === 'fisico'
+                ? 'Pedido creado. Pagaras en fisico al recibirlo.'
+                : 'Pedido creado y pago confirmado.',
+            );
+            this.closePaymentDialog();
+            void this.router.navigate(['/client/orders']);
+          },
+          error: () => {
+            this.creatingOrder = false;
+            this.setFeedback('error', 'No se pudo crear el pedido en servidor. No se desconto stock ni se confirmo la compra.');
+          },
+        });
       },
       error: () => {
-        const localOrder = this.buildLocalOrderFromCart();
-        this.orderStore.prependOrder(localOrder);
-        this.cartStore.clear();
-        this.refreshCart();
-        this.setFeedback('warning', 'Pedido guardado localmente. Se sincronizara cuando haya conexion.');
-        this.closePaymentDialog();
-        void this.router.navigate(['/client/orders']);
+        this.creatingOrder = false;
+        this.setFeedback('error', 'No se pudo validar tu perfil para crear el pedido.');
       },
     });
-  }
-
-  private buildLocalOrderFromCart(): OrderDTO {
-    const now = new Date();
-    const timestamp = now.getTime();
-    const paymentMethodMap: Record<PaymentMethod, string> = {
-      fisico: 'PHYSICAL',
-      paypal: 'PAYPAL',
-      tarjeta: 'CARD',
-    };
-
-    return {
-      id: -timestamp,
-      orderNumber: `LOCAL-${timestamp}`,
-      status: 'PENDING',
-      totalPrice: this.totalPedido,
-      paymentMethod: paymentMethodMap[this.selectedPaymentMethod],
-      paymentStatus: 'PENDING',
-      createdAt: now.toISOString(),
-      items: this.cartItems.map((item, index) => ({
-        id: index + 1,
-        productId: item.productId,
-        productName: item.name,
-        quantity: item.quantityKg,
-        unitPrice: item.unitPrice,
-        subtotal: this.getItemSubtotal(item),
-      })),
-    };
   }
 
   trackItem(_index: number, item: CartItem): number {

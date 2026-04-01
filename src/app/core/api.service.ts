@@ -159,16 +159,38 @@ export class ApiService {
       .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
-  createOrder(items: Array<{ productId: number; quantity: number }>): Observable<OrderDTO> {
-    return this.http.post<OrderDTO>(
+  createOrder(
+    items: Array<{ productId: number; quantity: number; unitPrice?: number; subtotal?: number }>,
+    shippingAddressId?: number,
+    totalPrice?: number,
+  ): Observable<OrderDTO> {
+    const payload: {
+      paymentMethod: 'CARD';
+      paymentStatus: 'PENDING';
+      items: Array<{ productId: number; quantity: number; unitPrice?: number; subtotal?: number }>;
+      shippingAddressId?: number;
+      totalPrice?: number;
+    } = {
+      paymentMethod: 'CARD',
+      paymentStatus: 'PENDING',
+      items,
+    };
+
+    if (shippingAddressId !== undefined) {
+      payload.shippingAddressId = shippingAddressId;
+    }
+
+    if (totalPrice !== undefined) {
+      payload.totalPrice = totalPrice;
+    }
+
+    return this.http
+      .post<OrderDTO | ApiSuccessResponse<OrderDTO>>(
       `${this.baseUrl}/api/v1/orders`,
-      {
-        paymentMethod: 'CARD',
-        paymentStatus: 'PENDING',
-        items,
-      },
+      payload,
       { headers: this.authHeaders() },
-    );
+    )
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
   }
 
   getWarehouses(): Observable<WarehouseDTO[]> {
@@ -296,7 +318,7 @@ export class ApiService {
         map((items) =>
           items.map<TopProductStatDTO>((item) => ({
             productId: Number(item['productId']) || 0,
-            productName: String(item['productName'] || ''),
+            productName: typeof item['productName'] === 'string' ? item['productName'] : '',
             unitsSold: Number(item['unitsSold']) || 0,
           })),
         ),

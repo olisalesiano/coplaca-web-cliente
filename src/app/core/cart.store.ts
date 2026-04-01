@@ -13,7 +13,14 @@ export class CartStore {
     }
 
     try {
-      return JSON.parse(raw) as CartItem[];
+      const parsed = JSON.parse(raw) as CartItem[];
+      // Normaliza para asegurar que los precios siempre son números
+      return parsed.map((item) => ({
+        ...item,
+        unitPrice: Number(item.unitPrice || 0),
+        quantityKg: Number(item.quantityKg || 0),
+        stockQuantity: Number(item.stockQuantity || 0),
+      }));
     } catch {
       return [];
     }
@@ -27,12 +34,23 @@ export class CartStore {
   // Agrega producto nuevo o acumula cantidad si ya existe en carrito.
   addItem(item: CartItem): void {
     const current = this.getItems();
+    const unitPrice = Number(item.unitPrice || 0);
+    const quantityKg = Number(item.quantityKg || 0);
+    const stockQuantity = Number(item.stockQuantity || 0);
     const existing = current.find((value) => value.productId === item.productId);
 
     if (existing) {
-      existing.quantityKg = Number((existing.quantityKg + item.quantityKg).toFixed(2));
+      const mergedQuantity = Number((existing.quantityKg + quantityKg).toFixed(2));
+      existing.stockQuantity = Math.max(0, stockQuantity);
+      existing.unitPrice = unitPrice;
+      existing.quantityKg = Number(Math.min(mergedQuantity, existing.stockQuantity || mergedQuantity).toFixed(2));
     } else {
-      current.push(item);
+      current.push({
+        ...item,
+        stockQuantity: Math.max(0, stockQuantity),
+        unitPrice: unitPrice,
+        quantityKg: Number(Math.min(quantityKg, stockQuantity || quantityKg).toFixed(2)),
+      });
     }
 
     this.saveItems(current);
