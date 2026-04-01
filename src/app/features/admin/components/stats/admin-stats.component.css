@@ -26,6 +26,95 @@ header p {
   gap: 0.9rem;
 }
 
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+
+.kpi-card {
+  border-radius: 12px;
+  border: 1px solid rgba(31, 109, 61, 0.16);
+  background: #ffffff;
+  padding: 0.7rem 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.kpi-card.highlight {
+  background: linear-gradient(160deg, #fff8de 0%, #fff0be 100%);
+  border-color: rgba(245, 197, 24, 0.45);
+}
+
+.kpi-card span {
+  font-size: 0.78rem;
+  color: #4b6152;
+}
+
+.kpi-card strong {
+  font-size: 1.25rem;
+  color: #193b2a;
+}
+
+.sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 0.95rem;
+}
+
+.section-card {
+  border: 1px solid rgba(31, 109, 61, 0.16);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(23, 71, 43, 0.06);
+}
+
+.section-card h2 {
+  margin: 0 0 0.7rem;
+  color: #1a412d;
+  font-size: 1rem;
+}
+
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.mini-grid div {
+  border-radius: 10px;
+  background: #f8fcf6;
+  border: 1px solid rgba(31, 109, 61, 0.12);
+  padding: 0.55rem 0.6rem;
+}
+
+.mini-grid span {
+  display: block;
+  font-size: 0.78rem;
+  color: #4b6152;
+}
+
+.mini-grid strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: #193b2a;
+  font-size: 1.1rem;
+}
+
+.top-products {
+  margin-top: 0.2rem;
+}
+
+.top-products h2,
+.insights h2 {
+  margin: 0 0 0.7rem;
+  color: #1a412d;
+}
+
 .card {
   border: 1px solid rgba(31, 109, 61, 0.16);
   border-radius: 14px;
@@ -44,7 +133,7 @@ header p {
   font-weight: 700;
 }
 
-h2 {
+h3 {
   margin: 0.6rem 0;
   font-size: 1.05rem;
 }
@@ -94,4 +183,30 @@ h2 {
 .health-check .count {
   color: #2f4f3a;
   font-weight: 600;
+}
+
+.insights {
+  margin-top: 0.9rem;
+  border-radius: 14px;
+  border: 1px solid rgba(31, 109, 61, 0.16);
+  background: #ffffff;
+  padding: 0.9rem;
+}
+
+.insights ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #365746;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.hint {
+  color: #4d6155;
+}
+
+@media (max-width: 680px) {
+  .mini-grid {
+    grid-template-columns: 1fr;
+  }
 }
