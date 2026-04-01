@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map } from 'rxjs';
 import { AuthStore } from './auth.store';
 import {
   AdminUserDTO,
@@ -386,11 +386,22 @@ export class ApiService {
   }
 
   assignOrderToDelivery(orderId: number, deliveryUserId: number): Observable<void> {
-    return this.http.put<void>(
-      `${this.baseUrl}/api/v1/orders/${orderId}/assign/${deliveryUserId}`,
-      {},
-      { headers: this.authHeaders() },
-    );
+    // Soporta ambas variantes de endpoint segun version de backend.
+    return this.http
+      .put<void>(
+        `${this.baseUrl}/api/v1/orders/${orderId}/assign/${deliveryUserId}`,
+        {},
+        { headers: this.authHeaders() },
+      )
+      .pipe(
+        catchError(() =>
+          this.http.put<void>(
+            `${this.baseUrl}/api/v1/orders/${orderId}/assign`,
+            { deliveryUserId },
+            { headers: this.authHeaders() },
+          ),
+        ),
+      );
   }
 
   updateLogisticsProductStock(productId: number, delta: number): Observable<void> {

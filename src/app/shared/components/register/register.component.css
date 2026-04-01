@@ -131,23 +131,26 @@
 .btn-login {
   width: 55%;
   padding: 0.85rem;
-  background-color: #1a7a40;
-  color: white;
+  background: linear-gradient(135deg, #ffd84a 0%, #f5c518 48%, #e4a900 100%);
+  color: #1f1a06;
   font-size: 1.05rem;
-  font-weight: 600;
+  font-weight: 700;
   font-family: 'Poppins', sans-serif;
-  border: none;
+  border: 1px solid #b98500;
   border-radius: 30px;
   cursor: pointer;
   margin-top: 0.5rem;
+  box-shadow: 0 8px 18px rgba(120, 90, 10, 0.28);
   transition:
     background-color 0.2s,
-    transform 0.1s;
+    transform 0.1s,
+    box-shadow 0.2s;
 }
 
 .btn-login:hover {
-  background-color: #155e30;
+  background: linear-gradient(135deg, #ffe169 0%, #f8cf35 50%, #eeb300 100%);
   transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(120, 90, 10, 0.35);
 }
 
 .btn-login:active {
