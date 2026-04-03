@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { catchError, forkJoin, of } from 'rxjs';
 import { ApiService } from '../../../../core/api.service';
@@ -29,7 +29,10 @@ export class LogisticsDashboardComponent implements OnInit {
   revenueMonth = 0;
   pendingRevenue = 0;
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   // Carga inicial del tablero.
   ngOnInit(): void {
@@ -56,9 +59,15 @@ export class LogisticsDashboardComponent implements OnInit {
         }
 
         forkJoin({
-          pendingOrders: this.apiService.getLogisticsOrders(user.warehouseId).pipe(catchError(() => of([]))),
-          confirmedOrders: this.apiService.getLogisticsConfirmedOrders(user.warehouseId).pipe(catchError(() => of([]))),
-          inTransitOrders: this.apiService.getLogisticsInTransitOrders(user.warehouseId).pipe(catchError(() => of([]))),
+          pendingOrders: this.apiService
+            .getLogisticsOrders(user.warehouseId)
+            .pipe(catchError(() => of([]))),
+          confirmedOrders: this.apiService
+            .getLogisticsConfirmedOrders(user.warehouseId)
+            .pipe(catchError(() => of([]))),
+          inTransitOrders: this.apiService
+            .getLogisticsInTransitOrders(user.warehouseId)
+            .pipe(catchError(() => of([]))),
           deliveryWorkers: this.apiService
             .getAvailableDeliveryWorkers(user.warehouseId)
             .pipe(catchError(() => of([]))),
@@ -68,13 +77,22 @@ export class LogisticsDashboardComponent implements OnInit {
           products: this.apiService.getProducts().pipe(catchError(() => of([]))),
           offers: this.apiService.getOffers().pipe(catchError(() => of([]))),
         }).subscribe({
-          next: ({ pendingOrders, confirmedOrders, inTransitOrders, deliveryWorkers, warehouseStats, products, offers }) => {
+          next: ({
+            pendingOrders,
+            confirmedOrders,
+            inTransitOrders,
+            deliveryWorkers,
+            warehouseStats,
+            products,
+            offers,
+          }) => {
             this.pendingOrders = pendingOrders;
             this.confirmedOrders = confirmedOrders;
             this.inTransitOrders = inTransitOrders;
             this.activeDeliveryUsers = deliveryWorkers.filter((entry) => entry.enabled !== false);
             this.activeLogisticsUsersCount =
-              this.normalizeNumber(warehouseStats['activeLogisticsUsers']) || (this.user?.enabled ? 1 : 0);
+              this.normalizeNumber(warehouseStats['activeLogisticsUsers']) ||
+              (this.user?.enabled ? 1 : 0);
             this.totalProducts = products.length;
             this.activeOffers = offers.filter((offer) => offer.active !== false).length;
 
@@ -88,6 +106,7 @@ export class LogisticsDashboardComponent implements OnInit {
             this.pendingRevenue =
               this.normalizeNumber(warehouseStats['pendingRevenue']) || fallbackPendingRevenue;
             this.loading = false;
+            this.cdr.detectChanges();
           },
           error: () => {
             this.loading = false;

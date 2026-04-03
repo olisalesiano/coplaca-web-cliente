@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { catchError, forkJoin, of } from 'rxjs';
 import { ApiService } from '../../../../core/api.service';
@@ -26,7 +26,10 @@ export class LogisticsProfileComponent implements OnInit {
   busyWorkers = 0;
   totalRevenue = 0;
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   // Carga perfil y metricas operativas del almacen.
   ngOnInit(): void {
@@ -67,20 +70,32 @@ export class LogisticsProfileComponent implements OnInit {
 
   private loadWarehouseData(warehouseId: number): void {
     forkJoin({
-      orders: this.apiService.getLogisticsAllOrders(warehouseId).pipe(catchError(() => of([] as LogisticsOrderDTO[]))),
-      workers: this.apiService.getAvailableDeliveryWorkers(warehouseId).pipe(catchError(() => of([]))),
-      stats: this.apiService.getLogisticsWarehouseStats(warehouseId, 'month').pipe(catchError(() => of({}))),
+      orders: this.apiService
+        .getLogisticsAllOrders(warehouseId)
+        .pipe(catchError(() => of([] as LogisticsOrderDTO[]))),
+      workers: this.apiService
+        .getAvailableDeliveryWorkers(warehouseId)
+        .pipe(catchError(() => of([]))),
+      stats: this.apiService
+        .getLogisticsWarehouseStats(warehouseId, 'month')
+        .pipe(catchError(() => of({}))),
     }).subscribe({
       next: ({ orders, workers, stats }) => {
         this.totalOrders = orders.length;
         this.confirmedOrders = this.countStatus(orders, 'CONFIRMED');
-        this.assignedOrders = this.countStatus(orders, 'ASSIGNED') + this.countStatus(orders, 'ACCEPTED');
+        this.assignedOrders =
+          this.countStatus(orders, 'ASSIGNED') + this.countStatus(orders, 'ACCEPTED');
         this.inTransitOrders = this.countStatus(orders, 'IN_TRANSIT');
         this.deliveredOrders = this.countStatus(orders, 'DELIVERED');
-        this.availableWorkers = workers.filter((worker) => worker.deliveryStatus === 'AT_WAREHOUSE').length;
-        this.busyWorkers = workers.filter((worker) => worker.deliveryStatus === 'DELIVERING').length;
+        this.availableWorkers = workers.filter(
+          (worker) => worker.deliveryStatus === 'AT_WAREHOUSE',
+        ).length;
+        this.busyWorkers = workers.filter(
+          (worker) => worker.deliveryStatus === 'DELIVERING',
+        ).length;
         this.totalRevenue = this.toNumber((stats as Record<string, unknown>)['revenue']);
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;

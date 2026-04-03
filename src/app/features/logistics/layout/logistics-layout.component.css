@@ -8,33 +8,23 @@
   --coplaca-green-700: #1f6d3d;
   --coplaca-yellow-500: #f5c518;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 90% -5%, rgba(245, 197, 24, 0.24), transparent 40%),
-    radial-gradient(circle at 10% 18%, rgba(42, 157, 63, 0.15), transparent 35%),
-    linear-gradient(180deg, #f5f9f0 0%, #edf6ea 100%);
+  background: #f0f7f1;
 }
 
 .logistics-navbar {
-  z-index: 100;
-  padding: 0 2rem;
-  height: 72px;
-  flex-shrink: 0;
-  background-color: #2a9d3f;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
-  z-index: 15;
+  z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.9rem 1.2rem;
-  background: linear-gradient(100deg, var(--coplaca-green-900), var(--coplaca-green-700));
+  padding: 0 2rem;
+  height: 72px;
+  flex-shrink: 0;
+  background-color: #2a9d3f;
   color: #fff;
-  box-shadow: 0 12px 32px rgba(9, 43, 23, 0.28);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
 .brand-container {
@@ -138,16 +128,6 @@
     color: white;
   }
 
-  .logout-btn {
-    border: none;
-    background: #f0c019;
-    color: #2a9d3f;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-  }
-
   .profile-chip {
     border: 1px solid rgba(255, 255, 255, 0.28);
     background: rgba(10, 49, 27, 0.44);
@@ -171,7 +151,7 @@
   .logout-btn {
     border: none;
     background: var(--coplaca-yellow-500);
-    color: #1f220f;
+    color: white;
     border-radius: 999px;
     display: inline-flex;
     align-items: center;
