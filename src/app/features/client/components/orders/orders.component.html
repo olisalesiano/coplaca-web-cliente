@@ -8,16 +8,28 @@
       </button>
     </div>
 
+    <div class="orders-toolbar">
+      <button class="btn-toggle" type="button" [class.active]="viewMode === 'active'" (click)="showActiveOrders()">
+        Tus pedidos
+      </button>
+      <button class="btn-toggle" type="button" [class.active]="viewMode === 'history'" (click)="showHistory()">
+        Historial de pedidos
+      </button>
+    </div>
+
+    <p class="orders-notice" *ngIf="deliveryNotice">{{ deliveryNotice }}</p>
+
     <p class="orders-message" *ngIf="error">{{ error }}</p>
 
-    <div class="orders-empty" *ngIf="!loading && pedidos.length === 0">
+    <div class="orders-empty" *ngIf="!loading && displayedOrders.length === 0">
       <h3>Aun no tienes pedidos</h3>
-      <p>Cuando completes tu primera compra, aparecera aqui con sus detalles.</p>
+      <p *ngIf="viewMode === 'active'">Cuando completes tu primera compra, aparecera aqui con sus detalles.</p>
+      <p *ngIf="viewMode === 'history'">No hay pedidos en el historial todavia.</p>
       <button class="btn-detalles" type="button" (click)="goToOurProducts()">Ir a la tienda</button>
     </div>
 
-    <div class="orders-scroll" [class.orders-scroll-limited]="pedidos.length > 3" *ngIf="pedidos.length > 0">
-      <div class="order-item" *ngFor="let p of pedidos; trackBy: trackOrder">
+    <div class="orders-scroll" [class.orders-scroll-limited]="displayedOrders.length > 3" *ngIf="displayedOrders.length > 0">
+      <div class="order-item" *ngFor="let p of displayedOrders; trackBy: trackOrder">
         <div class="order-row">
           <div class="order-left">
             <span class="order-id">#{{ p.orderNumber || p.id }}</span>

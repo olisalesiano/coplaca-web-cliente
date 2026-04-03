@@ -137,6 +137,38 @@
   flex-shrink: 0;
 }
 
+.orders-toolbar {
+  display: flex;
+  gap: 0.7rem;
+  margin: 0 0 0.2rem;
+}
+
+.btn-toggle {
+  border: 2px solid #1f6d2e;
+  background: #fff5b3;
+  color: #1f6d2e;
+  border-radius: 24px;
+  padding: 0.35rem 0.9rem;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-toggle.active {
+  background: #1f6d2e;
+  color: #fff;
+}
+
+.orders-notice {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #0f5132;
+  background: #d1e7dd;
+  border: 1px solid #badbcc;
+  border-radius: 10px;
+  padding: 0.5rem 0.8rem;
+}
+
 .btn-refresh {
   background: #1f6d2e;
   border: none;
