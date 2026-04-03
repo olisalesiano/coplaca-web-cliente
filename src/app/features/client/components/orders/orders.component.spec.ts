@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { ApiService } from '../../../../core/api.service';
+import { OrderDTO } from '../../../../core/api.models';
 import { OrderStore } from '../../../../core/order.store';
 
 import { OrdersComponent } from './orders.component';
@@ -28,6 +29,7 @@ describe('OrdersComponent', () => {
           provide: OrderStore,
           useValue: {
             getOrders: () => [],
+            mergeWithStored: (orders: OrderDTO[]) => orders,
             saveOrders: () => undefined,
           },
         },
@@ -42,5 +44,25 @@ describe('OrdersComponent', () => {
   // Verifica instanciacion del componente.
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows only delivered orders in history view', () => {
+    const makeOrder = (id: number, status: string): OrderDTO => ({
+      id,
+      orderNumber: `ORD-${id}`,
+      status,
+      totalPrice: 10,
+      items: [],
+    });
+
+    component.pedidos = [
+      makeOrder(1, 'PENDING'),
+      makeOrder(2, 'DELIVERED'),
+      makeOrder(3, 'CANCELLED'),
+      makeOrder(4, ' delivered '),
+    ];
+    component.showHistory();
+
+    expect(component.displayedOrders.map((o) => o.id)).toEqual([2, 4]);
   });
 });
