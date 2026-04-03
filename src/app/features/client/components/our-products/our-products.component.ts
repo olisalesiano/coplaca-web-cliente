@@ -84,6 +84,7 @@ export class OurProductsComponent implements OnInit {
   quantityByProduct: Record<number, number> = {};
   rotatedProductsIndex: number = 0;
   rotationInterval: number = 10000; // 10 segundos
+  displayOffers: DisplayOffer[] = [];
   private readonly destroyRef = inject(DestroyRef);
 
   constructor(
@@ -107,6 +108,7 @@ export class OurProductsComponent implements OnInit {
     this.apiService.getProducts('').subscribe({
       next: (products) => {
         this.products = products;
+        this.displayOffers = this.getDisplayOffers();
 
         for (const product of products) {
           this.quantityByProduct[product.id] ??= 1;
