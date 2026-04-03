@@ -44,6 +44,13 @@
       <span class="dialog-estado">{{ pedidoSeleccionado?.status }}</span>
     </div>
 
+    <div class="dialog-product" style="margin-bottom: 12px;">
+      <div class="dialog-product-details">
+        <span class="dialog-product-name">Dirección de entrega</span>
+        <span class="dialog-product-cantidad">{{ getDeliveryAddress(pedidoSeleccionado) }}</span>
+      </div>
+    </div>
+
     <!-- PRODUCTOS -->
     <div class="dialog-products">
       <div class="dialog-product" *ngFor="let prod of pedidoSeleccionado?.items">
