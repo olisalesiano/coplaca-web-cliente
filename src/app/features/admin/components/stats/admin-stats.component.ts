@@ -134,8 +134,10 @@ export class AdminStatsComponent implements OnInit {
   checkDatabaseHealth(): void {
     this.apiService.checkAdminHealth().subscribe({
       next: (response: Record<string, unknown>) => {
-        this.databaseStatus = String(response['database'] || 'UNKNOWN');
-        this.databaseMessage = String(response['message'] || 'Estado desconocido');
+        const databaseRaw = response['database'];
+        const messageRaw = response['message'];
+        this.databaseStatus = typeof databaseRaw === 'string' ? databaseRaw : 'UNKNOWN';
+        this.databaseMessage = typeof messageRaw === 'string' ? messageRaw : 'Estado desconocido';
         this.usersInDatabase = Number(response['usersInDatabase']) || 0;
       },
       error: () => {

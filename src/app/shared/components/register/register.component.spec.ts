@@ -6,10 +6,12 @@ import { AuthStore } from '../../../core/auth.store';
 
 import { RegisterComponent } from './register.component';
 
+// Prueba de inicializacion del formulario de registro.
 describe('RegisterComponent', () => {
   let component: RegisterComponent;
   let fixture: ComponentFixture<RegisterComponent>;
 
+  // Configura dependencias minimas para flujo de alta de usuario.
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RegisterComponent],
@@ -35,6 +37,7 @@ describe('RegisterComponent', () => {
     await fixture.whenStable();
   });
 
+  // Comprueba que el componente se cree correctamente.
   it('should create', () => {
     expect(component).toBeTruthy();
   });

@@ -4,6 +4,7 @@ import { ApiService } from './api.service';
 import { WarehouseDTO } from './api.models';
 import { environment } from '../../environments/environment';
 
+// Estructura comun que consume la UI para autocompletado y geocodificacion.
 export interface AddressSuggestion {
   displayName: string;
   street: string;
@@ -15,6 +16,7 @@ export interface AddressSuggestion {
   longitude: number;
 }
 
+// Campos que puede devolver Photon en cada resultado de direccion.
 interface PhotonProperties {
   name?: string;
   street?: string;
@@ -27,6 +29,7 @@ interface PhotonProperties {
   country?: string;
 }
 
+// Envoltorio de un elemento de Photon con propiedades y coordenadas.
 interface PhotonFeature {
   properties?: PhotonProperties;
   geometry?: {
@@ -34,10 +37,12 @@ interface PhotonFeature {
   };
 }
 
+// Respuesta principal de Photon.
 interface PhotonResponse {
   features?: PhotonFeature[];
 }
 
+// Componentes de direccion que devuelve OpenCage.
 interface OpenCageComponents {
   road?: string;
   neighbourhood?: string;
@@ -50,6 +55,7 @@ interface OpenCageComponents {
   house_number?: string;
 }
 
+// Resultado individual de OpenCage.
 interface OpenCageResult {
   formatted?: string;
   geometry?: {
@@ -59,10 +65,12 @@ interface OpenCageResult {
   components?: OpenCageComponents;
 }
 
+// Respuesta principal de OpenCage.
 interface OpenCageResponse {
   results?: OpenCageResult[];
 }
 
+// Campos de direccion de Nominatim.
 interface NominatimAddress {
   road?: string;
   pedestrian?: string;
@@ -81,6 +89,7 @@ interface NominatimAddress {
   country?: string;
 }
 
+// Resultado individual de Nominatim.
 interface NominatimItem {
   display_name?: string;
   lat?: string;
@@ -88,6 +97,7 @@ interface NominatimItem {
   address?: NominatimAddress;
 }
 
+// Resultado final para el calculo del almacen mas cercano.
 export interface NearestWarehouseResult {
   warehouse: WarehouseDTO;
   distanceKm: number;
@@ -95,12 +105,17 @@ export interface NearestWarehouseResult {
 
 @Injectable({ providedIn: 'root' })
 export class AddressGeoService {
+  // URLs base de proveedores de geocodificacion (ordenadas por prioridad de uso).
   private readonly photonBaseUrl = 'https://photon.komoot.io/api';
   private readonly openCageBaseUrl = 'https://api.opencagedata.com/geocode/v1/json';
   private readonly nominatimBaseUrl = 'https://nominatim.openstreetmap.org/search';
+
+  // Limites geograficos para acotar busquedas a Canarias y mejorar precision.
   private readonly canaryBbox = '-18.30,27.50,-13.10,29.60';
   private readonly canaryViewbox = '-18.30,29.60,-13.10,27.50';
   private readonly canaryQuerySuffix = 'Islas Canarias';
+
+  // API key de OpenCage: primero entorno, luego localStorage como fallback en runtime.
   private readonly openCageApiKey =
     environment.openCageApiKey?.trim() ||
     (globalThis.localStorage?.getItem('coplaca_opencage_api_key') ?? '').trim();
@@ -109,17 +124,22 @@ export class AddressGeoService {
 
   // Busca sugerencias de direccion con estrategia de fallback entre proveedores.
   async searchSuggestions(query: string): Promise<AddressSuggestion[]> {
+    // Normaliza el texto y evita consultas demasiado cortas.
     const normalized = query.trim();
     if (normalized.length < 3) {
       return [];
     }
 
+    // Fuerza contexto geografico de Canarias para mejorar coincidencias.
     const canaryQuery = normalized.toLowerCase().includes('canarias')
       ? normalized
       : `${normalized}, ${this.canaryQuerySuffix}`;
+
+    // Detecta si la entrada parece codigo postal para ajustar estrategia.
     const isPostalCodeSearch = this.looksLikePostalCodeQuery(normalized);
 
     try {
+      // 1) Photon suele ser rapido y suficiente para texto libre.
       if (!isPostalCodeSearch) {
         const photon = await this.searchWithPhoton(canaryQuery);
         if (photon.length > 0) {
@@ -127,11 +147,13 @@ export class AddressGeoService {
         }
       }
 
+      // 2) OpenCage como respaldo de mayor cobertura.
       const openCage = await this.searchWithOpenCage(canaryQuery);
       if (openCage.length > 0) {
         return openCage;
       }
 
+      // 3) Nominatim como ultimo fallback (y preferido en postal code).
       if (isPostalCodeSearch) {
         return await this.searchWithNominatim(canaryQuery);
       }
@@ -150,6 +172,7 @@ export class AddressGeoService {
     province: string;
     postalCode: string;
   }): Promise<{ latitude: number; longitude: number } | null> {
+    // Construye una consulta compacta desde campos estructurados de direccion.
     const query = [
       `${payload.street} ${payload.streetNumber}`.trim(),
       payload.city,
@@ -160,6 +183,7 @@ export class AddressGeoService {
       .filter(Boolean)
       .join(', ');
 
+    // Reutiliza el motor de sugerencias y toma el primer candidato valido.
     const suggestions = await this.searchSuggestions(query);
     if (suggestions.length === 0) {
       return null;
@@ -173,6 +197,7 @@ export class AddressGeoService {
 
   // Resuelve direccion aproximada desde codigo postal.
   async geocodeFromPostalCode(postalCode: string): Promise<AddressSuggestion | null> {
+    // Limpia espacios y valida longitud minima esperada de codigo postal.
     const normalizedPostalCode = postalCode.replaceAll(/\s+/g, '').trim();
     if (normalizedPostalCode.length < 5) {
       return null;
@@ -191,6 +216,7 @@ export class AddressGeoService {
     longitude: number,
   ): Promise<NearestWarehouseResult | null> {
     try {
+      // Obtiene almacenes y descarta inactivos o sin coordenadas utilizables.
       const warehouses = await firstValueFrom(this.apiService.getWarehouses());
       const candidates = warehouses.filter(
         (warehouse) =>
@@ -203,6 +229,7 @@ export class AddressGeoService {
         return null;
       }
 
+      // Inicializa con el primer candidato y calcula la distancia base.
       let nearest = candidates[0];
       let shortestDistance = this.calculateDistanceKm(
         latitude,
@@ -211,6 +238,7 @@ export class AddressGeoService {
         nearest.longitude,
       );
 
+      // Recorre el resto y conserva el almacen con menor distancia.
       for (const warehouse of candidates.slice(1)) {
         const distance = this.calculateDistanceKm(
           latitude,
@@ -227,6 +255,7 @@ export class AddressGeoService {
 
       return {
         warehouse: nearest,
+        // Redondea para mostrar una distancia legible en UI.
         distanceKm: Number(shortestDistance.toFixed(2)),
       };
     } catch {
@@ -235,6 +264,7 @@ export class AddressGeoService {
   }
 
   private parseSuggestion(feature: PhotonFeature): AddressSuggestion | null {
+    // Convierte coordenadas a numeros y descarta resultados incompletos.
     const coordinates = feature.geometry?.coordinates;
     const longitude = Number(coordinates?.[0]);
     const latitude = Number(coordinates?.[1]);
@@ -243,17 +273,20 @@ export class AddressGeoService {
     }
 
     const address = feature.properties ?? {};
+    // Prioriza calle, luego barrio y por ultimo nombre generico del punto.
     const street =
       address.street ??
       address.neighbourhood ??
       address.name ??
       '';
 
+    // Intenta derivar la ciudad con campos alternativos.
     const city =
       address.city ??
       address.district ??
       '';
 
+    // Construye una etiqueta amigable para mostrar en el autocompletado.
     const displayName = [
       `${street} ${address.housenumber ?? ''}`.trim(),
       city,
@@ -277,6 +310,7 @@ export class AddressGeoService {
   }
 
   private parseOpenCageSuggestion(result: OpenCageResult): AddressSuggestion | null {
+    // Normaliza lat/lng y valida que sean finitas.
     const latitude = Number(result.geometry?.lat);
     const longitude = Number(result.geometry?.lng);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -284,6 +318,7 @@ export class AddressGeoService {
     }
 
     const address = result.components ?? {};
+    // Define calle y ciudad con fallback por jerarquia de campos.
     const street =
       address.road ??
       address.neighbourhood ??
@@ -295,6 +330,7 @@ export class AddressGeoService {
       address.village ??
       '';
 
+    // Usa formatted si viene completo; si no, arma el texto manualmente.
     const displayName = result.formatted?.trim() || [
       `${street} ${address.house_number ?? ''}`.trim(),
       city,
@@ -318,6 +354,7 @@ export class AddressGeoService {
   }
 
   private parseNominatimSuggestion(item: NominatimItem): AddressSuggestion | null {
+    // Nominatim devuelve lat/lon como string; se convierten y validan.
     const latitude = Number(item.lat);
     const longitude = Number(item.lon);
     if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
@@ -325,6 +362,7 @@ export class AddressGeoService {
     }
 
     const address = item.address ?? {};
+    // Nominatim maneja varias claves para via/ciudad segun zona.
     const street =
       address.road ??
       address.pedestrian ??
@@ -340,6 +378,7 @@ export class AddressGeoService {
       address.county ??
       '';
 
+    // Si no hay display_name, se construye uno consistente con otros proveedores.
     const displayName = item.display_name?.trim() || [
       `${street} ${address.house_number ?? ''}`.trim(),
       city,
@@ -363,6 +402,7 @@ export class AddressGeoService {
   }
 
   private async searchWithPhoton(canaryQuery: string): Promise<AddressSuggestion[]> {
+    // Parametros afinados para busqueda corta y localizada en Canarias.
     const params = new URLSearchParams({
       q: canaryQuery,
       lang: 'es',
@@ -375,6 +415,7 @@ export class AddressGeoService {
       return [];
     }
 
+    // Convierte, limpia nulos y descarta sugerencias sin texto visible.
     const payload = (await response.json()) as PhotonResponse;
     return (payload.features ?? [])
       .map((item) => this.parseSuggestion(item))
@@ -383,10 +424,12 @@ export class AddressGeoService {
   }
 
   private async searchWithOpenCage(canaryQuery: string): Promise<AddressSuggestion[]> {
+    // Sin API key, se omite este proveedor.
     if (!this.openCageApiKey) {
       return [];
     }
 
+    // Restringe pais y limites para maximizar relevancia local.
     const params = new URLSearchParams({
       q: canaryQuery,
       key: this.openCageApiKey,
@@ -402,6 +445,7 @@ export class AddressGeoService {
       return [];
     }
 
+    // Convierte resultados al contrato comun de la aplicacion.
     const payload = (await response.json()) as OpenCageResponse;
     return (payload.results ?? [])
       .map((item) => this.parseOpenCageSuggestion(item))
@@ -410,6 +454,7 @@ export class AddressGeoService {
   }
 
   private async searchWithNominatim(canaryQuery: string): Promise<AddressSuggestion[]> {
+    // Configura respuesta detallada y acotada al territorio objetivo.
     const params = new URLSearchParams({
       q: canaryQuery,
       format: 'jsonv2',
@@ -430,6 +475,7 @@ export class AddressGeoService {
       return [];
     }
 
+    // Mapea resultados de Nominatim al formato unificado.
     const payload = (await response.json()) as NominatimItem[];
     return payload
       .map((item) => this.parseNominatimSuggestion(item))
@@ -437,10 +483,12 @@ export class AddressGeoService {
       .filter((value) => value.displayName.length > 0);
   }
 
+  // Conversion auxiliar de grados a radianes para la formula Haversine.
   private toRadians(value: number): number {
     return (value * Math.PI) / 180;
   }
 
+  // Detecta consultas cuyo primer bloque es un codigo postal espanol (5 digitos).
   private looksLikePostalCodeQuery(query: string): boolean {
     const firstSegment = query.split(',')[0]?.trim() ?? '';
     return /^\d{5}$/.test(firstSegment.replaceAll(/\s+/g, ''));
@@ -452,6 +500,7 @@ export class AddressGeoService {
     destinationLat: number,
     destinationLng: number,
   ): number {
+    // Distancia geodesica aproximada usando Haversine sobre esfera terrestre.
     const earthRadiusKm = 6371;
     const deltaLat = this.toRadians(destinationLat - originLat);
     const deltaLng = this.toRadians(destinationLng - originLng);

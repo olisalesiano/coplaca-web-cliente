@@ -59,32 +59,9 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
           return;
         }
 
-        forkJoin({
-          orders: this.apiService.getLogisticsOrders(user.warehouseId),
-          workers: this.apiService.getAvailableDeliveryWorkers(user.warehouseId),
-        }).subscribe({
-          next: ({ orders, workers }) => {
-            this.orders = orders;
-            this.workers = workers;
-
-            if (orders.length === 0) {
-              this.warning = 'No hay pedidos pendientes en tu almacen.';
-            } else if (workers.length === 0) {
-              this.warning =
-                'No hay repartidores disponibles. No podras asignar pedidos hasta que haya personal activo.';
-            }
-
-            this.loading = false;
-            this.cdr.detectChanges();
-          },
-          error: (httpError: unknown) => {
-            this.loading = false;
-            this.error = this.extractErrorMessage(
-              httpError,
-              'No se pudo cargar la operativa de pedidos.',
-            );
-          },
-        });
+        this.warehouseId = user.warehouseId;
+        this.loadData();
+        this.startAutoRefresh();
       },
       error: (httpError: unknown) => {
         this.loading = false;
@@ -117,6 +94,12 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
         this.orders = orders;
         this.workers = workers;
 
+        // Evita mantener selecciones de pedidos que ya no son asignables.
+        const assignableIds = new Set(this.assignableOrders.map((order) => order.id));
+        this.selectedDeliveryByOrder = Object.fromEntries(
+          Object.entries(this.selectedDeliveryByOrder).filter(([orderId]) => assignableIds.has(Number(orderId))),
+        );
+
         if (orders.length === 0) {
           this.warning = 'No hay pedidos registrados en tu almacen.';
         } else if (this.assignableOrders.length > 0 && workers.length === 0) {
@@ -134,6 +117,17 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
         );
       },
     });
+  }
+
+  private startAutoRefresh(): void {
+    if (this.autoRefreshHandle) {
+      clearInterval(this.autoRefreshHandle);
+    }
+
+    this.autoRefreshHandle = setInterval(() => {
+      this.loadData(true);
+      this.cdr.markForCheck();
+    }, 15000);
   }
 
   // Asigna pedido confirmado a un repartidor seleccionado.
@@ -168,6 +162,7 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     this.apiService.assignOrderToDelivery(orderId, deliveryUserId).subscribe({
       next: () => {
         this.assigningOrderId = null;
+        delete this.selectedDeliveryByOrder[orderId];
         this.message = `Pedido ${orderId} asignado correctamente.`;
         this.loadData(true);
       },

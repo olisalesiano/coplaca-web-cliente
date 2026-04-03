@@ -43,9 +43,14 @@
 }
 
 .brand img {
-  height: 38px;
-  width: auto;
-  filter: brightness(0) invert(1);
+  width: 150px;
+  height: 40px;
+  object-fit: contain;
+  background-color: #ffffff;
+  border: 1px solid rgba(31, 109, 61, 0.28);
+  border-radius: 6px;
+  filter: none;
+  padding: 0.18rem 0.35rem;
 }
 
 .brand-copy {
@@ -66,14 +71,6 @@
   cursor: pointer;
   border-radius: 10px;
   border: 4px solid #e0a800;
-}
-
-.brand img {
-  background-color: white;
-  width: 150px;
-  height: 40px;
-  object-fit: contain;
-  border-radius: 5px;
 }
 
 .user-status {
