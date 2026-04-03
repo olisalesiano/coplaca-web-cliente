@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../core/api.service';
 import { UserDTO } from '../../../../core/api.models';
@@ -17,7 +17,10 @@ export class AdminProfileComponent implements OnInit {
 
   user: UserDTO | null = null;
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   // Inicializa perfil y metricas del dashboard administrativo.
   ngOnInit(): void {
@@ -41,6 +44,7 @@ export class AdminProfileComponent implements OnInit {
       next: (user) => {
         this.user = user;
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;

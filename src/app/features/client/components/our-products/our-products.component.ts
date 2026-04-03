@@ -1,4 +1,12 @@
-import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
+import {
+  Component,
+  ChangeDetectorRef,
+  DestroyRef,
+  ElementRef,
+  OnInit,
+  ViewChild,
+  inject,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -41,7 +49,8 @@ export class OurProductsComponent implements OnInit {
     pera: 'https://upload.wikimedia.org/wikipedia/commons/0/06/Pears.jpg',
     naranja: 'https://upload.wikimedia.org/wikipedia/commons/c/c4/Orange-Fruit-Pieces.jpg',
     limon: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Lemon-Whole-Split.jpg',
-    aguacate: 'https://upload.wikimedia.org/wikipedia/commons/c/c8/Avocado_Hass_-_single_and_halved.jpg',
+    aguacate:
+      'https://upload.wikimedia.org/wikipedia/commons/c/c8/Avocado_Hass_-_single_and_halved.jpg',
     tomate: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Tomato_je.jpg',
     papaya: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Papaya_cross_section_BNC.jpg',
     mango: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Hapus_Mango.jpg',
@@ -81,6 +90,7 @@ export class OurProductsComponent implements OnInit {
     private readonly router: Router,
     private readonly apiService: ApiService,
     private readonly cartStore: CartStore,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   // Inicializa rotacion visual y carga de catalogo.
@@ -97,7 +107,7 @@ export class OurProductsComponent implements OnInit {
     this.apiService.getProducts('').subscribe({
       next: (products) => {
         this.products = products;
-        
+
         for (const product of products) {
           this.quantityByProduct[product.id] ??= 1;
         }
@@ -107,6 +117,7 @@ export class OurProductsComponent implements OnInit {
         }
 
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;
@@ -186,7 +197,7 @@ export class OurProductsComponent implements OnInit {
 
   getRotatedAvailableProducts(): ProductDTO[] {
     const available = this.getReactiveProducts().filter(
-      (product) => !this.getDisplayOffers().some((offer) => offer.product.id === product.id)
+      (product) => !this.getDisplayOffers().some((offer) => offer.product.id === product.id),
     );
 
     if (available.length === 0) {
@@ -201,7 +212,10 @@ export class OurProductsComponent implements OnInit {
       return available.slice(startIdx, endIdx);
     }
 
-    return [...available.slice(startIdx), ...available.slice(0, Math.abs(endIdx - available.length))];
+    return [
+      ...available.slice(startIdx),
+      ...available.slice(0, Math.abs(endIdx - available.length)),
+    ];
   }
 
   getReactiveProducts(): ProductDTO[] {
@@ -254,7 +268,10 @@ export class OurProductsComponent implements OnInit {
     }
 
     if (quantityKg > Number(product.stockQuantity)) {
-      this.setMessage('warning', `Solo hay ${product.stockQuantity} kg de ${product.name} disponibles.`);
+      this.setMessage(
+        'warning',
+        `Solo hay ${product.stockQuantity} kg de ${product.name} disponibles.`,
+      );
       return;
     }
 
@@ -306,7 +323,8 @@ export class OurProductsComponent implements OnInit {
       .subscribe(() => {
         const available = this.getReactiveProducts();
         if (available.length > 5) {
-          this.rotatedProductsIndex = (this.rotatedProductsIndex + 1) % Math.ceil(available.length / 5);
+          this.rotatedProductsIndex =
+            (this.rotatedProductsIndex + 1) % Math.ceil(available.length / 5);
         }
       });
   }
@@ -318,8 +336,8 @@ export class OurProductsComponent implements OnInit {
     }
 
     const normalizedName = this.normalizeText(product.name ?? '');
-    const matchedKeyword = Object.keys(OurProductsComponent.PRODUCT_IMAGE_BY_KEYWORD).find((keyword) =>
-      normalizedName.includes(keyword),
+    const matchedKeyword = Object.keys(OurProductsComponent.PRODUCT_IMAGE_BY_KEYWORD).find(
+      (keyword) => normalizedName.includes(keyword),
     );
 
     if (matchedKeyword) {
@@ -356,8 +374,8 @@ export class OurProductsComponent implements OnInit {
 
   private resolveFallbackOffer(product: ProductDTO): FallbackOffer | null {
     const normalizedName = this.normalizeText(product.name ?? '');
-    const matchedKeyword = Object.keys(OurProductsComponent.FALLBACK_OFFER_BY_KEYWORD).find((keyword) =>
-      normalizedName.includes(keyword),
+    const matchedKeyword = Object.keys(OurProductsComponent.FALLBACK_OFFER_BY_KEYWORD).find(
+      (keyword) => normalizedName.includes(keyword),
     );
 
     if (!matchedKeyword) {

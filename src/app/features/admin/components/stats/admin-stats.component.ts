@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ApiService } from '../../../../core/api.service';
 import { TopProductStatDTO } from '../../../../core/api.models';
@@ -33,7 +33,10 @@ export class AdminStatsComponent implements OnInit {
   activeOffers = 0;
   activeWarehouses = 0;
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   // Al iniciar, carga estadisticas de negocio y estado tecnico del backend.
   ngOnInit(): void {
@@ -83,7 +86,16 @@ export class AdminStatsComponent implements OnInit {
       offers: this.apiService.getOffers().pipe(catchError(() => of([]))),
       warehouses: this.apiService.getWarehouses().pipe(catchError(() => of([]))),
     }).subscribe({
-      next: ({ topProducts, users, orderMonth, orderWeek, orderDay, products, offers, warehouses }) => {
+      next: ({
+        topProducts,
+        users,
+        orderMonth,
+        orderWeek,
+        orderDay,
+        products,
+        offers,
+        warehouses,
+      }) => {
         this.topProducts = topProducts.slice(0, 8);
         this.activeUsers = users.filter((user) => user.enabled).length;
         this.disabledUsers = users.filter((user) => !user.enabled).length;
@@ -99,9 +111,12 @@ export class AdminStatsComponent implements OnInit {
 
         this.totalProducts = products.length;
         this.activeOffers = offers.filter((offer) => offer.active !== false).length;
-        this.activeWarehouses = warehouses.filter((warehouse) => warehouse.isActive !== false).length;
+        this.activeWarehouses = warehouses.filter(
+          (warehouse) => warehouse.isActive !== false,
+        ).length;
 
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;

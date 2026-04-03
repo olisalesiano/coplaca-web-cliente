@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, ChangeDetectorRef, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -35,7 +35,10 @@ export class AdminUsersComponent implements OnInit {
   warning = '';
   message = '';
 
-  constructor(private readonly apiService: ApiService) {}
+  constructor(
+    private readonly apiService: ApiService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   // Carga inicial del modulo de usuarios.
   ngOnInit(): void {
@@ -60,10 +63,14 @@ export class AdminUsersComponent implements OnInit {
         }
 
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (httpError: unknown) => {
         this.loading = false;
-        this.error = this.extractErrorMessage(httpError, 'No se pudieron cargar las cuentas de logistica y reparto.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudieron cargar las cuentas de logistica y reparto.',
+        );
       },
     });
   }
@@ -176,13 +183,20 @@ export class AdminUsersComponent implements OnInit {
       },
       error: (httpError: unknown) => {
         this.processingUserId = null;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo recuperar el estado actual del usuario.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo recuperar el estado actual del usuario.',
+        );
       },
     });
   }
 
   // Secuencia de actualizacion segura: rol y estado se aplican en pasos independientes.
-  private applyRoleAndStatusChanges(previousRole: string, previousEnabled: boolean, email: string): void {
+  private applyRoleAndStatusChanges(
+    previousRole: string,
+    previousEnabled: boolean,
+    email: string,
+  ): void {
     const roleChanged = this.editForm.role !== previousRole;
     const statusChanged = this.editForm.enabled !== previousEnabled;
 
@@ -196,7 +210,10 @@ export class AdminUsersComponent implements OnInit {
         next: () => this.finishEditSuccess(email),
         error: (httpError: unknown) => {
           this.processingUserId = null;
-          this.error = this.extractErrorMessage(httpError, 'Se actualizo el perfil pero no el estado.');
+          this.error = this.extractErrorMessage(
+            httpError,
+            'Se actualizo el perfil pero no el estado.',
+          );
         },
       });
     };
@@ -206,15 +223,13 @@ export class AdminUsersComponent implements OnInit {
       return;
     }
 
-    this.apiService
-      .updateAdminUserRoles(this.editingUserId!, [this.editForm.role])
-      .subscribe({
-        next: () => continueWithStatusUpdate(),
-        error: (httpError: unknown) => {
-          this.processingUserId = null;
-          this.error = this.extractErrorMessage(httpError, 'Se actualizo el perfil pero no el rol.');
-        },
-      });
+    this.apiService.updateAdminUserRoles(this.editingUserId!, [this.editForm.role]).subscribe({
+      next: () => continueWithStatusUpdate(),
+      error: (httpError: unknown) => {
+        this.processingUserId = null;
+        this.error = this.extractErrorMessage(httpError, 'Se actualizo el perfil pero no el rol.');
+      },
+    });
   }
 
   private finishEditSuccess(email: string): void {
@@ -252,7 +267,10 @@ export class AdminUsersComponent implements OnInit {
       },
       error: (httpError: unknown) => {
         this.processingUserId = null;
-        this.error = this.extractErrorMessage(httpError, 'No se pudo actualizar el estado de la cuenta.');
+        this.error = this.extractErrorMessage(
+          httpError,
+          'No se pudo actualizar el estado de la cuenta.',
+        );
       },
     });
   }
@@ -269,7 +287,8 @@ export class AdminUsersComponent implements OnInit {
     const term = this.searchTerm.trim().toLowerCase();
 
     return this.users.filter((user) => {
-      const roleMatch = this.selectedRoleFilter === 'ALL' || this.hasRole(user, this.selectedRoleFilter);
+      const roleMatch =
+        this.selectedRoleFilter === 'ALL' || this.hasRole(user, this.selectedRoleFilter);
       let statusMatch = true;
       if (this.selectedStatusFilter === 'ACTIVE') {
         statusMatch = user.enabled;
@@ -279,10 +298,7 @@ export class AdminUsersComponent implements OnInit {
 
       const fullName = `${user.firstName ?? ''} ${user.lastName ?? ''}`.toLowerCase();
       const email = (user.email ?? '').toLowerCase();
-      const searchMatch =
-        term.length === 0 ||
-        fullName.includes(term) ||
-        email.includes(term);
+      const searchMatch = term.length === 0 || fullName.includes(term) || email.includes(term);
 
       return roleMatch && statusMatch && searchMatch;
     });

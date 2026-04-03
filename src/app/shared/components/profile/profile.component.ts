@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -73,6 +73,7 @@ export class ProfileComponent {
     private readonly cartStore: CartStore,
     private readonly orderStore: OrderStore,
     private readonly addressGeoService: AddressGeoService,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     this.loadProfile();
   }
@@ -103,6 +104,7 @@ export class ProfileComponent {
         this.nearestWarehouseName = user.warehouseName ?? '';
         this.nearestWarehouseDistanceKm = null;
         this.originalForm = this.getCurrentFormValues();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.message = 'No se pudo cargar tu perfil.';
@@ -119,7 +121,9 @@ export class ProfileComponent {
   goToProfile(): void {
     this.router.navigate(['/client/profile']);
   }
-  goToOurProducts(): void { this.router.navigate(['/client/our-products']); }
+  goToOurProducts(): void {
+    this.router.navigate(['/client/our-products']);
+  }
   startEdit(): void {
     this.editando = true;
     this.message = '';
@@ -181,10 +185,7 @@ export class ProfileComponent {
     }
 
     this.coordinates = resolvedCoordinates;
-    await this.updateNearestWarehouse(
-      resolvedCoordinates.latitude,
-      resolvedCoordinates.longitude,
-    );
+    await this.updateNearestWarehouse(resolvedCoordinates.latitude, resolvedCoordinates.longitude);
 
     this.apiService
       .updateCurrentUser({
@@ -219,7 +220,9 @@ export class ProfileComponent {
   }
 
   darDeBaja(): void {
-    const confirmacion = globalThis.confirm('¿Estas seguro de que quieres darte de baja? Esta accion no se puede deshacer.');
+    const confirmacion = globalThis.confirm(
+      '¿Estas seguro de que quieres darte de baja? Esta accion no se puede deshacer.',
+    );
     if (!confirmacion) {
       return;
     }
@@ -270,17 +273,16 @@ export class ProfileComponent {
   }
 
   get profileImageUrl(): string {
-    const userWithImage = this.user as (UserDTO & {
-      profileImageUrl?: string;
-      avatarUrl?: string;
-      imageUrl?: string;
-    }) | null;
+    const userWithImage = this.user as
+      | (UserDTO & {
+          profileImageUrl?: string;
+          avatarUrl?: string;
+          imageUrl?: string;
+        })
+      | null;
 
     const candidate =
-      userWithImage?.profileImageUrl ??
-      userWithImage?.avatarUrl ??
-      userWithImage?.imageUrl ??
-      '';
+      userWithImage?.profileImageUrl ?? userWithImage?.avatarUrl ?? userWithImage?.imageUrl ?? '';
 
     if (candidate.trim().length > 0) {
       return candidate;
@@ -382,7 +384,7 @@ export class ProfileComponent {
     return expiry > new Date(now.getFullYear(), now.getMonth());
   }
 
-  private getCurrentFormValues() { 
+  private getCurrentFormValues() {
     return {
       firstName: this.firstName,
       lastName: this.lastName,

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 // import { MatIcon } from '@angular/material/icon';
@@ -26,6 +26,7 @@ export class OrdersComponent {
     private readonly router: Router,
     private readonly apiService: ApiService,
     private readonly orderStore: OrderStore,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     this.pedidos = this.orderStore.getOrders();
     this.loadOrders();
@@ -59,6 +60,7 @@ export class OrdersComponent {
         this.pedidos = mergedOrders;
         this.orderStore.saveOrders(mergedOrders);
         this.loading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.loading = false;

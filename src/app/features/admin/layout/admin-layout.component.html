@@ -1,17 +1,22 @@
 <div class="admin-shell">
   <header class="admin-navbar">
-    <button class="brand" type="button" routerLink="/admin/users">
-      <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
-      <div class="brand-copy">
-        <strong>Panel COPLACA</strong>
-        <span>Administracion interna</span>
-      </div>
-    </button>
+    <div class="brand-container">
+      <button class="brand" type="button" routerLink="/admin/users">
+        <img src="/assets/logo/logo-coplaca-apaisado.png" alt="Coplaca logo" />
+      </button>
+      <span class="user-status">Administracion</span>
+    </div>
 
     <nav class="links">
-      <button type="button" routerLink="/admin/users" routerLinkActive="active-link">Cuentas</button>
-      <button type="button" routerLink="/admin/stats" routerLinkActive="active-link">Estadisticas</button>
-      <button type="button" routerLink="/admin/profile" routerLinkActive="active-link">Perfil</button>
+      <button type="button" routerLink="/admin/users" routerLinkActive="active-link">
+        Cuentas
+      </button>
+      <button type="button" routerLink="/admin/stats" routerLinkActive="active-link">
+        Estadisticas
+      </button>
+      <button type="button" routerLink="/admin/profile" routerLinkActive="active-link">
+        Perfil
+      </button>
     </nav>
 
     <div class="admin-actions">
