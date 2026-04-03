@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 // import { MatIcon } from '@angular/material/icon';
 import { ApiService } from '../../../../core/api.service';
-import { OrderDTO } from '../../../../core/api.models';
+import { AddressDTO, OrderDTO } from '../../../../core/api.models';
 import { OrderStore } from '../../../../core/order.store';
 
 @Component({
@@ -92,6 +92,22 @@ export class OrdersComponent {
     this.dialogVisible = true;
   }
 
+  getDeliveryAddress(pedido: OrderDTO | null): string {
+    if (!pedido) {
+      return 'Dirección no disponible';
+    }
+
+    if (pedido.deliveryAddressLabel && pedido.deliveryAddressLabel.trim().length > 0) {
+      return pedido.deliveryAddressLabel;
+    }
+
+    if (pedido.deliveryAddress) {
+      return this.formatAddress(pedido.deliveryAddress);
+    }
+
+    return 'Dirección no disponible';
+  }
+
   cerrarDialog(): void {
     this.dialogVisible = false;
     this.pedidoSeleccionado = null;
@@ -107,5 +123,36 @@ export class OrdersComponent {
 
   resolveProductImage(productId: number): string {
     return this.productImageMap[productId] || '/assets/test/Banana.png';
+  }
+
+  private formatAddress(address: AddressDTO): string {
+    const parts: string[] = [];
+
+    const streetLine = [address.street, address.streetNumber, address.apartment]
+      .filter((value) => Boolean(value && value.trim().length > 0))
+      .map((value) => value!.trim())
+      .join(' ');
+
+    if (streetLine.length > 0) {
+      parts.push(streetLine);
+    }
+
+    if (address.postalCode && address.postalCode.trim().length > 0) {
+      parts.push(address.postalCode.trim());
+    }
+
+    if (address.city && address.city.trim().length > 0) {
+      parts.push(address.city.trim());
+    }
+
+    if (address.province && address.province.trim().length > 0) {
+      parts.push(address.province.trim());
+    }
+
+    if (address.additionalInfo && address.additionalInfo.trim().length > 0) {
+      parts.push(address.additionalInfo.trim());
+    }
+
+    return parts.join(', ');
   }
 }
