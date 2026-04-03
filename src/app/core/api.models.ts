@@ -86,6 +86,8 @@ export interface OrderDTO {
   paymentMethod?: string;
   paymentStatus?: string;
   createdAt?: string;
+  deliveryAddress?: AddressDTO;
+  deliveryAddressLabel?: string;
   items: OrderItemDTO[];
 }
 
@@ -126,6 +128,8 @@ export interface LogisticsOrderDTO {
   totalPrice: number;
   customerName?: string;
   deliveryAgentName?: string;
+  deliveryAddress?: AddressDTO;
+  deliveryAddressLabel?: string;
   createdAt?: string;
   warehouseName?: string;
 }
