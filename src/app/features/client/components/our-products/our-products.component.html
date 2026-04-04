@@ -66,6 +66,7 @@
     <p class="section-sub status-msg" *ngIf="message" [ngClass]="'status-' + messageType">
       {{ message }}
     </p>
+    <p class="section-sub stock-msg" *ngIf="stockNotice">{{ stockNotice }}</p>
   </section>
 
   <!-- DIÁLOGO GLOBAL - Disponible para todas las secciones -->
@@ -141,6 +142,7 @@
           *ngFor="let offer of displayOffers"
           type="button"
           (click)="openProductDialog(offer.product)"
+          [disabled]="isOutOfStock(offer.product)"
           [attr.aria-label]="'Abrir oferta de ' + offer.product.name"
         >
           <img
@@ -158,9 +160,11 @@
             <span class="offer-price-full"
               >{{ offer.product.unitPrice }} €/{{ offer.product.unit || 'kg' }}</span
             >
-            <span class="offer-stock">Stock: {{ offer.product.stockQuantity }} kg</span>
+            <span class="offer-stock" [class.offer-stock-out]="isOutOfStock(offer.product)">
+              {{ isOutOfStock(offer.product) ? 'Agotado' : 'Stock: ' + offer.product.stockQuantity + ' kg' }}
+            </span>
           </div>
-          <span class="btn-offer">Ver y añadir</span>
+          <span class="btn-offer">{{ isOutOfStock(offer.product) ? 'Agotado' : 'Ver y añadir' }}</span>
         </button>
       </div>
       <button
@@ -189,9 +193,15 @@
             alt="producto"
             class="available-product-img"
           />
+          <span class="stock-pill out" *ngIf="isOutOfStock(p)">Agotado</span>
           <span class="available-product-name">{{ p.name }}</span>
-          <button class="btn-add-available" type="button" (click)="openProductDialog(p)">
-            Agregar
+          <button
+            class="btn-add-available"
+            type="button"
+            (click)="openProductDialog(p)"
+            [disabled]="isOutOfStock(p)"
+          >
+            {{ isOutOfStock(p) ? 'Agotado' : 'Agregar' }}
           </button>
         </div>
       </div>
@@ -213,10 +223,14 @@
           <div class="producto-info">
             <span class="producto-name">{{ p.name }}</span>
             <span class="producto-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
-            <span class="fresh-tag">Muy fresco · {{ p.stockQuantity }} kg</span>
+            <span class="fresh-tag" [class.fresh-tag-out]="isOutOfStock(p)">
+              {{ isOutOfStock(p) ? 'Agotado' : 'Muy fresco · ' + p.stockQuantity + ' kg' }}
+            </span>
           </div>
         </div>
-        <button class="btn-add" type="button" (click)="openProductDialog(p)">Abrir</button>
+        <button class="btn-add" type="button" (click)="openProductDialog(p)">
+          {{ isOutOfStock(p) ? 'Agotado' : 'Abrir' }}
+        </button>
       </div>
     </div>
     <ng-template #noFreshProducts>
@@ -239,9 +253,14 @@
           <div class="producto-info">
             <span class="producto-name">{{ p.name }}</span>
             <span class="producto-price">{{ p.unitPrice }} €/{{ p.unit || 'kg' }}</span>
+            <span class="fresh-tag" [class.fresh-tag-out]="isOutOfStock(p)">
+              {{ isOutOfStock(p) ? 'Agotado' : 'Stock disponible · ' + p.stockQuantity + ' kg' }}
+            </span>
           </div>
         </div>
-        <button class="btn-add" type="button" (click)="openProductDialog(p)">Abrir</button>
+        <button class="btn-add" type="button" (click)="openProductDialog(p)">
+          {{ isOutOfStock(p) ? 'Agotado' : 'Abrir' }}
+        </button>
       </div>
     </div>
   </section>

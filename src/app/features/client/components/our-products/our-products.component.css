@@ -156,6 +156,19 @@
   color: #155427;
 }
 
+.stock-msg {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.55rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid #efb1b1;
+  width: fit-content;
+  max-width: 100%;
+  color: #8e2020;
+  background: #ffe9e9;
+  margin: 0.65rem 0 0;
+}
+
 .section-title-big {
   font-size: 3.5rem;
   font-weight: 700;
@@ -499,6 +512,10 @@
   color: #1f7f31;
 }
 
+.fresh-tag-out {
+  color: #8e2020;
+}
+
 :host {
   display: block;
   width: 100%;
@@ -708,6 +725,11 @@
   color: #888;
 }
 
+.offer-stock-out {
+  color: #8e2020;
+  font-weight: 700;
+}
+
 .btn-offer {
   background: #d9f3e0;
   border: 1px solid #2a9d3f;
@@ -727,6 +749,11 @@
 .btn-offer:hover {
   background: #c8ecd3;
   box-shadow: 0 4px 10px rgba(42, 157, 63, 0.3);
+}
+
+.offer-card-full:disabled {
+  cursor: default;
+  opacity: 0.95;
 }
 
 .btn-offer:active {
@@ -950,6 +977,23 @@
   justify-content: space-between;
 }
 
+.stock-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.18rem 0.55rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.stock-pill.out {
+  color: #8e2020;
+  background: #ffe4e4;
+  border: 1px solid rgba(161, 25, 25, 0.35);
+}
+
 .available-product-card:hover {
   transform: translateY(-8px) scale(1.02);
   border-color: #1b6e2f;
@@ -997,6 +1041,19 @@
   background: linear-gradient(135deg, #e0a800 0%, #c7940d 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(240, 160, 0, 0.4);
+}
+
+.btn-add-available:disabled {
+  background: #ececec;
+  color: #4f4f4f;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-add-available:disabled:hover {
+  background: #ececec;
+  transform: none;
+  box-shadow: none;
 }
 
 .btn-add-available:active {

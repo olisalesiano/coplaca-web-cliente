@@ -75,6 +75,7 @@ export class OurProductsComponent implements OnInit {
   loading = false;
   message = '';
   messageType: 'info' | 'warning' | 'error' | 'success' = 'info';
+  stockNotice = '';
   searchQuery = '';
   showFilters = false;
   selectedCategory = 'Todas';
@@ -97,18 +98,21 @@ export class OurProductsComponent implements OnInit {
   // Inicializa rotacion visual y carga de catalogo.
   ngOnInit(): void {
     this.setupProductRotation();
-    // Cargar todos los productos de inmediato sin esperar
+    this.startProductRefresh();
     this.loadAllProducts();
   }
 
   // Carga catalogo completo y normaliza cantidades por producto.
-  private loadAllProducts(): void {
+  private loadAllProducts(silentRefresh = false): void {
     this.loading = true;
-    this.message = '';
+    if (!silentRefresh) {
+      this.message = '';
+    }
     this.apiService.getProducts('').subscribe({
       next: (products) => {
         this.products = products;
         this.displayOffers = this.getDisplayOffers();
+        this.stockNotice = this.buildStockNotice(products);
 
         for (const product of products) {
           this.quantityByProduct[product.id] ??= 1;
@@ -264,8 +268,8 @@ export class OurProductsComponent implements OnInit {
       return;
     }
 
-    if (Number(product.stockQuantity) <= 0) {
-      this.setMessage('warning', `${product.name} no tiene stock disponible ahora mismo.`);
+    if (this.isOutOfStock(product)) {
+      this.setMessage('warning', `${product.name} ya está agotado.`);
       return;
     }
 
@@ -328,6 +332,14 @@ export class OurProductsComponent implements OnInit {
           this.rotatedProductsIndex =
             (this.rotatedProductsIndex + 1) % Math.ceil(available.length / 5);
         }
+      });
+  }
+
+  private startProductRefresh(): void {
+    interval(15000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.loadAllProducts(true);
       });
   }
 
@@ -395,6 +407,29 @@ export class OurProductsComponent implements OnInit {
       normalizedCategory.includes('ortaliza');
 
     return isFreshCategory && Number(product.stockQuantity) >= 120;
+  }
+
+  isOutOfStock(product: ProductDTO): boolean {
+    return Number(product.stockQuantity) <= 0;
+  }
+
+  private buildStockNotice(products: ProductDTO[]): string {
+    const outOfStockNames = products
+      .filter((product) => this.isOutOfStock(product))
+      .map((product) => product.name.trim())
+      .filter((name) => name.length > 0);
+
+    if (outOfStockNames.length === 0) {
+      return '';
+    }
+
+    const preview = outOfStockNames.slice(0, 3).join(', ');
+    const remaining = outOfStockNames.length - 3;
+    const suffix = remaining > 0 ? ` y ${remaining} mas` : '';
+
+    return outOfStockNames.length === 1
+      ? `Producto agotado: ${preview}.`
+      : `Productos agotados: ${preview}${suffix}.`;
   }
 
   private setMessage(type: 'info' | 'warning' | 'error' | 'success', text: string): void {
