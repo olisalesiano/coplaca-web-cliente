@@ -59,6 +59,7 @@
   <p *ngIf="loading" class="loading">Cargando productos...</p>
   <p class="error" *ngIf="error">{{ error }}</p>
   <p class="warning" *ngIf="warning">{{ warning }}</p>
+  <p class="warning stock-notice" *ngIf="stockNotice">{{ stockNotice }}</p>
   <p class="ok" *ngIf="message">{{ message }}</p>
 
   <section class="filters-card" *ngIf="!loading">
@@ -114,8 +115,8 @@
       <div class="badges-row">
         <span class="badge category">{{ getCategoryLabel(product) }}</span>
         <span class="badge offer" *ngIf="offersByProductId[product.id] as offer">Oferta {{ offer.discountPercentage }}%</span>
-        <span class="badge stock low" *ngIf="stockByProductId[product.id] > 0 && stockByProductId[product.id] < 30">Stock bajo</span>
-        <span class="badge stock out" *ngIf="stockByProductId[product.id] <= 0">Sin stock</span>
+          <span class="badge stock low" *ngIf="stockByProductId[product.id] > 0 && stockByProductId[product.id] < 30">Stock bajo</span>
+          <span class="badge stock out" *ngIf="stockByProductId[product.id] <= 0">Agotado</span>
       </div>
       <p class="meta">Precio actual: {{ product.unitPrice | number : '1.2-2' }} EUR</p>
 

@@ -33,6 +33,7 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
   private autoRefreshHandle: ReturnType<typeof setInterval> | null = null;
   error = '';
   warning = '';
+  stockNotice = '';
   message = '';
   createForm = {
     name: '',
@@ -101,6 +102,8 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
           this.offerReasonByProductId[product.id] = offer?.reason ?? '';
           this.discountByProductId[product.id] = offer?.discountPercentage ?? 0;
         }
+
+        this.stockNotice = this.buildStockNotice(products);
 
         if (categories.length > 0 && this.createForm.categoryId <= 0) {
           this.createForm.categoryId = categories[0].id;
@@ -410,6 +413,11 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
     };
   }
 
+  isOutOfStock(product: ProductDTO): boolean {
+    const stock = Number(this.stockByProductId[product.id] ?? product.stockQuantity ?? 0);
+    return stock <= 0;
+  }
+
   getCategoryLabel(product: ProductDTO): string {
     return product.categoryName?.trim() || 'Sin categoria';
   }
@@ -423,47 +431,64 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
   }
 
   get filteredProducts(): ProductDTO[] {
-    return this.products.filter((product) => {
-      const productName = this.normalizeText(product.name ?? '');
-      const productDescription = this.normalizeText(product.description ?? '');
-      const productCategory = this.getCategoryLabel(product);
+    return this.products.filter(
+      (product) =>
+        this.matchesSearchFilter(product) &&
+        this.matchesCategoryFilter(product) &&
+        this.matchesOfferFilter(product) &&
+        this.matchesStockFilter(product),
+    );
+  }
 
-      if (this.searchTerm.trim().length > 0) {
-        const query = this.normalizeText(this.searchTerm.trim());
-        const searchable = `${productName} ${productDescription} ${this.normalizeText(productCategory)}`;
-        if (!searchable.includes(query)) {
-          return false;
-        }
-      }
-
-      if (
-        this.selectedCategoryFilter !== 'Todas' &&
-        productCategory !== this.selectedCategoryFilter
-      ) {
-        return false;
-      }
-
-      const hasOffer = Boolean(this.offersByProductId[product.id]);
-      if (this.offerFilter === 'with' && !hasOffer) {
-        return false;
-      }
-      if (this.offerFilter === 'without' && hasOffer) {
-        return false;
-      }
-
-      const stock = Number(this.stockByProductId[product.id] ?? product.stockQuantity ?? 0);
-      if (this.stockFilter === 'in' && stock <= 0) {
-        return false;
-      }
-      if (this.stockFilter === 'low' && !(stock > 0 && stock < 30)) {
-        return false;
-      }
-      if (this.stockFilter === 'out' && stock > 0) {
-        return false;
-      }
-
+  private matchesSearchFilter(product: ProductDTO): boolean {
+    if (this.searchTerm.trim().length === 0) {
       return true;
-    });
+    }
+
+    const query = this.normalizeText(this.searchTerm.trim());
+    const productName = this.normalizeText(product.name ?? '');
+    const productDescription = this.normalizeText(product.description ?? '');
+    const productCategory = this.normalizeText(this.getCategoryLabel(product));
+    const searchable = `${productName} ${productDescription} ${productCategory}`;
+
+    return searchable.includes(query);
+  }
+
+  private matchesCategoryFilter(product: ProductDTO): boolean {
+    const productCategory = this.getCategoryLabel(product);
+    return this.selectedCategoryFilter === 'Todas' || productCategory === this.selectedCategoryFilter;
+  }
+
+  private matchesOfferFilter(product: ProductDTO): boolean {
+    const hasOffer = Boolean(this.offersByProductId[product.id]);
+
+    if (this.offerFilter === 'with') {
+      return hasOffer;
+    }
+
+    if (this.offerFilter === 'without') {
+      return !hasOffer;
+    }
+
+    return true;
+  }
+
+  private matchesStockFilter(product: ProductDTO): boolean {
+    const stock = Number(this.stockByProductId[product.id] ?? product.stockQuantity ?? 0);
+
+    if (this.stockFilter === 'in') {
+      return stock > 0;
+    }
+
+    if (this.stockFilter === 'low') {
+      return stock > 0 && stock < 30;
+    }
+
+    if (this.stockFilter === 'out') {
+      return stock <= 0;
+    }
+
+    return true;
   }
 
   clearFilters(): void {
@@ -471,6 +496,25 @@ export class LogisticsProductsComponent implements OnInit, OnDestroy {
     this.selectedCategoryFilter = 'Todas';
     this.offerFilter = 'all';
     this.stockFilter = 'all';
+  }
+
+  private buildStockNotice(products: ProductDTO[]): string {
+    const outOfStockNames = products
+      .filter((product) => Number(product.stockQuantity) <= 0)
+      .map((product) => product.name.trim())
+      .filter((name) => name.length > 0);
+
+    if (outOfStockNames.length === 0) {
+      return '';
+    }
+
+    const preview = outOfStockNames.slice(0, 3).join(', ');
+    const remaining = outOfStockNames.length - 3;
+    const suffix = remaining > 0 ? ` y ${remaining} mas` : '';
+
+    return outOfStockNames.length === 1
+      ? `Producto agotado: ${preview}.`
+      : `Productos agotados: ${preview}${suffix}.`;
   }
 
   private normalizeText(value: string): string {
