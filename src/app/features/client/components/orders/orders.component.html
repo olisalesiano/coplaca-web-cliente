@@ -37,7 +37,8 @@
           </div>
           <div class="order-right">
             <span class="order-fecha">{{ p.createdAt | date:'short' }}</span>
-            <span class="order-total">Total pedido: {{ p.totalPrice | number:'1.2-2' }} €</span>
+            <span class="order-shipping">Envio: {{ getOrderDeliveryFee(p) | number:'1.2-2' }} €</span>
+            <span class="order-total">Total pedido: {{ getOrderTotal(p) | number:'1.2-2' }} €</span>
           </div>
         </div>
         <button class="btn-detalles" (click)="verDetalles(p)">Ver detalles</button>
@@ -79,9 +80,19 @@
 
     <!-- FOOTER -->
     <div class="dialog-footer">
-      <div class="dialog-total-section">
-        <span class="dialog-total-label">Total pedido:</span>
-        <span class="dialog-total-amount">{{ pedidoSeleccionado?.totalPrice | number:'1.2-2' }} €</span>
+      <div class="dialog-total-section" *ngIf="pedidoSeleccionado as order">
+        <div class="dialog-total-line">
+          <span class="dialog-total-label">Subtotal productos:</span>
+          <span class="dialog-total-value">{{ getOrderSubtotal(order) | number:'1.2-2' }} €</span>
+        </div>
+        <div class="dialog-total-line">
+          <span class="dialog-total-label">Gastos de envio:</span>
+          <span class="dialog-total-value">{{ getOrderDeliveryFee(order) | number:'1.2-2' }} €</span>
+        </div>
+        <div class="dialog-total-line dialog-total-final">
+          <span class="dialog-total-label">Total pedido:</span>
+          <span class="dialog-total-amount">{{ getOrderTotal(order) | number:'1.2-2' }} €</span>
+        </div>
       </div>
       <button class="btn-cancelar" type="button" (click)="cancelarPedido()">Cerrar</button>
     </div>
