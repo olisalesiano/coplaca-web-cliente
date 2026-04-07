@@ -62,7 +62,11 @@
 
   <!-- FOOTER: total + pagar -->
   <div class="cart-footer">
-    <span class="total-label">Total a pagar: {{ totalPedido | number:'1.2-2' }} €</span>
+    <div class="cart-footer-totals">
+      <span class="total-line">Subtotal productos: {{ subtotalPedido | number:'1.2-2' }} €</span>
+      <span class="total-line">Gastos de envio: {{ gastosEnvio | number:'1.2-2' }} €</span>
+      <span class="total-label">Total a pagar: {{ totalPedido | number:'1.2-2' }} €</span>
+    </div>
     <button class="btn-pagar" type="button" (click)="pagar()" [disabled]="cartItems.length === 0">Pagar</button>
   </div>
 
