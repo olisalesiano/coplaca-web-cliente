@@ -1,12 +1,17 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-// import { MatIconModule, MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../core/api.service';
 import { CartStore } from '../../../../core/cart.store';
 import { CartItem } from '../../../../core/api.models';
 import { OrderStore } from '../../../../core/order.store';
+import {
+  calculateCartSubtotal,
+  calculateDeliveryFee,
+  calculateTotal,
+  roundMoney,
+} from '../../../../core/pricing.utils';
 
 type PaymentMethod = 'fisico' | 'paypal' | 'tarjeta';
 type FeedbackTone = 'success' | 'warning' | 'error' | 'info';
@@ -22,6 +27,8 @@ type FeedbackTone = 'success' | 'warning' | 'error' | 'info';
 export class CartComponent {
   readonly metodosPago = ['fisico', 'paypal', 'tarjeta'] as const;
   cartItems: CartItem[] = [];
+  subtotalPedido = 0;
+  gastosEnvio = 0;
   totalPedido = 0;
   feedback: { tone: FeedbackTone; text: string } | null = null;
   paymentDialogOpen = false;
@@ -59,12 +66,9 @@ export class CartComponent {
       };
     });
     this.cartStore.saveItems(this.cartItems);
-    // Calcula suma sin redondear intermedios
-    const totalSinRedondeo = this.cartItems.reduce((acc, item) => {
-      const subtotal = Number((item.unitPrice * item.quantityKg).toFixed(2));
-      return Number((acc + subtotal).toFixed(2));
-    }, 0);
-    this.totalPedido = this.roundMoney(totalSinRedondeo);
+    this.subtotalPedido = calculateCartSubtotal(this.cartItems);
+    this.gastosEnvio = calculateDeliveryFee(this.subtotalPedido);
+    this.totalPedido = calculateTotal(this.subtotalPedido, this.gastosEnvio);
   }
 
   increment(item: CartItem): void {
@@ -242,11 +246,7 @@ export class CartComponent {
   }
 
   getItemSubtotal(item: CartItem): number {
-    return this.roundMoney(item.unitPrice * item.quantityKg);
-  }
-
-  private roundMoney(value: number): number {
-    return Number((Math.round((value + Number.EPSILON) * 100) / 100).toFixed(2));
+    return roundMoney(item.unitPrice * item.quantityKg);
   }
 
   private isValidEmail(value: string): boolean {
