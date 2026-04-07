@@ -1,0 +1,1 @@
+export const DELIVERY_FEE_EUR = 2.5;
