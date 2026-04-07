@@ -11,9 +11,17 @@ import { CartComponent } from './cart.component';
 describe('CartComponent', () => {
   let component: CartComponent;
   let fixture: ComponentFixture<CartComponent>;
+  let storedItems: Array<{
+    productId: number;
+    name: string;
+    unitPrice: number;
+    stockQuantity: number;
+    quantityKg: number;
+  }>;
 
   // Registra mocks de servicios usados en inicializacion del carrito.
   beforeEach(async () => {
+    storedItems = [];
     await TestBed.configureTestingModule({
       imports: [CartComponent],
       providers: [
@@ -27,7 +35,7 @@ describe('CartComponent', () => {
         {
           provide: CartStore,
           useValue: {
-            getItems: () => [],
+            getItems: () => storedItems,
             saveItems: () => undefined,
             clear: () => undefined,
           },
@@ -49,5 +57,18 @@ describe('CartComponent', () => {
   // Verifica que el componente se instancie sin errores.
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('calculates total as products subtotal plus shipping', () => {
+    storedItems = [
+      { productId: 1, name: 'Platano', unitPrice: 2, stockQuantity: 10, quantityKg: 2 },
+      { productId: 2, name: 'Mango', unitPrice: 3, stockQuantity: 10, quantityKg: 1 },
+    ];
+
+    component.refreshCart();
+
+    expect(component.subtotalPedido).toBe(7);
+    expect(component.gastosEnvio).toBe(2.5);
+    expect(component.totalPedido).toBe(9.5);
   });
 });
