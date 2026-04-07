@@ -4,6 +4,11 @@ import { Router } from '@angular/router';
 import { ApiService } from '../../../../core/api.service';
 import { AddressDTO, OrderDTO } from '../../../../core/api.models';
 import { OrderStore } from '../../../../core/order.store';
+import {
+  calculateTotal,
+  resolveOrderDeliveryFee,
+  resolveOrderSubtotal,
+} from '../../../../core/pricing.utils';
 
 @Component({
   selector: 'app-orders',
@@ -160,6 +165,22 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   trackOrder(_index: number, pedido: OrderDTO): number {
     return pedido.id;
+  }
+
+  getOrderSubtotal(order: OrderDTO | null): number {
+    return resolveOrderSubtotal(order);
+  }
+
+  getOrderDeliveryFee(order: OrderDTO | null): number {
+    return resolveOrderDeliveryFee(order);
+  }
+
+  getOrderTotal(order: OrderDTO | null): number {
+    if (!order) {
+      return 0;
+    }
+
+    return calculateTotal(this.getOrderSubtotal(order), this.getOrderDeliveryFee(order));
   }
 
   resolveProductImage(productId: number): string {
