@@ -19,10 +19,31 @@ export class CheckoutComponent {
     { nombre: 'Aguacate Premium', cantidad: 2, precio: '2,80€', peso: '0,6kg' },
   ];
 
-  subtotal = '10,50€';
-  envio = '2,50€';
-  totalPedido = '13,00€';
-  totalNumerico = 13;
+  subtotalNumerico = 10.5;
+  envioNumerico = 2.5;
+
+  get totalNumerico(): number {
+    return this.roundMoney(this.subtotalNumerico + this.envioNumerico);
+  }
+
+  get subtotal(): string {
+    return this.formatCurrency(this.subtotalNumerico);
+  }
+
+  get envio(): string {
+    return this.formatCurrency(this.envioNumerico);
+  }
+
+  get totalPedido(): string {
+    return this.formatCurrency(this.totalNumerico);
+  }
+
+  get subidaPorEnvio(): string {
+    const percent = this.subtotalNumerico <= 0
+      ? 0
+      : (this.envioNumerico / this.subtotalNumerico) * 100;
+    return `${percent.toFixed(1).replace('.', ',')}%`;
+  }
 
   saldoCuenta: number = Number(sessionStorage.getItem('saldo') ?? '0');
 
@@ -111,5 +132,13 @@ export class CheckoutComponent {
   private setStatus(tone: 'info' | 'warning' | 'error' | 'success', message: string): void {
     this.statusTone = tone;
     this.statusMessage = message;
+  }
+
+  private formatCurrency(value: number): string {
+    return `${value.toFixed(2).replace('.', ',')}€`;
+  }
+
+  private roundMoney(value: number): number {
+    return Number((Math.round((value + Number.EPSILON) * 100) / 100).toFixed(2));
   }
 }
