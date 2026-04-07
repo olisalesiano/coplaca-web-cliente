@@ -281,6 +281,10 @@
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.85);
 }
+.order-shipping {
+  font-size: 0.8rem;
+  color: #d8ffe3;
+}
 .order-total {
   font-size: 1rem;
   font-weight: 600;
@@ -437,14 +441,31 @@
 
 .dialog-total-section {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.dialog-total-line {
+  display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.55rem;
 }
 
 .dialog-total-label {
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: white;
+}
+
+.dialog-total-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e7fff0;
+}
+
+.dialog-total-final .dialog-total-label {
+  font-size: 1rem;
 }
 
 .dialog-total-amount {
