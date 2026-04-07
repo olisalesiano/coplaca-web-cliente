@@ -65,4 +65,21 @@ describe('OrdersComponent', () => {
 
     expect(component.displayedOrders.map((o) => o.id)).toEqual([2, 4]);
   });
+
+  it('computes order total as subtotal plus shipping', () => {
+    const order: OrderDTO = {
+      id: 10,
+      orderNumber: 'ORD-10',
+      status: 'DELIVERED',
+      totalPrice: 12.5,
+      items: [
+        { id: 1, productId: 1, productName: 'Platano', quantity: 2, unitPrice: 4, subtotal: 8 },
+        { id: 2, productId: 2, productName: 'Mango', quantity: 1, unitPrice: 2, subtotal: 2 },
+      ],
+    };
+
+    expect(component.getOrderSubtotal(order)).toBe(10);
+    expect(component.getOrderDeliveryFee(order)).toBe(2.5);
+    expect(component.getOrderTotal(order)).toBe(12.5);
+  });
 });
