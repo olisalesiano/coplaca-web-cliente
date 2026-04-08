@@ -9,9 +9,13 @@
       <span>Total pedidos del almacen</span>
       <strong>{{ totalOrdersCount }}</strong>
     </article>
+    <article class="summary-card warning">
+      <span>Pedidos por confirmar</span>
+      <strong>{{ pendingOrdersCount }}</strong>
+    </article>
     <article class="summary-card">
       <span>Pedidos por asignar</span>
-      <strong>{{ pendingOrdersCount }}</strong>
+      <strong>{{ confirmableOrdersCount }}</strong>
     </article>
     <article class="summary-card">
       <span>Repartidores disponibles</span>
@@ -41,6 +45,47 @@
     <p>
       En cuanto entren pedidos nuevos, apareceran aqui con su estado para poder gestionarlos en tiempo real.
     </p>
+  </section>
+
+  <section class="orders-section" *ngIf="!loading && pendingOrders.length > 0">
+    <h2>Pedidos pendientes por confirmar</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pedido</th>
+            <th>Estado</th>
+            <th>Cliente</th>
+            <th>Dirección de entrega</th>
+            <th>Total</th>
+            <th>Almacen</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of pendingOrders; trackBy: trackByOrderId">
+            <td>
+              <strong>{{ order.orderNumber || order.id }}</strong>
+            </td>
+            <td>
+              <span [class]="statusClass(order.status)">{{ statusLabel(order.status) }}</span>
+            </td>
+            <td>{{ order.customerName || 'Cliente Coplaca' }}</td>
+            <td>{{ order.deliveryAddressLabel || order.deliveryAddress?.street || '-' }}</td>
+            <td>{{ getOrderTotal(order) | number : '1.2-2' }} EUR</td>
+            <td>{{ order.warehouseName || '-' }}</td>
+            <td>
+              <button 
+                class="confirm-btn" 
+                [disabled]="isConfirming(order.id)" 
+                (click)="confirmOrder(order.id)">
+                {{ isConfirming(order.id) ? 'Confirmando...' : 'Confirmar pedido' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section class="orders-section" *ngIf="!loading && assignableOrders.length > 0">
