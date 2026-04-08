@@ -1,5 +1,5 @@
-<div class="dialog-backdrop" *ngIf="isOpen" (click)="close()">
-  <div class="dialog-box" (click)="$event.stopPropagation()">
+<div class="dialog-backdrop" *ngIf="isOpen" (click)="close()" (keydown.enter)="close()">
+  <div class="dialog-box" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
     <div class="dialog-header">
       <h3 class="dialog-title">{{ title }}</h3>
       <button class="close-btn" type="button" (click)="close()" aria-label="Cerrar dialogo">✕</button>

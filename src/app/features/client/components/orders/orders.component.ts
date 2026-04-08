@@ -9,6 +9,10 @@ import {
   resolveOrderDeliveryFee,
   resolveOrderSubtotal,
 } from '../../../../core/pricing.utils';
+import {
+  DEFAULT_PRODUCT_IMAGE,
+  resolveProductImageUrl,
+} from '../../../../core/product-image.utils';
 
 @Component({
   selector: 'app-orders',
@@ -59,7 +63,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
       next: (products) => {
         for (const product of products) {
           if (product.imageUrl) {
-            this.productImageMap[product.id] = product.imageUrl;
+            this.productImageMap[product.id] = resolveProductImageUrl(product.imageUrl);
           }
         }
       },
@@ -242,7 +246,7 @@ export class OrdersComponent implements OnInit, OnDestroy {
   }
 
   resolveProductImage(productId: number): string {
-    return this.productImageMap[productId] || '/assets/test/Banana.png';
+    return this.productImageMap[productId] || DEFAULT_PRODUCT_IMAGE;
   }
 
   private startAutoRefresh(): void {

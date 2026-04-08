@@ -16,6 +16,10 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ApiService } from '../../../../core/api.service';
 import { CartStore } from '../../../../core/cart.store';
 import { ProductDTO } from '../../../../core/api.models';
+import {
+  DEFAULT_PRODUCT_IMAGE,
+  resolveProductImageUrl,
+} from '../../../../core/product-image.utils';
 import { DialogComponent } from '../dlg/dialog.component';
 
 interface DisplayOffer {
@@ -40,28 +44,6 @@ interface FallbackOffer {
 export class OurProductsComponent implements OnInit {
   @ViewChild('addProductDialog') addProductDialogRef?: DialogComponent;
   @ViewChild('offersGridContainer') offersGridContainer?: ElementRef<HTMLDivElement>;
-  private static readonly DEFAULT_PRODUCT_IMAGE = '/assets/test/Banana.png';
-
-  private static readonly PRODUCT_IMAGE_BY_KEYWORD: Record<string, string> = {
-    banana: 'https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg',
-    platano: 'https://upload.wikimedia.org/wikipedia/commons/8/8a/Banana-Single.jpg',
-    manzana: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Red_Apple.jpg',
-    pera: 'https://upload.wikimedia.org/wikipedia/commons/0/06/Pears.jpg',
-    naranja: 'https://upload.wikimedia.org/wikipedia/commons/c/c4/Orange-Fruit-Pieces.jpg',
-    limon: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Lemon-Whole-Split.jpg',
-    aguacate:
-      'https://upload.wikimedia.org/wikipedia/commons/c/c8/Avocado_Hass_-_single_and_halved.jpg',
-    tomate: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Tomato_je.jpg',
-    papaya: 'https://upload.wikimedia.org/wikipedia/commons/5/50/Papaya_cross_section_BNC.jpg',
-    mango: 'https://upload.wikimedia.org/wikipedia/commons/9/90/Hapus_Mango.jpg',
-    pina: 'https://upload.wikimedia.org/wikipedia/commons/c/cb/Pineapple_and_cross_section.jpg',
-    melon: 'https://upload.wikimedia.org/wikipedia/commons/2/28/Cantaloupes.jpg',
-    sandia: 'https://upload.wikimedia.org/wikipedia/commons/f/fb/Watermelon_cross_BNC.jpg',
-    fresa: 'https://upload.wikimedia.org/wikipedia/commons/2/29/PerfectStrawberry.jpg',
-    kiwi: 'https://upload.wikimedia.org/wikipedia/commons/d/d3/Kiwi_aka.jpg',
-    lechuga: 'https://upload.wikimedia.org/wikipedia/commons/2/21/Lettuce_Mini_Romaine.jpg',
-  };
-
   private static readonly FALLBACK_OFFER_BY_KEYWORD: Record<string, FallbackOffer> = {
     platano: { reason: 'Exceso de cosecha', discountPercentage: 15 },
     mango: { reason: 'Promocion tropical', discountPercentage: 18 },
@@ -344,21 +326,7 @@ export class OurProductsComponent implements OnInit {
   }
 
   getProductImage(product: ProductDTO): string {
-    const imageFromApi = (product.imageUrl ?? '').trim();
-    if (imageFromApi.length > 0) {
-      return imageFromApi;
-    }
-
-    const normalizedName = this.normalizeText(product.name ?? '');
-    const matchedKeyword = Object.keys(OurProductsComponent.PRODUCT_IMAGE_BY_KEYWORD).find(
-      (keyword) => normalizedName.includes(keyword),
-    );
-
-    if (matchedKeyword) {
-      return OurProductsComponent.PRODUCT_IMAGE_BY_KEYWORD[matchedKeyword];
-    }
-
-    return OurProductsComponent.DEFAULT_PRODUCT_IMAGE;
+    return resolveProductImageUrl(product.imageUrl);
   }
 
   onProductImageError(event: Event): void {
@@ -367,7 +335,7 @@ export class OurProductsComponent implements OnInit {
       return;
     }
 
-    target.src = OurProductsComponent.DEFAULT_PRODUCT_IMAGE;
+    target.src = DEFAULT_PRODUCT_IMAGE;
   }
 
   private normalizeText(value: string): string {

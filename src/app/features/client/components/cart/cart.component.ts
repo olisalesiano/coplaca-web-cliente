@@ -12,6 +12,7 @@ import {
   calculateTotal,
   roundMoney,
 } from '../../../../core/pricing.utils';
+import { resolveProductImageUrl } from '../../../../core/product-image.utils';
 
 type PaymentMethod = 'fisico' | 'paypal' | 'tarjeta';
 type FeedbackTone = 'success' | 'warning' | 'error' | 'info';
@@ -63,6 +64,7 @@ export class CartComponent {
         unitPrice: Math.max(0, unitPrice),
         quantityKg: Math.max(0, quantityKg),
         stockQuantity: Math.max(0, stockQuantity),
+        imageUrl: resolveProductImageUrl(item.imageUrl),
       };
     });
     this.cartStore.saveItems(this.cartItems);

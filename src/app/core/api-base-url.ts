@@ -15,9 +15,11 @@ function sanitizeBaseUrl(url: string): string {
 // 2) override guardado en localStorage,
 // 3) valor de environment.
 export function resolveApiBaseUrl(): string {
+  const runtimeWindow = globalThis.window;
+  const runtimeStorage = globalThis.localStorage;
   const runtimeUrl =
-    window.__COPLACA_API_URL__ ??
-    localStorage.getItem('coplaca_api_url') ??
+    runtimeWindow?.__COPLACA_API_URL__ ??
+    runtimeStorage?.getItem('coplaca_api_url') ??
     environment.apiUrl;
 
   return sanitizeBaseUrl(runtimeUrl);

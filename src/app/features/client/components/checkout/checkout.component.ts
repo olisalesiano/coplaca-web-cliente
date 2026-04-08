@@ -11,6 +11,7 @@ import {
   calculateTotal,
   roundMoney,
 } from '../../../../core/pricing.utils';
+import { resolveProductImageUrl } from '../../../../core/product-image.utils';
 
 @Component({
   selector: 'app-checkout',
@@ -162,6 +163,7 @@ export class CheckoutComponent {
       unitPrice: Math.max(0, Number(item.unitPrice || 0)),
       quantityKg: Math.max(0, Number(item.quantityKg || 0)),
       stockQuantity: Math.max(0, Number(item.stockQuantity || 0)),
+      imageUrl: resolveProductImageUrl(item.imageUrl),
     }));
 
     this.subtotalNumerico = calculateCartSubtotal(this.cartItems);
