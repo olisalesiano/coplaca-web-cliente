@@ -3,6 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatIconModule, MatIcon } from '@angular/material/icon';
 import { FormsModule } from '@angular/forms';
+import { CartStore } from '../../../../core/cart.store';
+import { CartItem } from '../../../../core/api.models';
+import {
+  calculateCartSubtotal,
+  calculateDeliveryFee,
+  calculateTotal,
+  roundMoney,
+} from '../../../../core/pricing.utils';
 
 @Component({
   selector: 'app-checkout',
@@ -13,17 +21,22 @@ import { FormsModule } from '@angular/forms';
 })
 // Checkout simulado: resumen de compra, direccion, validacion de saldo y confirmacion.
 export class CheckoutComponent {
-  orderItems = [
-    { nombre: 'Plátano de Canarias', cantidad: 3, precio: '4,50€', peso: '2kg' },
-    { nombre: 'Mango Extra', cantidad: 1, precio: '3,20€', peso: '0,8kg' },
-    { nombre: 'Aguacate Premium', cantidad: 2, precio: '2,80€', peso: '0,6kg' },
-  ];
+  cartItems: CartItem[] = [];
+  subtotalNumerico = 0;
+  envioNumerico = 0;
 
-  subtotalNumerico = 10.5;
-  envioNumerico = 2.5;
+  get orderItems(): Array<{ nombre: string; cantidad: number; peso: string; precioUnitario: number; imageUrl?: string }> {
+    return this.cartItems.map((item) => ({
+      nombre: item.name,
+      cantidad: item.quantityKg,
+      peso: `${item.quantityKg}kg`,
+      precioUnitario: item.unitPrice,
+      imageUrl: item.imageUrl,
+    }));
+  }
 
   get totalNumerico(): number {
-    return this.roundMoney(this.subtotalNumerico + this.envioNumerico);
+    return calculateTotal(this.subtotalNumerico, this.envioNumerico);
   }
 
   get subtotal(): string {
@@ -121,7 +134,12 @@ export class CheckoutComponent {
     this.orderSuccess = true;
   }
 
-  constructor(private readonly router: Router) {}
+  constructor(
+    private readonly router: Router,
+    private readonly cartStore: CartStore,
+  ) {
+    this.refreshCheckoutSummary();
+  }
 
   goToOurProducts(): void { this.router.navigate(['/client/our-products']); }
   goToOrders(): void { this.router.navigate(['/client/orders']); }
@@ -138,7 +156,17 @@ export class CheckoutComponent {
     return `${value.toFixed(2).replace('.', ',')}€`;
   }
 
-  private roundMoney(value: number): number {
-    return Number((Math.round((value + Number.EPSILON) * 100) / 100).toFixed(2));
+  private refreshCheckoutSummary(): void {
+    this.cartItems = this.cartStore.getItems().map((item) => ({
+      ...item,
+      unitPrice: Math.max(0, Number(item.unitPrice || 0)),
+      quantityKg: Math.max(0, Number(item.quantityKg || 0)),
+      stockQuantity: Math.max(0, Number(item.stockQuantity || 0)),
+    }));
+
+    this.subtotalNumerico = calculateCartSubtotal(this.cartItems);
+    this.envioNumerico = calculateDeliveryFee(this.subtotalNumerico);
+    this.subtotalNumerico = roundMoney(this.subtotalNumerico);
+    this.envioNumerico = roundMoney(this.envioNumerico);
   }
 }
