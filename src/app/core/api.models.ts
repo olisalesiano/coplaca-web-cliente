@@ -126,6 +126,9 @@ export interface LogisticsOrderDTO {
   orderNumber: string;
   status: string;
   totalPrice: number;
+  subtotal?: number;
+  deliveryFee?: number;
+  items?: OrderItemDTO[];
   customerName?: string;
   deliveryAgentName?: string;
   deliveryAddress?: AddressDTO;
