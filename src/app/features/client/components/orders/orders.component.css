@@ -312,6 +312,29 @@
   color: #1a5e28;
 }
 
+.btn-cancel-order {
+  align-self: center;
+  background: #8b1e1e;
+  border: 2px solid #5f1212;
+  border-radius: 30px;
+  padding: 0.35rem 1.4rem;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cancel-order:hover:not(:disabled) {
+  background: #701515;
+}
+
+.btn-cancel-order:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
 /* ===== DIALOG OVERLAY ===== */
 .dialog-overlay {
   position: fixed;
@@ -547,6 +570,11 @@
   }
 
   .btn-detalles {
+    width: 100%;
+    padding: 0.45rem 1rem;
+  }
+
+  .btn-cancel-order {
     width: 100%;
     padding: 0.45rem 1rem;
   }
