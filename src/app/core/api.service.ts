@@ -401,6 +401,16 @@ export class ApiService {
       .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
+  confirmOrder(orderId: number): Observable<OrderDTO> {
+    return this.http
+      .put<OrderDTO | ApiSuccessResponse<OrderDTO>>(
+        `${this.baseUrl}/api/v1/orders/${orderId}/confirm`,
+        {},
+        { headers: this.authHeaders() },
+      )
+      .pipe(map((response) => this.unwrapSingleResponse(response)));
+  }
+
   assignOrderToDelivery(orderId: number, deliveryUserId: number): Observable<void> {
     // Soporta ambas variantes de endpoint segun version de backend.
     return this.http
