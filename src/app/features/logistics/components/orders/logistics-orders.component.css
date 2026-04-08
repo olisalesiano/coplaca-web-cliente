@@ -75,6 +75,15 @@
   color: #5e4300;
 }
 
+.summary-card.warning {
+  background: linear-gradient(180deg, #fff9e6, #fff3cc);
+  border-color: rgba(186, 125, 0, 0.3);
+}
+
+.summary-card.warning strong {
+  color: #7a5400;
+}
+
 .loading {
   color: #355544;
 }
@@ -157,6 +166,17 @@ button {
 
 .assign-btn {
   min-width: 130px;
+}
+
+.confirm-btn {
+  min-width: 140px;
+  background: linear-gradient(135deg, #1f6d3d, #2d8b50);
+  color: #fff;
+}
+
+.confirm-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1a5d33, #257541);
+  box-shadow: 0 4px 12px rgba(31, 109, 61, 0.3);
 }
 
 select:disabled,
