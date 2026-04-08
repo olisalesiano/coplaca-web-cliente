@@ -2,7 +2,12 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { catchError, forkJoin, of } from 'rxjs';
 import { ApiService } from '../../../../core/api.service';
-import { DeliveryWorkerDTO, LogisticsOrderDTO, UserDTO } from '../../../../core/api.models';
+import { DeliveryWorkerDTO, LogisticsOrderDTO, OrderDTO, UserDTO } from '../../../../core/api.models';
+import {
+  calculateTotal,
+  resolveOrderDeliveryFee,
+  resolveOrderSubtotal,
+} from '../../../../core/pricing.utils';
 
 @Component({
   selector: 'app-logistics-dashboard',
@@ -97,7 +102,7 @@ export class LogisticsDashboardComponent implements OnInit {
             this.activeOffers = offers.filter((offer) => offer.active !== false).length;
 
             const fallbackPendingRevenue = pendingOrders.reduce(
-              (sum, order) => sum + this.normalizeNumber(order.totalPrice),
+              (sum, order) => sum + this.getOrderTotal(order),
               0,
             );
             this.totalOrdersMonth = this.normalizeNumber(warehouseStats['totalOrders']);
@@ -124,5 +129,25 @@ export class LogisticsDashboardComponent implements OnInit {
   private normalizeNumber(value: unknown): number {
     const numericValue = Number(value);
     return Number.isFinite(numericValue) ? numericValue : 0;
+  }
+
+  private getOrderTotal(order: LogisticsOrderDTO): number {
+    const normalizedOrder: OrderDTO = {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      totalPrice: order.totalPrice,
+      subtotal: order.subtotal,
+      deliveryFee: order.deliveryFee,
+      items: order.items ?? [],
+      deliveryAddress: order.deliveryAddress,
+      deliveryAddressLabel: order.deliveryAddressLabel,
+      createdAt: order.createdAt,
+    };
+
+    return calculateTotal(
+      resolveOrderSubtotal(normalizedOrder),
+      resolveOrderDeliveryFee(normalizedOrder),
+    );
   }
 }
