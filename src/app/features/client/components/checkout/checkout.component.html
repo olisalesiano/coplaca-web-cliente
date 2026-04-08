@@ -29,13 +29,13 @@
       </h2>
       <div class="order-scroll">
         <div class="order-item" *ngFor="let item of orderItems">
-          <img src="/assets/test/Banana.png" alt="producto" class="order-item-img" />
+          <img [src]="item.imageUrl || '/assets/test/Banana.png'" alt="producto" class="order-item-img" />
           <span class="order-item-name">{{ item.nombre }}</span>
           <div class="order-item-details">
             <span><mat-icon class="detail-icon">scale</mat-icon>{{ item.peso }}</span>
             <span><mat-icon class="detail-icon">tag</mat-icon>x{{ item.cantidad }}</span>
           </div>
-          <span class="order-item-price">{{ item.precio }}</span>
+          <span class="order-item-price">{{ item.precioUnitario | number:'1.2-2' }} €</span>
         </div>
       </div>
 
