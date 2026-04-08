@@ -4,7 +4,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../../../core/api.service';
-import { DeliveryWorkerDTO, LogisticsOrderDTO } from '../../../../core/api.models';
+import { DeliveryWorkerDTO, LogisticsOrderDTO, OrderDTO } from '../../../../core/api.models';
+import {
+  calculateTotal,
+  resolveOrderDeliveryFee,
+  resolveOrderSubtotal,
+} from '../../../../core/pricing.utils';
 
 @Component({
   selector: 'app-logistics-orders',
@@ -230,7 +235,7 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
   }
 
   get pendingOrdersAmount(): number {
-    return this.assignableOrders.reduce((sum, order) => sum + Number(order.totalPrice || 0), 0);
+    return this.assignableOrders.reduce((sum, order) => sum + this.getOrderTotal(order), 0);
   }
 
   get assignableOrders(): LogisticsOrderDTO[] {
@@ -249,8 +254,35 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     return order.id;
   }
 
+  getOrderSubtotal(order: LogisticsOrderDTO): number {
+    return resolveOrderSubtotal(this.toOrderDto(order));
+  }
+
+  getOrderDeliveryFee(order: LogisticsOrderDTO): number {
+    return resolveOrderDeliveryFee(this.toOrderDto(order));
+  }
+
+  getOrderTotal(order: LogisticsOrderDTO): number {
+    return calculateTotal(this.getOrderSubtotal(order), this.getOrderDeliveryFee(order));
+  }
+
   private normalizeStatus(status: string | undefined): string {
     return (status ?? '').trim().toUpperCase();
+  }
+
+  private toOrderDto(order: LogisticsOrderDTO): OrderDTO {
+    return {
+      id: order.id,
+      orderNumber: order.orderNumber,
+      status: order.status,
+      totalPrice: order.totalPrice,
+      subtotal: order.subtotal,
+      deliveryFee: order.deliveryFee,
+      items: order.items ?? [],
+      createdAt: order.createdAt,
+      deliveryAddress: order.deliveryAddress,
+      deliveryAddressLabel: order.deliveryAddressLabel,
+    };
   }
 
   private extractErrorMessage(error: unknown, fallback: string): string {
