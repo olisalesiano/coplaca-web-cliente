@@ -24,6 +24,7 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
   workers: DeliveryWorkerDTO[] = [];
   selectedDeliveryByOrder: Record<number, number> = {};
   loading = false;
+  confirmingOrderId: number | null = null;
   assigningOrderId: number | null = null;
   warehouseId: number | null = null;
   private autoRefreshHandle: ReturnType<typeof setInterval> | null = null;
@@ -178,8 +179,48 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
     });
   }
 
+  // Confirma un pedido pendiente para poder asignarle un repartidor.
+  confirmOrder(orderId: number): void {
+    if (this.confirmingOrderId !== null) {
+      this.warning = 'Ya hay una confirmacion en curso. Espera a que termine.';
+      return;
+    }
+
+    const confirmed = confirm(
+      `Vas a confirmar el pedido ${orderId}. Una vez confirmado podras asignarlo a un repartidor. ¿Confirmas la operacion?`,
+    );
+    if (!confirmed) {
+      this.warning = 'Confirmacion cancelada por seguridad.';
+      return;
+    }
+
+    this.confirmingOrderId = orderId;
+    this.error = '';
+    this.warning = '';
+    this.message = '';
+    this.apiService.confirmOrder(orderId).subscribe({
+      next: () => {
+        this.confirmingOrderId = null;
+        this.message = `Pedido ${orderId} confirmado correctamente. Ahora puedes asignarlo a un repartidor.`;
+        this.loadData(true);
+      },
+      error: (httpError: unknown) => {
+        this.confirmingOrderId = null;
+        this.error = this.extractErrorMessage(httpError, 'No se pudo confirmar el pedido.');
+      },
+    });
+  }
+
   isAssigning(orderId: number): boolean {
     return this.assigningOrderId === orderId;
+  }
+
+  isConfirming(orderId: number): boolean {
+    return this.confirmingOrderId === orderId;
+  }
+
+  canConfirm(order: LogisticsOrderDTO): boolean {
+    return this.normalizeStatus(order.status) === 'PENDING';
   }
 
   canAssign(order: LogisticsOrderDTO): boolean {
@@ -215,6 +256,10 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
   }
 
   get pendingOrdersCount(): number {
+    return this.pendingOrders.length;
+  }
+
+  get confirmableOrdersCount(): number {
     return this.assignableOrders.length;
   }
 
@@ -248,6 +293,10 @@ export class LogisticsOrdersComponent implements OnInit, OnDestroy {
 
   get deliveredOrders(): LogisticsOrderDTO[] {
     return this.orders.filter((order) => this.isDelivered(order));
+  }
+
+  get pendingOrders(): LogisticsOrderDTO[] {
+    return this.orders.filter((order) => this.canConfirm(order));
   }
 
   trackByOrderId(_: number, order: LogisticsOrderDTO): number {
