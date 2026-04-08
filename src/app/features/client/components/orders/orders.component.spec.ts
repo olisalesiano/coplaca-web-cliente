@@ -23,6 +23,7 @@ describe('OrdersComponent', () => {
           useValue: {
             getMyOrders: () => of([]),
             getProducts: () => of([]),
+            cancelOrder: () => of(void 0),
           },
         },
         {
@@ -81,5 +82,33 @@ describe('OrdersComponent', () => {
     expect(component.getOrderSubtotal(order)).toBe(10);
     expect(component.getOrderDeliveryFee(order)).toBe(2.5);
     expect(component.getOrderTotal(order)).toBe(12.5);
+  });
+
+  it('allows cancellation only before delivery period', () => {
+    const pendingOrder: OrderDTO = {
+      id: 11,
+      orderNumber: 'ORD-11',
+      status: 'PENDING',
+      totalPrice: 0,
+      items: [],
+    };
+    const confirmedOrder: OrderDTO = {
+      id: 12,
+      orderNumber: 'ORD-12',
+      status: 'CONFIRMED',
+      totalPrice: 0,
+      items: [],
+    };
+    const inTransitOrder: OrderDTO = {
+      id: 13,
+      orderNumber: 'ORD-13',
+      status: 'IN_TRANSIT',
+      totalPrice: 0,
+      items: [],
+    };
+
+    expect(component.canCancelOrder(pendingOrder)).toBe(true);
+    expect(component.canCancelOrder(confirmedOrder)).toBe(true);
+    expect(component.canCancelOrder(inTransitOrder)).toBe(false);
   });
 });
