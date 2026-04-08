@@ -23,8 +23,10 @@ export class OrdersComponent implements OnInit, OnDestroy {
   pedidoSeleccionado: OrderDTO | null = null;
   dialogVisible = false;
   error = '';
+  actionMessage = '';
   deliveryNotice = '';
   loading = false;
+  cancelingOrderId: number | null = null;
   viewMode: 'active' | 'history' = 'active';
   private autoRefreshHandle: ReturnType<typeof setInterval> | null = null;
   private readonly productImageMap: Record<number, string> = {};
@@ -161,6 +163,62 @@ export class OrdersComponent implements OnInit, OnDestroy {
 
   cancelarPedido(): void {
     this.cerrarDialog();
+  }
+
+  canCancelOrder(order: OrderDTO | null): boolean {
+    if (!order) {
+      return false;
+    }
+
+    const status = this.normalizeStatus(order.status);
+    return status === 'PENDING' || status === 'CONFIRMED';
+  }
+
+  isCancelingOrder(orderId: number): boolean {
+    return this.cancelingOrderId === orderId;
+  }
+
+  requestOrderCancellation(order: OrderDTO | null): void {
+    if (!order) {
+      return;
+    }
+
+    this.error = '';
+    this.actionMessage = '';
+
+    if (!this.canCancelOrder(order)) {
+      this.error = 'Este pedido ya esta en periodo de entrega y no se puede cancelar.';
+      return;
+    }
+
+    const orderLabel = `#${order.orderNumber || order.id}`;
+    const confirmed = confirm(`Vas a cancelar el pedido ${orderLabel}. Esta accion no se puede deshacer. ¿Continuar?`);
+    if (!confirmed) {
+      this.actionMessage = 'Cancelacion anulada por seguridad.';
+      return;
+    }
+
+    this.cancelingOrderId = order.id;
+    this.apiService.cancelOrder(order.id).subscribe({
+      next: () => {
+        this.cancelingOrderId = null;
+        const updatedOrders = this.pedidos.map((item) =>
+          item.id === order.id ? { ...item, status: 'CANCELLED' } : item,
+        );
+        this.pedidos = updatedOrders;
+        this.orderStore.saveOrders(updatedOrders);
+
+        if (this.pedidoSeleccionado?.id === order.id) {
+          this.pedidoSeleccionado = { ...this.pedidoSeleccionado, status: 'CANCELLED' };
+        }
+
+        this.actionMessage = `Pedido ${orderLabel} cancelado correctamente.`;
+      },
+      error: () => {
+        this.cancelingOrderId = null;
+        this.error = 'No se pudo cancelar el pedido. Intenta de nuevo en unos segundos.';
+      },
+    });
   }
 
   trackOrder(_index: number, pedido: OrderDTO): number {
