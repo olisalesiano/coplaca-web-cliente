@@ -18,6 +18,7 @@
     </div>
 
     <p class="orders-notice" *ngIf="deliveryNotice">{{ deliveryNotice }}</p>
+    <p class="orders-notice" *ngIf="actionMessage">{{ actionMessage }}</p>
 
     <p class="orders-message" *ngIf="error">{{ error }}</p>
 
@@ -42,6 +43,15 @@
           </div>
         </div>
         <button class="btn-detalles" (click)="verDetalles(p)">Ver detalles</button>
+        <button
+          class="btn-cancel-order"
+          type="button"
+          *ngIf="canCancelOrder(p)"
+          [disabled]="isCancelingOrder(p.id)"
+          (click)="requestOrderCancellation(p)"
+        >
+          {{ isCancelingOrder(p.id) ? 'Cancelando...' : 'Cancelar pedido' }}
+        </button>
       </div>
     </div>
   </div>
@@ -94,6 +104,15 @@
           <span class="dialog-total-amount">{{ getOrderTotal(order) | number:'1.2-2' }} €</span>
         </div>
       </div>
+      <button
+        class="btn-cancel-order"
+        type="button"
+        *ngIf="pedidoSeleccionado as selectedOrder"
+        [disabled]="!canCancelOrder(selectedOrder) || isCancelingOrder(selectedOrder.id)"
+        (click)="requestOrderCancellation(selectedOrder)"
+      >
+        {{ isCancelingOrder(selectedOrder.id) ? 'Cancelando...' : 'Cancelar pedido' }}
+      </button>
       <button class="btn-cancelar" type="button" (click)="cancelarPedido()">Cerrar</button>
     </div>
   </div>
