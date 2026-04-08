@@ -159,6 +159,22 @@ export class ApiService {
       .pipe(map((response) => this.unwrapListResponse(response)));
   }
 
+  cancelOrder(orderId: number, reason?: string): Observable<void> {
+    const payload = reason && reason.trim().length > 0 ? { reason: reason.trim() } : {};
+
+    return this.http
+      .put<void>(`${this.baseUrl}/api/v1/orders/${orderId}/cancel`, payload, {
+        headers: this.authHeaders(),
+      })
+      .pipe(
+        catchError(() =>
+          this.http.put<void>(`${this.baseUrl}/api/v1/orders/${orderId}/cancel`, null, {
+            headers: this.authHeaders(),
+          }),
+        ),
+      );
+  }
+
   createOrder(
     items: Array<{ productId: number; quantity: number; unitPrice?: number; subtotal?: number }>,
     shippingAddressId?: number,
